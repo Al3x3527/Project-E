@@ -5,6 +5,10 @@ Project Enoch game for idtech 2/Quake engine
 /quakec src/progs.src
 tangle this?
 * dependencies
+Project directory:
+#+begin_src emacs-lisp
+"~/Project E/"
+#+end_src
 Format:
 #+begin_example emacs-lisp
 (placeholder "destination" ("source"))
