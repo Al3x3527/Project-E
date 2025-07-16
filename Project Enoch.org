@@ -1,0 +1,19 @@
+#+title: Project Enoch
+* About
+Project Enoch game for idtech 2/Quake engine
+* progs.src
+/quakec src/progs.src
+tangle this?
+* dependencies
+Format:
+#+begin_example emacs-lisp
+(placeholder "destination" ("source"))
+#+end_example
+Project Enoch files outside GitHub source:
+#+begin_src emacs-lisp
+(placeholder "progs" (
+        ("models/truck/truck.mdl")
+        ("models/sniper/qp_m40a5.mdl")
+))
+#+end_src
+* build
