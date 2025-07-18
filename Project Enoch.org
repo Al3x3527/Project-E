@@ -1,23 +1,104 @@
 #+title: Project Enoch
-* About
+* about
 Project Enoch game for idtech 2/Quake engine
 * progs.src
-/quakec src/progs.src
-tangle this?
+#+begin_src emacs-lisp
+(setq progsSrc "quakec src/progs.src")
+#+end_src
 * dependencies
 Project directory:
 #+begin_src emacs-lisp
-"~/Project E/"
+(setq projectDir "~/Project E/")
 #+end_src
-Format:
-#+begin_example emacs-lisp
-(placeholder "destination" ("source"))
-#+end_example
-Project Enoch files outside GitHub source:
+Project files outside GitHub repo:
 #+begin_src emacs-lisp
-(placeholder "progs" (
-        ("models/truck/truck.mdl")
-        ("models/sniper/qp_m40a5.mdl")
+;; assets: anything in modDest folder
+(setq modSrc '(
+        "models/truck/truck.mdl"
+        "models/sniper/qp_m40a5.mdl"
+
+))
+(setq modDest "progs") ;; QuakeC source and .fgd must match
+;; maps
+(setq modMaps '(
+        "bsp/start.bsp"
+))
+(setq mapDest "maps")
+;; sounds
+(setq modSounds '(
+
+))
+(setq soundsDest "sounds")
+;; music
+(setq modMusic '(
+
+))
+(setq musicDest "music")
+;; core files: these are always packaged into pak0,pak1...
+(setq modCore '(
+        "pak0/gfx.wad" ;; affects mapping tool
+        "pak0/gfx/conback.lmp"
 ))
 #+end_src
+** Release
+Release only files:
+#+begin_src emacs-lisp
+(setq modSrc '(
+        modSrc ;; keep
+))
+#+end_src
+** Debug
+Debug only files:
+#+begin_src emacs-lisp
+(setq modSrc '(
+        modSrc ;; keep
+))
+#+end_src
+* mapping
+From Github repo:
+#+begin_src emacs-lisp
+;; .fgd source files
+(setq fgdSrc "quakec src/") ;; fix later -- fgd per qc src file?
+#+end_src
+Project
+#+begin_src emacs-lisp
+;; .wad source files
+(setq wadSrc "wads/")
+;; .map source files
+(setq mapSrc "maps/")
+#+end_src
 * build
+Build directory:
+#+begin_src emacs-lisp
+(setq buildDir "~/Quake/")
+#+end_src
+** Release
+Build files: if the mod has engine dependencies, it is neccessary to define them here.
+#+begin_src emacs-lisp
+;; engine
+(setq quakeEngine "ironwail-0.8.0-linux-x64/ironwail")
+#+end_src
+Configuration:
+#+begin_src emacs-lisp
+;; pak0
+(setq pakSrc replace) ;; replace | package | substitute | quake
+;; replace: build pak0 from mod files only
+;; package: substitute core files and package mod
+;; substitute: substitute core files
+;; quake: use vanilla pak0 from Quake registered
+#+end_src
+** Debug
+Build files:
+#+begin_src emacs-lisp
+;; engine:
+(setq quakeEngine "ironwail-0.8.0-linux-x64/ironwail")
+#+end_src
+configuration:
+#+begin_src emacs-lisp
+;; pak0:
+(setq pakSrc replace) ;; replace | package | substitute | quake
+;; replace: build pak0 from mod files only
+;; package: substitute core files and package mod
+;; substitute: substitute core files
+;; quake: use vanilla pak0 from Quake registered
+#+end_src
