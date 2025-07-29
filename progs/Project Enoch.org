@@ -1,6 +1,9 @@
 #+title: Project Enoch
 * about
 Project Enoch game for idtech 2/Quake engine
+* branch
+** SUI QC
+Project-E mod starting with SUI QC template.
 * progs.src
 #+begin_src emacs-lisp
 (setq progsSrc "quakec src/progs.src")
