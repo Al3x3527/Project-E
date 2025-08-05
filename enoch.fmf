@@ -1,0 +1,8 @@
+FTEMANIFEST 1
+GAME quake
+NAME "Project Enoch"
+PROTOCOLNAME ProjectE
+//UPDATEURL ""
+//BASEGAME id1
+BASEGAME enoch
+//PACKAGE "enoch/pak0.pak"
