@@ -3,11 +3,34 @@
 Project Enoch game for idtech 2/Quake engine
 * branch
 ** SUI QC
-Project-E mod starting with SUI QC template.
++ Project-E mod starting with SUI QC template.
++ FTE Manifest
+* Manifest
+** Release
+#+begin_src emacs-lisp
+(setq fteManifest '(1)
+      fmfGame '(quake)
+      protocolName '(ProjectE)
+      updateURL '()
+      baseGame '(enoch)
+      )
+#+end_src
+** Debug
+#+begin_src emacs-lisp
+(setq fteManifest '(1)
+      fmfGame '(quake)
+      protocolName '(ProjectE)
+      updateURL '()
+      baseGame '(id1 enoch)
+      )
+#+end_src
+NAME, PACKAGE already defined
 * progs.src
 #+begin_src emacs-lisp
-(setq progsSrc "quakec src/progs.src")
+(setq progsSrc '("quakec src/progs.src"
+                 ))
 #+end_src
+this section is probably not relevant.
 * dependencies
 Project directory:
 #+begin_src emacs-lisp
@@ -79,7 +102,7 @@ Build directory:
 Build files: if the mod has engine dependencies, it is neccessary to define them here.
 #+begin_src emacs-lisp
 ;; engine
-(setq quakeEngine "ironwail-0.8.0-linux-x64/ironwail")
+(setq quakeEngine "FTEQW/FTEQW64")
 #+end_src
 Configuration:
 #+begin_src emacs-lisp
@@ -94,7 +117,7 @@ Configuration:
 Build files:
 #+begin_src emacs-lisp
 ;; engine:
-(setq quakeEngine "ironwail-0.8.0-linux-x64/ironwail")
+(setq quakeEngine "FTEQW/FTEQW64")
 #+end_src
 configuration:
 #+begin_src emacs-lisp
