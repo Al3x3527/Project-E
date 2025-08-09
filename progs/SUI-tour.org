@@ -371,16 +371,339 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 #+end_src
 
 * sv_progs.src
+this file is a second old style progs.dat file. it lists 8 Quake C source files which contribute to a `qwprogs.dat` program.
 * sv_defs.qc
-* sh_customdefs.qc
+this file is a bit smaller than `cl_defs.qc`, but appears to have much the same contents and purpose, but for the `qwprogs.dat` program.
 * sv_customdefs.qc
+#+begin_src quakec
+// put custom server-only globals and fields here
+
+const float FL_JUMPRELEASED = 4096;
+#+end_src
+this file is for globals accessible only to the SSQC game. the first definition is the constant float `FL_JUMPRELEASED`, this is a vanilla constant that relates both to player physics and to player input.
+** subs
+#+begin_src quakec
+void() sub_remove =
+void() sub_noop = {};
+#+end_src
+these basic funtions are defined here in SUI QC instead of in `subs.qc`, a file that does not exist in this codebase.
+** multicast
+(lines 12-48)
+#+begin_src quakec
+void(float event) BeginEvent =
+void(vector vec) MulticastVector =
+void(float val) MulticastByte =
+void(float val) MulticastShort =
+void(float val) MulticastFloat =
+void(entity e) MulticastEnt =
+void(string s) MulticastString =
+#+end_src
+these are custom functions that make use of the `MSG_MULTICAST` built-in.
+** light
+this is a one line fuction that appears to remove light entities from the PVS. (line 50)
+** linked lists
+(lines 55-84)
+#+begin_src quakec
+entity player_chain_head;
+.entity player_chain_next;
+.entity player_chain_prev;
+void(entity adding) player_chain_add =
+void(entity removing) player_chain_remove =
+#+end_src
+the file ends with some definitions related to linked lists called "player chains".
 * sv_combat.qc
+there's nothing here.
 * sv_enemies.qc
+this file is intentionally left empty.
 * sv_triggers.qc
+this file contains an example trigger spawn function as a comment and two spawn functions.
+#+begin_src quakec
+void() info_null =
+void() func_illusionary =
+#+end_src
 * sv_player.qc
+#+begin_src quakec
+//	Player.qc - Various stuff done for the player, including per-frame functions like PlayerPreThink and PlayerPostThink, also client specific stuff like PutClientInServer etc.
+#+end_src
+the first function defined in this file, `PlayerJump`, implements the `FL_JUMPRELEASED` constant defined in `sv_customdefs.qc`.
+#+begin_src quakec
+void() PlayerJump =
+void() CheckImpulses =
+vector() get_spawn_point =
+void() PlayerPreThink =
+void() PlayerPostThink =
+void() ClientKill =
+void() ClientConnect =
+void() PlayerSpawn =
+void() PutClientInServer =
+void() ClientDisconnect =
+void() SetNewParms =
+void() SetChangeParms =
+void() info_player_start =
+#+end_src
+the last functions have the prefix `SV`. these apparently have to do with console commands.
+#+begin_src quakec
+void(float elapsedtime) SV_PausedTic =
+void(string command_string) SV_ParseClientCommand =
+void() SV_RunClientCommand =
+#+end_src
+the names of the simple placeholder functions in this file largly describe their purpose.
 * sv_main.qc
+#+begin_src quakec
+//	Main.qc - mostly functions that will be called from the engine and are expected to exist
+//
+
+void() main =
+{
+};
+
+//called for each frame that QC runs
+void() StartFrame =
+{
+};
+
+void() worldspawn =
+{
+	precache_everything();
+};
+
+void() SpectatorConnect =
+{
+};
+#+end_src
+self explainatory.
 * m_progs.src
+the final old style progs.src file. it lists 4 files to be included in `menu.dat`.
 * m_defs.qc
-* sui_sys.qc
+this def.qc file is smaller than the other two, but starts with the same header and macros. the numbers associated with each built-in function are different here from cl_defs or sv_defs. some functions are labeled as "Menuqc-specific version".
 * m_menu.qc
+this file apparently defines the content and behavior of the custom menu.
+** style
+the file starts by defining some global vector variables that have to do with the styling of the menu. (lines 1-13)
+#+begin_src quakec
+vector MENU_BG = '0.2 0.3 0.4';
+vector MENU_BG_DARK = '0.1 0.15 0.2';
+vector MENU_BORDER = '0.3 0.4 0.5';
+vector MENU_BUTTON = '0.3 0.4 0.5';
+vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
+vector MENU_TEXT_1 = '1 1 1';
+vector MENU_TEXT_2 = '0.7 0.75 0.75';
+vector MENU_HIGHLIGHT = '1 1 1';
+vector MENU_DARKEN = '1 1 1';
+
+vector MENU_TEXT_SMALL = '8 8 0';
+vector MENU_TEXT_MEDIUM = '16 16 0';
+vector MENU_TEXT_LARGE = '24 24 0';
+#+end_src
+** input
+the first two functions have to do with getting user input. (lines 15-64)
+#+begin_src quakec
+void() input_tester =
+void(string id, vector pos, vector size, float maxlen, __inout string text, __inout float cursor) text_input_control =
+#+end_src
+** interactive
+the  next functions have to do with interactive elements. (lines 66-110)
+#+begin_src quakec
+float(string id, vector pos, vector size, string text) my_button =
+void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) my_slider =
+void(vector pos, vector size, vector minmaxsteps, string cvar_s, string name, string format) cvar_slider =
+#+end_src
+** binds
+this part of the file defines a new struct `name_command` and a `name_command` `bindlist`, which holds some command bindings. (lines 112-134)
+#+begin_src quakec
+struct name_command {
+	string name;
+	string command;
+};
+
+name_command bindlist[] =
+{
+	{ "Forward", "+forward" },
+	{ "Back", "+back" },
+	{ "Left", "+moveleft" },
+	{ "Right", "+moveright" },
+	{ "Jump", "+jump" },
+	{ "Jump1", "+jump" },
+	{ "Jump2", "+jump" },
+	{ "Jump3", "+jump" },
+	{ "Jump4", "+jump" },
+	{ "Jump5", "+jump" },
+	{ "Jump6", "+jump" },
+	{ "Jump7", "+jump" },
+	{ "Jump8", "+jump" },
+	{ "Jump9", "+jump" },
+	{ "Jump0", "+jump" },
+};
+#+end_src
+this is followed by a couple bind related functions. (lines 136-162)
+#+begin_src quakec
+void(string id, vector pos, vector size, string name, string command) bind_button =
+void(string id, vector pos, vector size, __inout vector scrollofs) bind_list =
+#+end_src
+** menus
+this part defines the actual content of menus. (lines 165-289)
+#+begin_src quakec
+float current_menu;
+const float MENU_MAIN = 1;
+const float MENU_SETTINGS = 2;
+const float MENU_HELP = 3;
+
+vector binds_scroll;
+void() settings_menu =
+void() help_menu =
+void() main_menu =
+void(vector size) root_menu =
+#+end_src
+end of file.
+** main_menu
+special attention to the main menu and how it was implemented. (lines 253-276)
+*** Title Screen
+#+begin_src quakec
+void() main_menu =
+{
+	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
+	sui_text([0, 64], MENU_TEXT_LARGE, "Title Screen", [1, 1, 1], 1, 0);
+#+end_src
+the function starts with `sui_set_align`. this function is called 4 different times in `main_menu`, always taking the first vector argument: `SUI_ALIGN_CENTER` but switching between `SUI_ALIGN_START` and `SUI_ALIGN_END` for the second vector argument.
+sui_set_align is defined in `sui_sys.qc`, where it stores the alignment of the frame `_frame_index` within the `_frames` `_frame_t` structure.
+#+begin_src quakec
+void(vector align) sui_set_align =
+{
+	_frames[_frame_index].align = align;
+};
+#+end_src
+the frame index was set by `sui_pop_frame`, defined line 164 in `sui_sys.qc`. more on that later.
+the alignments, `SUI_ALIGN_CENTER` and `SUI_ALIGN_START` apparently align the first element of the menu to the center and top of the frame.
+`sui_text` defines the first element. this function is defined on line 1078 of `sui_sys.qc`.
+#+begin_src quakec
+void(vector pos, vector size, string text, vector color, float alpha, float flags) sui_text =
+{
+	sui_transform_box(pos, [stringwidth(text, 1, size), size_y]);
+
+	drawstring(pos, text, size, color, alpha, flags);
+};
+#+end_src
+it takes 6 arguments: vector pos, vector size, string text, vector color, float alpha, float flags. in this case, the position passed in is [0, 64]. `MENU_TEXT_LARGE` is the text size, defined on line 13 of `m_menu.qc`. "Title Screen" is the text content, [1, 1, 1] is the text color, 1 is the alpha, and 0 is passed in for flags.
+*** Nav buttons
+`m_menu.qc` lines 258-264
+#+begin_src quakec
+vector pos = [0, -24];
+vector size = [120, 140];
+sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_END]);
+sui_push_frame(pos, size);
+
+sui_fill([0, 0], size, MENU_BG, 0.3, 0);
+sui_border_box([0, 0], size, 2, MENU_BORDER, 0.2, 0);
+#+end_src
+after creating the title text, a new frame is created. at position `pos` with size `size`. the alignment is set first, before a new frame is defined using `sui_push_frame`, defined on line 148 of `sui-sys.qc`.
+why is `sui_set_align` called before `sui_push_frame`? it does not apply to the new frame.
+#+begin_src quakec
+void(vector pos, vector size) sui_push_frame =
+{
+	sui_transform_box(pos, size);
+
+	_frame_index += 1;
+	if (_frame_index >= MAX_FRAMES)
+	{
+		printf("^3sui warning: amount of frames = %.0f exceeds MAX_FRAMES = %.0f, consider increasing MAX_FRAMES\n", _frame_index, MAX_FRAMES);
+		return;
+	}
+
+	_frames[_frame_index].pos = pos;
+	_frames[_frame_index].size = size;
+	_frames[_frame_index].align = [SUI_ALIGN_START, SUI_ALIGN_START]; // TODO allow customizing this
+};
+#+end_src
+this defines a new frame at frame index += 1 from the previous frame, at position `pos` and with size `size` and alignment `SUI_ALIGN_START, SUI_ALIGN_START`.
+`sui_fill` is defined on line 1049 of `sui_sys.qc`.
+#+begin_src quakec
+void(vector pos, vector size, vector color, float alpha, float flags) sui_fill =
+{
+	sui_transform_box(pos, size);
+
+	drawfill(pos, size, color, alpha, flags);
+};
+#+end_src
+`sui_border_box` is defined on line 1063.
+#+begin_src quakec
+void(vector pos, vector size, float width, vector color, float alpha, float flags) sui_border_box =
+{
+ sui_transform_box(pos, size);
+
+	// Top line
+	drawfill(pos, [size_x, width], color, alpha, flags);
+	// Bottom line
+	drawfill([pos_x, pos_y + size_y - width], [size_x, width], color, alpha, flags);
+	// Left line
+	drawfill([pos_x, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+	// Right line
+	drawfill([pos_x + size_x - width, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+};
+#+end_src
+after creating a bordered and filled box of size `size` at position `pos`, we set the alignment of the frame to bottom center. (line 266)
+#+begin_src quake c
+sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
+#+end_src
+after settig the alignment again, 3 buttons are created. the alignment is set one more time before creating the final button. (lines 268-272)
+#+begin_src quakec
+my_button("mm_start", [0, 8], [size_x - 16, 20], "Start Game") ? localcmd("map test\n") : 0;
+my_button("mm_settings", [0, 8 + 24], [size_x - 16, 20], "Settings") ? current_menu = MENU_SETTINGS : 0;
+my_button("mm_help", [0, 8 + 48], [size_x - 16, 20], "Help") ? current_menu = MENU_HELP : 0;
+sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_END]);
+my_button("mm_quit", [0, -8], [size_x - 16, 20], "Quit") ? localcmd("quit\n") : 0;
+#+end_src
+the unusual syntax "function() ? somecode : 0" creates a menu element then defines an action associated with it. this appears to be equivalent to:
+#+begin_example quakec
+if(function()) {somecode;} : 0; //what does the : 0; do?
+#+end_example
+the function `my_button` is defined on line 66 of `m_menu.qc`.
+#+begin_src quakec
+float(string id, vector pos, vector size, string text) my_button =
+{
+  sui_push_frame(pos, size);
+  vector basecolor = sui_is_hovered(id) ? MENU_BUTTON + MENU_HIGHLIGHT * 0.25 : MENU_BUTTON;
+  basecolor = sui_is_held(id) ? MENU_BUTTON - MENU_DARKEN * 0.1 : basecolor;
+  sui_fill([0, 0], size, basecolor, 0.6, 0);
+  sui_border_box([0, 0], size, 1, MENU_BUTTON_BORDER, 0.4, 0);
+
+  sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+  sui_text([0, 0], MENU_TEXT_SMALL, text, MENU_TEXT_1, 1, 0);
+  sui_action_element([0, 0], size, id, sui_noop);
+  sui_pop_frame();
+
+  return sui_is_clicked(id);
+};
+#+end_src
+this function starts by pushing a new frame for the new button. text within the button is aligned to center.
+`sui_pop_frame` is called before returning the click status of the button.
+*** end of function
+the main menu function ends with: (lines 273-276)
+#+begin_src quakec
+	sui_pop_frame();
+
+	sui_set_default_kb_focus("mm_start");
+};
+#+end_src
+`sui_pop_frame` should not be confused with `sui_push_frame`. it is defined on line 164, and reverts the current frame index to the previous frame, `_frame_index -= 1`.
+#+begin_src quakec
+void() sui_pop_frame =
+{
+	if (_frame_index > 0) _frame_index -= 1;
+};
+#+end_src
+`sui_set_default_kb_focus` is self explainatory.
 * m_main.qc
+this file defines some fundamental menu behaviors such as the initialization and drawing of the menu screen itself.
+#+begin_src quakec
+float menu_active;
+float splash_time;
+void() m_init =
+vector() randomofs = { return [random() - 0.5, random() - 0.5] * 2; };
+void(vector screensize) m_draw =
+void() m_close =
+void() m_open =
+float(float evtype, float scanx, float chary, float devid) Menu_InputEvent =
+float(string cmd) m_consolecommand =
+void(float wantmode) m_toggle =
+void() m_shutdown =
+#+end_src
