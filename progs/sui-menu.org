@@ -1,0 +1,28 @@
+#+title: Sui Menu
+Documenting work done on SUI menu branch.
+* Colors
+** Notes
+*** Code
+the color vectors lines 1-9 in m_menu.qc range from 0-1. this is a color model called "RGB 0-1".
++ _BG means background
++ the _DARK color is half the regular background color
++ the background border color = regular color + 0.1
++ the button border color = button color + 0.5
++ the button color = menu border color+
++ the color passed into sui_text for "Title Screen" is [1,1,1]
+*** Behavior
++ defualt code opens a black screen with pale orange text (consolas)
++ other menus have white text
++ this is not the intended behavior of the mod. this must be a fallback mode built-in to FTEQW.
++ initiallizing "Project Enoch" just leaves you at the console.
++ the menu.dat file was missing. behavior now reflects code.
+** Changing the text color
+*** MENU_TEXT_1
++ changed menu text 1 to [0.75 1 0.75] for a green tint.
++ this re-colors the button text.
+** text content
+*** main_menu
++ changed "Title Screen" to "Project Enoch" (line 256)
++ this worked as expected.
++ changed color of title from white to green.
++ this worked as expected.

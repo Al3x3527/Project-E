@@ -3,7 +3,7 @@ vector MENU_BG_DARK = '0.1 0.15 0.2';
 vector MENU_BORDER = '0.3 0.4 0.5';
 vector MENU_BUTTON = '0.3 0.4 0.5';
 vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
-vector MENU_TEXT_1 = '1 1 1';
+vector MENU_TEXT_1 = '0.75 1 0.75';
 vector MENU_TEXT_2 = '0.7 0.75 0.75';
 vector MENU_HIGHLIGHT = '1 1 1';
 vector MENU_DARKEN = '1 1 1';
@@ -253,7 +253,7 @@ void() help_menu =
 void() main_menu =
 {
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
-	sui_text([0, 64], MENU_TEXT_LARGE, "Title Screen", [1, 1, 1], 1, 0);
+	sui_text([0, 64], MENU_TEXT_LARGE, "Project Enoch", [0, 1, 0], 1, 0);
 	
 	vector pos = [0, -24];
 	vector size = [120, 140];
