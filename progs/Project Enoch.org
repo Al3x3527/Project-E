@@ -5,6 +5,8 @@ Project Enoch game for idtech 2/Quake engine
 ** SUI QC
 + Project-E mod starting with SUI QC template.
 + FTE Manifest
+** SUI Menu
++ Customized menus from the SUI QC template.
 * Manifest
 ** Release
 #+begin_src emacs-lisp
