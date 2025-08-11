@@ -596,7 +596,7 @@ sui_fill([0, 0], size, MENU_BG, 0.3, 0);
 sui_border_box([0, 0], size, 2, MENU_BORDER, 0.2, 0);
 #+end_src
 after creating the title text, a new frame is created. at position `pos` with size `size`. the alignment is set first, before a new frame is defined using `sui_push_frame`, defined on line 148 of `sui-sys.qc`.
-why is `sui_set_align` called before `sui_push_frame`? it does not apply to the new frame.
+why is `sui_set_align` called before `sui_push_frame`? it is not carried over the the elements within the new frame; it applies to the new frame itself.
 #+begin_src quakec
 void(vector pos, vector size) sui_push_frame =
 {
