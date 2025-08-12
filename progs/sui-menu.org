@@ -29,3 +29,4 @@ the color vectors lines 1-9 in m_menu.qc range from 0-1. this is a color model c
 * Basic functionality
 + pulling up the console does not work with SUI QC active
 + starting the game does not work with SUI QC active
++ FIX: all SUI related assets must be in the mod folder, not the base engine folder or elsewhere.
