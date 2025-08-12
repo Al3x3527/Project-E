@@ -14,6 +14,7 @@ void() PlayerJump =
 	self.weaponframe = 0;
 	self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
 	self.button2 = 0;
+	dprint("player jumped\n");
 };
 
 void() CheckImpulses =

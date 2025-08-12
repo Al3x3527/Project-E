@@ -1,0 +1,8 @@
+#+title: Sui World
+this branch only exists to test spawn functions.
+TODO: create a debug trigger_changelevel.
+tested dprint with trigger. no response.
+tested dprint with player jump. functions as expected.
+tried setting trigger model to self.model. now touch works.
+tried setting modelindex to 0. trigger is now invisible again.
+test think worked.
