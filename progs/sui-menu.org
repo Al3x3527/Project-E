@@ -26,3 +26,6 @@ the color vectors lines 1-9 in m_menu.qc range from 0-1. this is a color model c
 + this worked as expected.
 + changed color of title from white to green.
 + this worked as expected.
+* Basic functionality
++ pulling up the console does not work with SUI QC active
++ starting the game does not work with SUI QC active
