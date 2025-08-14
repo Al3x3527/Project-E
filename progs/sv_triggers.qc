@@ -28,13 +28,13 @@ void() test_think =
 				return;
 			}
 		self.health = 0;
-		dprint("test think");
+		dprint("test think/n");
 	}
 
 void() trigger_changelevel_touch =
 	{
 		dprint("trigger changelevel touched\n");
-		sprint(other, 999, "trigger");
+		sprint(other, 999, "trigger/n");
 	}
 
 void() trigger_changelevel =
