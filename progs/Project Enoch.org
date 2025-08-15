@@ -5,6 +5,8 @@ Project Enoch game for idtech 2/Quake engine
 ** SUI QC
 + Project-E mod starting with SUI QC template.
 + FTE Manifest
+** weapon-classes
++ implementation of weapon classes using class inheritance.
 * Manifest
 ** Release
 #+begin_src emacs-lisp
