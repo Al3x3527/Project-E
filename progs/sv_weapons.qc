@@ -1,32 +1,3 @@
-void() RespawnItemDo = {
-  setmodel(self, self.model);
-  self.solid = SOLID_TRIGGER;
-}
-
-void() RespawnItemTry = {
-  switch (self.spawnflags) {
-    case ITEM_DONTRESPAWN : {
-      self.think = SUB_NULL;
-      break;
-    }
-  case ITEM_HELD : {
-    //if checkruntime() RespawnItemDo; else - clear behavior
-    self.nextthink = time + respawntime;
-    break;
-  }
-  case default : {
-    RespawnItemDo();
-    break;
-  }
-  }
-}
-
-void() item = {
-nextthink = time + 0.3;
-think = RespawnItemTry;
-this.modelindex = 0;
-};
-
 //weapon classes using class inheritance
 #define w_placeholder "progs/mdls/w_placeholder.mdl"
 #define v_placeholder "progs/mdls/v_placeholder.mdl"
@@ -38,22 +9,23 @@ this.modelindex = 0;
 class weapon : entity {
 
 nonvirtual void(vector dir, float v) launch_projectile;
-nonvirtual void weapon_use =
+nonvirtual void weapon_use = //not weapon.use();
   {
     //check ammo
     if (!self.current_ammo) return;
 //launch projectile at rate of fire = speed
     self.launch_projectile(dir, self.speed);
   };
+virtual void() think =
+  {//override conflicts in the spawn function
+    ISCONSUMABLE
+  };
 
 BASEDEF(weapon, Spawnflags | Targetname) //only affects FGD.
 if (SUB_Inhibit()) return;
-item();
-usable();
-consumable();
+nextthink = time + 0.3;
 flags = FL_WEAPON;//field assigned in program
 setsize (this, '-16 -24 0', '16 24 16');//field needed by FGD and engine
-touch = weapon_touch;
 COLOR(206 18 18); //bbox color. does nothing in game (unless?)
 BMODEL(w_placeholder)
 VMODEL(v_placeholder)
@@ -61,7 +33,7 @@ ENDCLASS
 
 CLASSDEF(weapon, weapon_assault, "assault rifle placed on map.")
 WEAPONMODELS(w_assault, v_assault)
-FLOAT(current_ammo, "starting ammo (default 150)", 150)
+FLOAT(current_ammo, "starting ammo", 150)
 //rate of fire (speed)
 //projectile
 //default respawn time
@@ -69,7 +41,7 @@ ENDCLASS
 
 CLASSDEF(weapon, weapon_plasrifle, "plasma rifle placed on map.")
 WEAPONMODELS(w_plasrifle, v_plasrifle)
-FLOAT(current_ammo, "starting ammo (default 140)", 140)
+FLOAT(current_ammo, "starting ammo", 140)
 ENDCLASS
 
 };
