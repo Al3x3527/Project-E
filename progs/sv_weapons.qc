@@ -1,44 +1,75 @@
-//weapon classes using class inheritance
+void() RespawnItemDo = {
+  setmodel(self, self.model);
+  self.solid = SOLID_TRIGGER;
+}
 
-void(float metaclass) base = { //should only impact FGD but exposed to game
-  if (metaclass && Spawnflags){
-    spawnflags = { //field = flag : desc optional: default syntax.
-    //(type) redundant here.
-    4 : "dont place at start" : 0;
+void() RespawnItemTry = {
+  switch (self.spawnflags) {
+    case ITEM_DONTRESPAWN : {
+      self.think = SUB_NULL;
+      break;
     }
+  case ITEM_HELD : {
+    //if checkruntime() RespawnItemDo; else - clear behavior
+    self.nextthink = time + respawntime;
+    break;
   }
-  if (metaclass && Targetname){
-  targetname : "target name"; //field : desc optional: default syntax.
+  case default : {
+    RespawnItemDo();
+    break;
+  }
   }
 }
 
-vector(float r = 0, float g = 0, float b = 0) color = {
-  return ('r g b'); //might as well
-}
+void() item = {
+nextthink = time + 0.3;
+think = RespawnItemTry;
+this.modelindex = 0;
+};
+
+//weapon classes using class inheritance
+#define w_placeholder "progs/mdls/w_placeholder.mdl"
+#define v_placeholder "progs/mdls/v_placeholder.mdl"
+#define w_assault "progs/mdls/w_AD70.mdl"
+#define v_assault "progs/mdls/v_AD70.mdl"
+#define w_plasrifle "progs/mdls/w_plasmarifle.mdl"
+#define v_plasrifle "progs/mdls/v_plasmarifle.mdl"
 
 class weapon : entity {
- flags = FL_WEAPON;//field assigned in program
- size = '16 24 16';//field needed by FGD and engine
- color(206 18 18); //bbox color. does nothing in game (unless?)
- base(Spawnflags & Targetname); //only affects FGD.
-};
 
-//valid syntax
-class weapon_assault : weapon {
-classname = "weapon_assault";
-if (!current_ammo) {current_ammo = 70;}// normal style
-}
-
-//for FGD parity/tools
-//descriptions not compiled, reference only
-class weapon_assault : weapon : "assault rifle placed on map." { //optional description
-  classname = "weapon_assault"; //field assigned in program
-  current_ammo : "starting ammo (default 150)" : 150; //default value used by game
-};
-
-/* void() weapon_assault =
+nonvirtual void(vector dir, float v) launch_projectile;
+nonvirtual void weapon_use =
   {
-    weaponAssault new = spawn();
-    //current_ammo set in editor should be passed in automatically?
-  }
- class constructor will double as spawn function */
+    //check ammo
+    if (!self.current_ammo) return;
+//launch projectile at rate of fire = speed
+    self.launch_projectile(dir, self.speed);
+  };
+
+BASEDEF(weapon, Spawnflags | Targetname) //only affects FGD.
+if (SUB_Inhibit()) return;
+item();
+usable();
+consumable();
+flags = FL_WEAPON;//field assigned in program
+setsize (this, '-16 -24 0', '16 24 16');//field needed by FGD and engine
+touch = weapon_touch;
+COLOR(206 18 18); //bbox color. does nothing in game (unless?)
+BMODEL(w_placeholder)
+VMODEL(v_placeholder)
+ENDCLASS
+
+CLASSDEF(weapon, weapon_assault, "assault rifle placed on map.")
+WEAPONMODELS(w_assault, v_assault)
+FLOAT(current_ammo, "starting ammo (default 150)", 150)
+//rate of fire (speed)
+//projectile
+//default respawn time
+ENDCLASS
+
+CLASSDEF(weapon, weapon_plasrifle, "plasma rifle placed on map.")
+WEAPONMODELS(w_plasrifle, v_plasrifle)
+FLOAT(current_ammo, "starting ammo (default 140)", 140)
+ENDCLASS
+
+};

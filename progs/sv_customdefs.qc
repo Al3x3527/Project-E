@@ -82,4 +82,3 @@ void(entity removing) player_chain_remove =
 	removing.player_chain_next = world;
 	removing.player_chain_prev = world;
 };
-

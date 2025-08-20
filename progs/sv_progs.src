@@ -1,4 +1,5 @@
 ../qwprogs.dat
+sv_fgdgen.qc
 sv_defs.qc
 sh_customdefs.qc
 sv_customdefs.qc
