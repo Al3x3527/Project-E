@@ -7,6 +7,8 @@ Project Enoch game for idtech 2/Quake engine
 + FTE Manifest
 ** SUI Menu
 + Customized menus from the SUI QC template.
+** class-test
++ small tests of ways to use class constructors.
 * Manifest
 ** Release
 #+begin_src emacs-lisp
