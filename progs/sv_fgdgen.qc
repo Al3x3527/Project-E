@@ -1,17 +1,16 @@
 //FGD class MACROS
-#define BASEDEF(BASEname, BASEflags) {\
+#define BASEDEF(BASEname, BASEflags)\
 void() BASEname = {\
-#message "#+FGD_base #BASEname"\
-}
-#define CLASSDEF(CLASSbase, CLASSname, CLASSdesc) {\
+/*#message "#+FGD_base #BASEname"*/
+#define CLASSDEF(CLASSbase, CLASSname, CLASSdesc)\
 void() CLASSname = {\
 CLASSbase();\
-classname = "#CLASSname";\
-#message "#+FGD_class #CLASSname"\
-}
+this = CLASSbase CLASSname = spawn(CLASSbase);                               \
+this.classname = "#CLASSname";\
+/*#message "#+FGD_class #CLASSname"*/
 #define ENDCLASS };
 #define FLOAT(FLOATfield, FLOATdesc, FLOATfloat) {\
-if (!FLOATfield) FLOATfield = FLOATfloat;\
+if (!this.FLOATfield) this.FLOATfield = FLOATfloat;\
 }
 #define COLOR() /*do nothing*/
 //fallback models
@@ -25,5 +24,5 @@ if (!this.weaponmodel) this.weaponmodel = modelstring;}
 #define WEAPONMODELS(wmdl, vmdl) {\
 precache_model(wmdl);\
 precache_model(vmdl);\
-setmodel(this, modelstring);\
-weaponmodel = vmdl;}
+setmodel(self, modelstring);\
+self.Weaponmodel = vmdl;}
