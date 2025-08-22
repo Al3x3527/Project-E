@@ -1,0 +1,76 @@
+#+title: Classes
+* Tests
+** class foo
+class foo with void() foo to create point entity with model works as expected.
+** function bar
+void() bar = {foo();} outside constructor creates empty point entity without throwing errors.
+virtual void() bar can not be found as a spawn function.
+nonvirtual void() bar can not be found as a spawn function.
+#+begin_src quakec
+void() bar = {
+foo myfoo = spawn(foo);
+self = myfoo;
+};
+#+end_src
+creates empty entity bar and foo myfoo.
+foo self creates foo local self.
+#+begin_src quakec
+*self = *myfoo;
+#+end_src
+ERROR: unable to deference non-pointer type.
+** class bar
+#+begin_src quakec
+class bar : foo { void() bar = {}; };
+#+end_src
+spawns bar bar with spawn function foo().
+class bar : foo {}; also works without function bar().
+#+begin_src quakec
+class foo : entity {
+precache_model("foobar");
+};
+#+end_src
+ERROR: does not compile because a type is expected.
+#+begin_src quakec
+class foo : entity {float nextthink = time + 0.3;};
+#+end_src
+ERROR: values can not be assigned to initialized fields here.
+#+begin_src quakec
+class foo : entity
+{
+virtual void() think = {setmodel(this, FOOBAR);
+};
+};
+
+class bar : foo {
+void() bar = {
+  precache_model(FOOBAR);
+  this.think();
+};
+};
+#+end_src
+creates bar bar with model FOOBAR and invisible foo foo.
+WARNING: using void() think generates warnings.
+** inheritance from foo
+#+begin_src quakec
+class foo : entity
+{
+  virtual void() foothink ={
+    setmodel(this,FOOBAR);
+  };
+  void() foo = {
+    precache_model(FOOBAR);
+    think = foothink;
+    nextthink = time + 0.3;
+  };
+};
+class bar : foo {};
+#+end_src
+creates foo and bar with models FOOBAR.
+nonvirtual void() foothink gives identical results.
+#+begin_src quakec
+class bar : entity {
+void() bar = {
+  foothink(); }};
+#+end_src
+ERROR: bar from entity can not access nonvirtual void() foothink.
+ERROR: virtual void() foothink gives the same results as expected.
