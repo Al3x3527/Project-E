@@ -74,3 +74,40 @@ void() bar = {
 #+end_src
 ERROR: bar from entity can not access nonvirtual void() foothink.
 ERROR: virtual void() foothink gives the same results as expected.
+** non oo functions
+#+begin_src quakec
+void() foothink = {
+  setmodel(self, FOOBAR);
+};
+
+void() barthink = {};
+
+class foo : entity
+{
+  void() foo = {
+    precache_model(FOOBAR);
+    think = foothink;
+    nextthink = time + 0.3;
+  };
+};
+class bar : entity {
+void() bar = {
+foo myfoo = spawn(foo);
+think = barthink;
+};
+};
+#+end_src
+creates foo and myfoo with model FOOBAR and empty bar.
+** MACRO abuse
+#+begin_src quakec
+#define SPAWNCLASSMODEL(foo) void() foo = {\
+    precache_model(FOOBAR);\
+    setmodel(this, FOOBAR);
+#define ENDCLASS };
+class foo : entity {
+  SPAWNCLASSMODEL(foo)
+  ENDCLASS
+};
+class bar : foo {};
+#+end_src
+creates foo and bar with models FOOBAR.
