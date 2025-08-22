@@ -1,49 +1,56 @@
 //weapon classes using class inheritance
-#define w_placeholder "progs/mdls/w_placeholder.mdl"
-#define v_placeholder "progs/mdls/v_placeholder.mdl"
-#define w_assault "progs/mdls/w_AD70.mdl"
-#define v_assault "progs/mdls/v_AD70.mdl"
-#define w_plasrifle "progs/mdls/w_plasmarifle.mdl"
-#define v_plasrifle "progs/mdls/v_plasmarifle.mdl"
+//#define w_placeholder gamemodels"w_placeholder.mdl"
+//#define v_placeholder gamemodels"v_placeholder.mdl"
+#define w_assault gamemodels"w_AD70.mdl"
+#define v_assault gamemodels"v_AD70.mdl"
+//#define w_plasrifle gamemodels"w_plasmarifle.mdl"
+//#define v_plasrifle gamemodels"v_plasmarifle.mdl"
 
-class weapon : entity {
-float current_ammo, speed; //should be defined?
+class weapon_class : entity {
+float rateoffire;
+float attackvelocity;
+float attacktimes;
+//void *attackdo(float times); I give up.
 
-nonvirtual void(vector dir, float v) launch_projectile;
-nonvirtual void() weapon_use = //not weapon.use();
+virtual float (float times) hitscan = {
+  float rof = this.rateoffire;
+  float speed = this.attackvelocity;
+  return TRUE;
+};
+virtual void() weapon_use = //not weapon.use();
   {
-    vector dir;
-    //check ammo
-    if (!this.current_ammo) return;
-//launch projectile at rate of fire = speed
-    this.launch_projectile(dir, this.speed);
+    if (!currentammo) return;
+    float times = attacktimes;
+    if (currentammo == BOTTOMLESS_CLIP) times = 0;
+    if (currentammo != UNLIMITED_AMMO) currentammo -= times;
+    this.attack(times);
   };
-virtual void() think =
-  {//override conflicts in the spawn function
-    ISCONSUMABLE
-  };
-
-BASEDEF(weapon, Spawnflags | Targetname) //only affects FGD.
-if (SUB_Inhibit()) return;
-nextthink = time + 0.3;
-flags = FL_WEAPON;//field assigned in program
-setsize (this, '-16 -24 0', '16 24 16');//field needed by FGD and engine
+void() weapon_class = {
+FGDbase(Spawnflags | Targetname) //only affects FGD.
 COLOR(206 18 18); //bbox color. does nothing in game (unless?)
-BMODEL(w_placeholder)
-VMODEL(v_placeholder)
-ENDCLASS
+
+//if (SUB_Inhibit()) return;
+ think = IsConsumable;
+nextthink = time + 0.3;
+setsize (this, '-16 -24 0', '16 24 16');
+//MODELdefault(w_placeholder)
+//precache_model(v_placeholder);
+//if (!this.weaponmodel) this.weaponmodel = v_placeholder;
+};
 };
 
-CLASSDEF(weapon, WEAPON_BATTLERIFLE, "assault rifle placed on map.")
-WEAPONMODELS(w_assault, v_assault)
-FLOAT(current_ammo, "starting ammo", 150)
-//rate of fire (speed)
-//projectile
+//CLASSDEF(weapon, weapon_battlerifle, "assault rifle placed on map.")
+class weapon_battlerifle : weapon_class {
+void () weapon_battlerifle = {
+  classname = "weapon_battlerifle";
+ WEAPONMODELS(w_assault, v_assault)
+FLOAT(currentammo, "starting ammo", 150)
+rateoffire = 8;
+attackvelocity = 120;
+attacktimes = 1;
+float(float times) attack = { return(hitscan(times)); };
+
 //default respawn time
 dprint("weapon_battlerifle spawn function\n");
-ENDCLASS
-
-CLASSDEF(weapon, weapon_plasrifle, "plasma rifle placed on map.")
-WEAPONMODELS(w_plasrifle, v_plasrifle)
-FLOAT(current_ammo, "starting ammo", 140)
-ENDCLASS
+};
+};

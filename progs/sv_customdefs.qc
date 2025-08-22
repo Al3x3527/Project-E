@@ -82,3 +82,17 @@ void(entity removing) player_chain_remove =
 	removing.player_chain_next = world;
 	removing.player_chain_prev = world;
 };
+
+//Halo defs
+.float respawntime;
+.float runtimeminimum;
+.float runtimemaximum;
+float PLACE_AT_START;
+float GAMETYPE_SPECIFIC;
+
+float UNLIMITED_AMMO;
+float BOTTOMLESS_CLIP;
+
+//useful defs
+.float(float times) attack; //returns TRUE or FALSE
+#define gamemodels "mdls/"

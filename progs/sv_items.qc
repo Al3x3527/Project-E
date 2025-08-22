@@ -1,6 +1,3 @@
-void() SUB_NULL = {};
-.float respawntime;
-
 void() RespawnItemDo = {
   setmodel(self, self.model);
   self.solid = SOLID_TRIGGER;
@@ -10,7 +7,7 @@ float ITEM_HELD = 8;
 void() RespawnItemTry = {
   switch (self.spawnflags) {
     case ITEM_DONTRESPAWN : {
-      self.think = SUB_NULL;
+      self.think = sub_noop;
       break;
     }
   case ITEM_HELD : {
@@ -37,15 +34,28 @@ void() UseItemTry = {
 }
 
 #define ISITEM {\
-  this.nextthink = time + 0.3;\
-  this.think = RespawnItemTry;\
-  this.modelindex = 0;\
+  nextthink = time + 0.3;\
+  think = RespawnItemTry;\
+  modelindex = 0;\
 }
 #define ISUSABLE {\
-  this.touch = UseItemTry;\
+  touch = UseItemTry;\
   ISITEM\
 }
 #define ISCONSUMABLE {\
-  this.use = PickupItem;\
+  use = PickupItem;\
   ISUSABLE\
 }
+void() IsItem = {
+  self.nextthink = time + 0.3;
+  self.think = RespawnItemTry;
+  self.modelindex = 0;
+};
+void() IsUsable = {
+  self.touch = UseItemTry;
+  IsItem();
+};
+void() IsConsumable = {
+  self.use = PickupItem;
+  IsUsable();
+};
