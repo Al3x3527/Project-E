@@ -1,12 +1,15 @@
 //FGD class MACROS
 #define FGDbase(flags)
+#define FGDfield(field, desc)
 #define CLASSDEF(CLASSbase, CLASSname, CLASSdesc)\
 class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = "#CLASSname";\
+netname = "#CLASSdesc";
+//fgd description = #CLASSdesc placed on map.
 /*#message "#+FGD_class #CLASSname"*/
-#define ENDCLASS };
-#define FLOAT(FLOATfield, FLOATdesc, FLOATfloat) {\
+#define ENDCLASS };};
+#define FLOAT(FLOATfield, FLOATfloat) {\
 if (!this.FLOATfield) this.FLOATfield = FLOATfloat;}
 #define COLOR() /*do nothing*/
 //fallback models

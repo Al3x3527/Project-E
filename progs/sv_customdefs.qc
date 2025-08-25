@@ -107,7 +107,7 @@ typedef struct
 //useful defs
 .float(float times) attack; //returns TRUE or FALSE
 #define gamemodels "mdls/"
-
+/*
 float GT_SHOW_CLOCK = 1;
 class parms_test : entity {
 	void() parms_test = {
@@ -121,4 +121,4 @@ game_type test_mode = {
 	TEST_MODE = 1,
 	GT_SHOW_CLOCK,
 	test_traits
-};
+}; */
