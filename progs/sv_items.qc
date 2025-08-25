@@ -26,11 +26,17 @@ void() PickupItem ={
  //case (self.flags)
 }
 
-void() UseItemDo = {};
+void() UseItemDo = {dprint("UseItemDo\n");};
 
 void() UseItemTry = {
   //prompt flag
+  //dprint("UseItemTry\n");
+  if (self.impulse > time) return;
+  self.impulse = time + 0.2;
+  sprint(other, 1, "press 1 to use\n");
+  if (other.impulse != 1) return;
   UseItemDo();
+  other.impulse = 0;
 }
 
 #define ISITEM {\

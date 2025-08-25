@@ -15,6 +15,7 @@ float attacktimes;
 virtual float (float times) hitscan = {
   float rof = this.rateoffire;
   float speed = this.attackvelocity;
+  dprint("hitscan()!\n");
   return TRUE;
 };
 virtual void() weapon_use = //not weapon.use();
