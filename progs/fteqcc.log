@@ -1,0 +1,34 @@
+Source file: progs.src
+nothing to write
+-------------------------------------
+Source file: cl_progs.src
+outputfile: ../csprogs.dat
+compiling cl_defs.qc
+cl_defs.qc:15: warning: Unknown pragma 'noref'
+cl_defs.qc:17: warning: warning state not recognised
+cl_defs.qc:18: warning: warning state not recognised
+cl_defs.qc:19: warning: warning state not recognised
+cl_defs.qc:20: warning: warning state not recognised
+cl_defs.qc:21: warning: warning id not recognised
+cl_defs.qc:22: warning: warning id not recognised
+cl_defs.qc:23: warning: warning id not recognised
+cl_defs.qc:408: error: "__used" is not a type
+cl_defs.qc:421: error: "__in" is not a type
+cl_defs.qc:425: error: "__used" is not a type
+cl_defs.qc:537: warning: Missing semicolon at end of definition
+cl_defs.qc:537: error: "|" is not a type
+cl_defs.qc:538: warning: Missing semicolon at end of definition
+cl_defs.qc:538: error: "|" is not a type
+cl_defs.qc:539: warning: Missing semicolon at end of definition
+cl_defs.qc:539: error: "|" is not a type
+cl_defs.qc:824: error: "optional" is not a type
+cl_defs.qc:844: error: "optional" is not a type
+cl_defs.qc:876: error: "optional" is not a type
+cl_defs.qc:882: error: dprint redeclared, prev instance is in cl_defs.qc
+cl_defs.qc:879:    dprint  is defined here
+cl_defs.qc:903: error: "optional" is not a type
+
+************ ERROR ************
+Errors have occured
+
+Error in cl_defs.qc on line 903
