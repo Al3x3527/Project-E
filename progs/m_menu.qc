@@ -249,7 +249,7 @@ void() help_menu =
 
 	sui_pop_frame();	
 };
-
+void() m_close;
 void() main_menu =
 {
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
@@ -270,7 +270,11 @@ void() main_menu =
 	my_button("mm_help", [0, 8 + 48], [size_x - 16, 20], "Help") ? current_menu = MENU_HELP : 0;
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_END]);
 	my_button("mm_quit", [0, -8], [size_x - 16, 20], "Quit") ? localcmd("quit\n") : 0;
-	sui_pop_frame();	
+
+	if (sui_listen_back())
+		m_close();
+
+	sui_pop_frame();
 
 	sui_set_default_kb_focus("mm_start");
 };
