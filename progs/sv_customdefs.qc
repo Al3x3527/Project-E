@@ -107,6 +107,10 @@ typedef struct
 //useful defs
 .float(float times) attack; //returns TRUE or FALSE
 #define gamemodels "mdls/"
+.void() equip;
+.void() weapon_use;
+.entity primary;
+.entity secondary;
 /*
 float GT_SHOW_CLOCK = 1;
 class parms_test : entity {

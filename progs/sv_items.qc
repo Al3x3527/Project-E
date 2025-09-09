@@ -22,36 +22,47 @@ void() RespawnItemTry = {
   }
 }
 
-void() PickupItem ={
- //case (self.flags)
+void() DespawnItem = {
+  self.solid = SOLID_NOT;
+  self.modelindex = 0;
 }
 
-void() UseItemDo = {dprint("UseItemDo\n");};
+#define CONSUMEITEM {\
+  if(this.spawnflags | ITEM_HELD) return;\
+  this.spawnflags = this.enemy.spawnflags -= ITEM_HELD;\
+  this.enemy.nextthink = time + this.enemy.respawntime;\
+  return;}
+/*
+void() ConsumeItem = {
+  if(self.spawnflags || ITEM_HELD) return;
+  self.spawnflags -= ITEM_HELD;
+  self.nextthink = time + respawntime;
+}*/
+
+void() PickupItem ={
+  DespawnItem();
+  self.equip(); //because we don't know the class
+  if (self.spawnflags | ITEM_HELD) self.spawnflags += ITEM_HELD;
+}
+
+void() UseItemDo = {
+  sprint(other, 1, "UseItemDo\n");
+  self.use();
+};
 
 void() UseItemTry = {
   //prompt flag
   //dprint("UseItemTry\n");
-  if (self.impulse > time) return;
+  if (other.impulse == 1) {
+    other.impulse = 0;
+    UseItemDo();
+    return;
+    }
+  else if (self.impulse > time) return;
   self.impulse = time + 0.2;
   sprint(other, 1, "press 1 to use\n");
-  if (other.impulse != 1) return;
-  UseItemDo();
-  other.impulse = 0;
 }
 
-#define ISITEM {\
-  nextthink = time + 0.3;\
-  think = RespawnItemTry;\
-  modelindex = 0;\
-}
-#define ISUSABLE {\
-  touch = UseItemTry;\
-  ISITEM\
-}
-#define ISCONSUMABLE {\
-  use = PickupItem;\
-  ISUSABLE\
-}
 void() IsItem = {
   self.nextthink = time + 0.3;
   self.think = RespawnItemTry;

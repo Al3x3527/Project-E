@@ -22,7 +22,7 @@ void() CheckImpulses =
 	{
 	default: break;
 	}
-	self.impulse = 0;
+//	self.impulse = 0;
 };
 
 vector() get_spawn_point =
