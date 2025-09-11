@@ -98,6 +98,7 @@ rateoffire = 8;
 attackvelocity = 80;
 attacktimes = 3;
 float(float times) attack = { return(hitscan(times)); };
+equip = plasmarifle_equip;
 RUNTIME(weapon_plasmarifle_runtime)
 ENDCLASS
 void() plasmarifle_equip = WEAPONEQUIP(weapon_plasmarifle);
@@ -105,6 +106,7 @@ void() plasmarifle_equip = WEAPONEQUIP(weapon_plasmarifle);
 #define w_browning gamemodels "browning.mdl"
 #define v_browning gamemodels "browning.mdl"
 void() browning_equip;
+runtime_t weapon_browning_runtime;
 CLASSDEF(weapon_class, weapon_browning, "machine gun")
 WEAPONMODELS(w_browning, v_browning)
 FLOAT(currentammo, 400, "starting ammo")
@@ -112,12 +114,15 @@ rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 float(float times) attack = {return(hitscan(times)); };
+equip = browning_equip;
+RUNTIME(weapon_browning_runtime)
 ENDCLASS
 void() browning_equip = WEAPONEQUIP(weapon_browning);
 
 #define w_cannon gamemodels "qp_cannon.mdl"
 #define v_cannon gamemodels "qp_cannon.mdl"
 void() cannon_equip;
+runtime_t weapon_cannon_runtime;
 CLASSDEF(weapon_class, weapon_cannon, "cannon")
 WEAPONMODELS(w_cannon, v_cannon)
 FLOAT(currentammo, 10, "starting ammo")
@@ -125,12 +130,15 @@ rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 float(float times) attack = {return(hitscan(times)); };
+equip = cannon_equip;
+RUNTIME(weapon_cannon_runtime)
 ENDCLASS
 void() cannon_equip = WEAPONEQUIP(weapon_cannon);
 
 #define w_sniper gamemodels "qp_m40a5.mdl"
 #define v_sniper gamemodels "qp_m40a5.mdl"
 void() sniper_equip;
+runtime_t weapon_sniper_runtime;
 CLASSDEF(weapon_class, weapon_sniper, "sniper")
 WEAPONMODELS(w_sniper, v_sniper)
 FLOAT(currentammo, 40, "starting ammo")
@@ -138,12 +146,15 @@ rateoffire = 4;
 attackvelocity = 120;
 attacktimes = 1;
 float(float times) attack = {return(hitscan(times)); };
+equip = sniper_equip;
+RUNTIME(weapon_sniper_runtime)
 ENDCLASS
 void() sniper_equip = WEAPONEQUIP(weapon_sniper);
 
 #define w_rocket gamemodels "qp_rocket_launcher.mdl"
 #define v_rocket gamemodels "qp_rocket_launcher.mdl"
 void() rocket_equip;
+runtime_t weapon_rocket_runtime;
 CLASSDEF(weapon_class, weapon_rocket, "rocket launcher")
 WEAPONMODELS(w_rocket, v_rocket)
 FLOAT(currentammo, 10, "starting ammo")
@@ -151,12 +162,15 @@ rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 float(float times) attack = {return(hitscan(times)); };
+equip = rocket_equip;
+RUNTIME(weapon_rocket_runtime)
 ENDCLASS
 void() rocket_equip = WEAPONEQUIP(weapon_rocket);
 
 #define w_smg gamemodels "qp_sentinelsmg.mdl"
 #define v_smg gamemodels "qp_sentinelsmg.mdl"
 void() smg_equip;
+runtime_t weapon_smg_runtime;
 CLASSDEF(weapon_class, weapon_smg, "sentinel smg")
 WEAPONMODELS(w_smg, v_smg)
 FLOAT(currentammo, 140, "starting ammo")
@@ -164,12 +178,15 @@ rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 float (float times) attack = {return(hitscan(times)); };
+equip = smg_equip;
+RUNTIME(weapon_smg_runtime)
 ENDCLASS
 void() smg_equip = WEAPONEQUIP(weapon_smg);
 
 #define w_spear gamemodels "qp_spear.mdl"
 #define v_spear gamemodels "qp_spear.mdl"
 void() spear_equip;
+runtime_t weapon_spear_runtime;
 CLASSDEF(weapon_class, weapon_spear, "sentinel spear")
 WEAPONMODELS(w_spear, v_spear)
 FLOAT(currentammo, 40, "starting ammo")
@@ -177,5 +194,7 @@ rateoffire = 1;
 attackvelocity = 100;
 attacktimes = 1;
 float (float times) attack = {return(hitscan(times));};
+equip = spear_equip;
+RUNTIME(weapon_spear_runtime)
 ENDCLASS
 void() spear_equip = WEAPONEQUIP(weapon_spear);
