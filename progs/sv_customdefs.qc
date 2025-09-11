@@ -85,15 +85,35 @@ void(entity removing) player_chain_remove =
 
 //Halo defs
 .float respawntime;
-.float runtimeminimum;
-.float runtimemaximum;
+.int *runtime_current;
+.int *runtime_minimum;
+.int *runtime_maximum;
 float DONT_PLACE_AT_START = 1;
 float GAMETYPE_SPECIFIC = 2;
-float gametype; //entity game type
+//float gametype; //entity game type
+.entity primary;
+.entity secondary;
+
 
 float UNLIMITED_AMMO;
 float BOTTOMLESS_CLIP;
 
+typedef struct
+{
+  int runtime_current;
+  int runtime_minimum;
+  int runtime_maximum; //ignore 0
+} runtime_t;
+
+#define RUNTIME(class_runtime)\
+	runtime_current = &class_runtime.runtime_current;\
+	class_runtime.runtime_current += 1;\
+	runtime_minimum = &class_runtime.runtime_minimum;\
+	runtime_maximum = &class_runtime.runtime_maximum;\
+	dprint("#class_runtime runtime current");\
+	dprint(ftos(*this.runtime_current));\
+	dprint("\n");
+  /*
 typedef struct
 {
 	string title;
@@ -103,14 +123,13 @@ typedef struct
 	void player_traits();
 } game_type;
 .game_type currentgametype;
-
+*/
 //useful defs
 .float(float times) attack; //returns TRUE or FALSE
 #define gamemodels "mdls/"
 .void() equip;
 .void() weapon_use;
-.entity primary;
-.entity secondary;
+
 /*
 float GT_SHOW_CLOCK = 1;
 class parms_test : entity {

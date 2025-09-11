@@ -12,12 +12,31 @@ void() RespawnItemTry = {
     }
   case ITEM_HELD : {
     //if checkruntime() RespawnItemDo; else - clear behavior
+    if (self.runtime_current < self.runtime_minimum) {
+      RespawnItemDo();
+      self.runtime_current += 1;
+      break;
+    }
+    else {
     self.nextthink = time + self.respawntime;
     break;
+    }
   }
   default : {
-    RespawnItemDo();
-    break;
+    if !(self.runtime_maximum) {
+        RespawnItemDo();
+        self.runtime_current += 1;
+        break;
+      }
+    if (self.runtime_current < self.runtime_maximum) {
+      RespawnItemDo();
+      self.runtime_current += 1;
+      break;
+    }
+    else {
+      self.nextthink = time + self.respawntime;
+      break;
+    }
   }
   }
 }
