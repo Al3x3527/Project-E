@@ -129,6 +129,8 @@ typedef struct
 #define gamemodels "mdls/"
 .void() equip;
 .void() weapon_use;
+//Quake defs
+.void(entity inflictor, float damage) th_pain;
 
 /*
 float GT_SHOW_CLOCK = 1;

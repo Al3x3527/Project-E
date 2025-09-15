@@ -50,6 +50,7 @@ void() DespawnItem = {
   if(this.spawnflags | ITEM_HELD) return;\
   this.spawnflags = this.enemy.spawnflags -= ITEM_HELD;\
   this.enemy.nextthink = time + this.enemy.respawntime;\
+  dprint("item consumed\n");\
   return;}
 /*
 void() ConsumeItem = {
@@ -65,7 +66,7 @@ void() PickupItem ={
 }
 
 void() UseItemDo = {
-  sprint(other, 1, "UseItemDo\n");
+  //sprint(other, 1, "UseItemDo\n");
   self.use();
 };
 
@@ -78,7 +79,7 @@ void() UseItemTry = {
     return;
     }
   else if (self.impulse > time) return;
-  self.impulse = time + 0.2;
+  self.impulse = time + 1;
   sprint(other, 1, "press 1 to use\n");
 }
 
