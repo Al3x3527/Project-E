@@ -93,7 +93,7 @@ float GAMETYPE_SPECIFIC = 2;
 //float gametype; //entity game type
 .entity primary;
 .entity secondary;
-
+.entity active_weapon;
 
 float UNLIMITED_AMMO;
 float BOTTOMLESS_CLIP;

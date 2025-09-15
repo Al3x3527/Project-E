@@ -7,46 +7,43 @@
 //#define v_plasrifle gamemodels"v_plasmarifle.mdl"
 const float WEAPON_BATTLERIFLE = 2;
 
-void(entity new) switch_weapon = {
- //expect other = player, self = new.enemy
- other.weapon = new.weapon;
- other.weaponmodel = new.weaponmodel;
- other.currentammo = new.currentammo;
- other.weapon_use = new.weapon_use;
- sprint(other, 1, "you switched to the ");
- sprint(other, 1, new.classname);
- sprint(other, 1, "!\n");
-}
+
+
+void() weapon_print = {dprint("weapon_use\n");}
 
 class weapon_class : entity {
 float rateoffire;
 float attackvelocity;
 float attacktimes;
-//void *attackdo(float times); I give up.
 
+virtual float(float times) attackdo = {dprint("placeholder attack\n"); return 0;};
 virtual float (float times) hitscan = {
   float rof = this.rateoffire;
   float speed = this.attackvelocity;
   dprint("hitscan()!\n");
   return TRUE;
 };
-
-virtual void() use_weapon = {
-  if (!currentammo) return;
-    float times = attacktimes;
-    if (currentammo == BOTTOMLESS_CLIP) times = 0; //not congruous
-    if (currentammo != UNLIMITED_AMMO) currentammo -= times;
-    this.attack(times);
-    if (!currentammo) CONSUMEITEM
+//virtual void() use_weapon = {
+//};
+virtual void() weapon_use = {
+  dprint("use_weapon!\n");
+  if (!this.currentammo) return;
+    float times = this.attacktimes;
+    if (this.currentammo == BOTTOMLESS_CLIP) times = 0; //not congruous
+    if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;
+    //attackdo(times); works
+    this.attack(times); //attack = attackdo;
+    if (!this.currentammo) CONSUMEITEM
 };
+
 void() weapon_class = {
 FGDbase(Spawnflags Targetname) //only affects FGD.
 COLOR(206 18 18)
 //if (SUB_Inhibit()) return;
  think = IsConsumable;
 nextthink = time + 0.3;
-weapon_use = use_weapon;
 setsize (this, '-16 -24 0', '16 24 16');
+float(float times) attack = attackdo;
 //MODELdefault(w_placeholder)
 //precache_model(v_placeholder);
 //if (!this.weaponmodel) this.weaponmodel = v_placeholder;
@@ -66,10 +63,32 @@ setsize (this, '-16 -24 0', '16 24 16');
   switch_weapon(new);\
 }
 
+void() use_active = {
+  entity oself = self;
+  self = self.active_weapon;
+  self.weapon_use();
+  self = oself;
+  return;
+}
+void(entity new) switch_weapon = {
+ //expect other = player, self = new.enemy
+ other.weapon = new.weapon;
+ other.active_weapon = new;
+ other.weaponmodel = new.weaponmodel;
+ other.currentammo = new.currentammo;
+ other.weapon_use = use_active;
+ sprint(other, 1, "you switched to the ");
+ sprint(other, 1, new.classname);
+ sprint(other, 1, "!\n");
+}
+
+
 void() battlerifle_equip;
 runtime_t weapon_battlerifle_runtime;
 //CLASSDEF(weapon, weapon_battlerifle, "assault rifle placed on map.")
 class weapon_battlerifle : weapon_class {
+virtual float(float times) attack = {return(attackdo(times));};
+
 void () weapon_battlerifle = {
   classname = "weapon_battlerifle";
  WEAPONMODELS(w_assault, v_assault)
@@ -78,11 +97,11 @@ weapon = WEAPON_BATTLERIFLE;
 rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
-float(float times) attack = { return(hitscan(times)); };
 equip = battlerifle_equip;
 RUNTIME(weapon_battlerifle_runtime)
 //default respawn time
 dprint("weapon_battlerifle spawn function\n");
+//float(float times) attack = { return(hitscan(times)); };
 };
 };
 void() battlerifle_equip = WEAPONEQUIP(weapon_battlerifle);

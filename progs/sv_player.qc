@@ -39,7 +39,7 @@ void() PlayerPreThink =
 	makevectors(self.v_angle);
 	if(self.button0)
 	{
-		
+		if(self.weapon_use) self.weapon_use();
 	}
 	if(self.button2)
 	{
