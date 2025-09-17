@@ -110,7 +110,7 @@ typedef struct
 	class_runtime.runtime_current += 1;\
 	runtime_minimum = &class_runtime.runtime_minimum;\
 	runtime_maximum = &class_runtime.runtime_maximum;\
-	dprint("#class_runtime runtime current");\
+	dprint(#class_runtime "runtime current");\
 	dprint(ftos(*this.runtime_current));\
 	dprint("\n");
   /*
@@ -131,7 +131,6 @@ typedef struct
 .void() weapon_use;
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
-
 /*
 float GT_SHOW_CLOCK = 1;
 class parms_test : entity {

@@ -1,55 +1,14 @@
-//weapon classes using class inheritance
-//#define w_placeholder gamemodels"w_placeholder.mdl"
-//#define v_placeholder gamemodels"v_placeholder.mdl"
-#define w_assault gamemodels"w_AD70.mdl"
-#define v_assault gamemodels"v_AD70.mdl"
-#define w_smg gamemodels "qp_sentinelsmg.mdl"
-#define v_smg gamemodels "qp_sentinelsmg.mdl"
-
-//#define w_plasrifle gamemodels"w_plasmarifle.mdl"
-//#define v_plasrifle gamemodels"v_plasmarifle.mdl"
 const float WEAPON_BATTLERIFLE = 2;
+const float WEAPON_PLASMARIFLE = 4;
+#define e_plasma gamemodels "qp_bomb.mdl"
+#define w_weapon_plasmarifle gamemodels "w_plasma_rifle.mdl"
+#define v_weapon_plasmarifle gamemodels "v_plasma_rifle.mdl"
 
-void() weapon_print = {dprint("weapon_use\n");}
-
-void(entity targ, entity inflictor, entity attacker, float damage) TakeDamage = {
-//inflictor can = projectile
-targ.health -= damage;
-entity oself = self;
-self = targ;
-targ.th_pain(inflictor, damage);
-self = oself;
-//dprint(ftos(targ.health));
-//dprint(" targ health\n");
-};
-
-entity multi_ent;
-float multi_damage;
-
-void() ClearMultiDamage = //from Copper?
-{
-  multi_ent = world;
-  multi_damage = 0;
-};
-void() ApplyMultiDamage = {
-  dprint(ftos(multi_damage)); dprint(" damage apply multi damage\n");
-  if(!multi_ent) return;
-  TakeDamage(multi_ent, other, other, multi_damage);
-};
-void(entity hit, float damage) AddMultiDamage = {
-  if (!hit) return;
-  if (hit != multi_ent)
-    {
-      ApplyMultiDamage();
-      multi_damage = damage;
-      multi_ent = hit;
-    }
-  else multi_damage += damage;
-};
-
-void(float damage, vector dir) BulletHit = {
-  //other should be shooter
-  AddMultiDamage(trace_ent, damage);
+void() plasma_touch = {
+  if (other == self.owner) return;
+  if (other.solid == SOLID_TRIGGER) return;
+  TakeDamage(other, self, self.owner, self.impulse);
+  remove(self);
 };
 
 class weapon_class : entity {
@@ -58,35 +17,28 @@ float attackvelocity;
 float attacktimes;
 float attackdamage;
 float attackdelay;
-virtual void() projectile_touch = {
-  if (other == this.owner) return;
-  if (other.solid == SOLID_TRIGGER) return;
-  TakeDamage(other, this, this.owner, this.attackdamage);
-  remove(this);
-};
 virtual void(float times) attackdo = {dprint("placeholder attack\n");};
 virtual void(float times) projectile = {
   float rof = this.rateoffire;
   float speed = this.attackvelocity;
-  //dprint("hitscan()!\n");
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
   makevectors(ent.v_angle);
   vector dir = v_forward;
   vector end = dir * 2048 + org;
-  //dprint(vtos(end));
   float flags = 0;
   //not multidamage
-
   //could be a projectile_class projectile_x
   entity proj = spawn();
   proj.origin = org;
   proj.velocity = dir * 100;
+  proj.impulse = this.attackdamage;
   proj.movetype = MOVETYPE_NOCLIP;
-  setmodel(proj, w_smg);
-  proj.touch = projectile_touch;
-
+  setmodel(proj, e_plasma);
+  proj.touch = plasma_touch;
 };
+virtual void(float times) weapon_plasmarifle_attack = {projectile(times);};
+
 virtual void (float times) hitscan = {
   float rof = this.rateoffire;
   float speed = this.attackvelocity;
@@ -113,21 +65,18 @@ virtual void (float times) hitscan = {
 };
 
 virtual void() weapon_use = {
-  //dprint("use_weapon!\n");
   if (!this.currentammo) {
     dprint("no ammo!\n");
     return;
     }
   if (this.impulse > time) {
-    //dprint("delay\n");
     return;
   }
   this.impulse = time + this.attackdelay;
     float times = this.attacktimes;
     if (this.currentammo == BOTTOMLESS_CLIP) times = 0; //not congruous
     if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;
-    //attackdo(times); works
-    this.attack(times); //attack = attackdo;
+    this.attack(times);
     if (!this.currentammo) CONSUMEITEM
 };
 
@@ -139,24 +88,12 @@ COLOR(206 18 18)
 nextthink = time + 0.3;
 setsize (this, '-16 -24 0', '16 24 16');
 void(float times) attack = attackdo;
+precache_model(gamemodels "qp_bomb.mdl");
 //MODELdefault(w_placeholder)
 //precache_model(v_placeholder);
 //if (!this.weaponmodel) this.weaponmodel = v_placeholder;
 };
 };
-
-#define WEAPONEQUIP(aclass) {\
- aclass new = spawn(aclass);\
-  new.spawnflags = self.spawnflags;\
-  new.currentammo = self.currentammo;\
-  new.enemy = self;\
-  new.solid = SOLID_NOT;\
-  if !(other.primary) other.primary = new;\
-  else if !(other.secondary) other.secondary = new;\
-  else if (other.weapon == other.primary.weapon) other.primary = new;\
-  else other.secondary = new;\
-  switch_weapon(new);\
-}
 
 void() use_active = {
   other = self;
@@ -180,17 +117,16 @@ void(entity new) switch_weapon = {
  sprint(other, 1, "!\n");
 }
 
-
-void() battlerifle_equip;
+//void() battlerifle_equip;
 runtime_t weapon_battlerifle_runtime;
 //CLASSDEF(weapon, weapon_battlerifle, "assault rifle placed on map.")
 class weapon_battlerifle : weapon_class {
   //put whatever here
 virtual void(float times) attack = {hitscan(times);};
-
+virtual void() equip = WEAPONEQUIP(weapon_battlerifle);
 void () weapon_battlerifle = {
   classname = "weapon_battlerifle";
- WEAPONMODELS(w_assault, v_assault)
+WEAPONMODELS(gamemodels "w_ad70.mdl", gamemodels "v_ad70.mdl")
 FLOAT(currentammo, 150, "starting ammo")
 weapon = WEAPON_BATTLERIFLE;
 rateoffire = 8;
@@ -198,34 +134,27 @@ attackvelocity = 120;
 attacktimes = 1;
 attackdamage = 20;
 attackdelay = 0.6;
-equip = battlerifle_equip;
+//equip = battlerifle_equip;
 RUNTIME(weapon_battlerifle_runtime)
 //default respawn time
 dprint("weapon_battlerifle spawn function\n");
 //float(float times) attack = { return(hitscan(times)); };
 };
 };
-void() battlerifle_equip = WEAPONEQUIP(weapon_battlerifle);
+//void() battlerifle_equip = WEAPONEQUIP(weapon_battlerifle);
 
-#define w_plas gamemodels "plasma_rifle.mdl"
-#define v_plas gamemodels "v_plasma_rifle.mdl"
-void() plasmarifle_equip;
-runtime_t weapon_plasmarifle_runtime;
-CLASSDEF(weapon_class, weapon_plasmarifle, "plasma rifle")
-WEAPONMODELS(w_plas, v_plas)
-FLOAT(currentammo, 140, "starting ammo")
+WPCLASS(weapon_plasmarifle, "plasma rifle")
+weapon = WEAPON_PLASMARIFLE;
+STARTINGAMMO(140)
 rateoffire = 8;
 attackvelocity = 80;
 attacktimes = 3;
-//void(float times) attack = { return(hitscan(times)); };
-equip = plasmarifle_equip;
-RUNTIME(weapon_plasmarifle_runtime)
+attackdelay = 0.8;
 ENDCLASS
-void() plasmarifle_equip = WEAPONEQUIP(weapon_plasmarifle);
 
 #define w_browning gamemodels "browning.mdl"
 #define v_browning gamemodels "browning.mdl"
-void() browning_equip;
+//void() browning_equip;
 runtime_t weapon_browning_runtime;
 CLASSDEF(weapon_class, weapon_browning, "machine gun")
 WEAPONMODELS(w_browning, v_browning)
@@ -234,14 +163,14 @@ rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 //void(float times) attack = {return(hitscan(times)); };
-equip = browning_equip;
+//equip = browning_equip;
 RUNTIME(weapon_browning_runtime)
 ENDCLASS
-void() browning_equip = WEAPONEQUIP(weapon_browning);
+//void() browning_equip = WEAPONEQUIP(weapon_browning);
 
 #define w_cannon gamemodels "qp_cannon.mdl"
 #define v_cannon gamemodels "qp_cannon.mdl"
-void() cannon_equip;
+//void() cannon_equip;
 runtime_t weapon_cannon_runtime;
 CLASSDEF(weapon_class, weapon_cannon, "cannon")
 WEAPONMODELS(w_cannon, v_cannon)
@@ -250,14 +179,14 @@ rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 //float(float times) attack = {return(hitscan(times)); };
-equip = cannon_equip;
+//equip = cannon_equip;
 RUNTIME(weapon_cannon_runtime)
 ENDCLASS
-void() cannon_equip = WEAPONEQUIP(weapon_cannon);
+//void() cannon_equip = WEAPONEQUIP(weapon_cannon);
 
 #define w_sniper gamemodels "qp_m40a5.mdl"
 #define v_sniper gamemodels "qp_m40a5.mdl"
-void() sniper_equip;
+//void() sniper_equip;
 runtime_t weapon_sniper_runtime;
 CLASSDEF(weapon_class, weapon_sniper, "sniper")
 WEAPONMODELS(w_sniper, v_sniper)
@@ -266,14 +195,14 @@ rateoffire = 4;
 attackvelocity = 120;
 attacktimes = 1;
 //float(float times) attack = {return(hitscan(times)); };
-equip = sniper_equip;
+//equip = sniper_equip;
 RUNTIME(weapon_sniper_runtime)
 ENDCLASS
-void() sniper_equip = WEAPONEQUIP(weapon_sniper);
+//void() sniper_equip = WEAPONEQUIP(weapon_sniper);
 
 #define w_rocket gamemodels "qp_rocket_launcher.mdl"
 #define v_rocket gamemodels "qp_rocket_launcher.mdl"
-void() rocket_equip;
+//void() rocket_equip;
 runtime_t weapon_rocket_runtime;
 CLASSDEF(weapon_class, weapon_rocket, "rocket launcher")
 WEAPONMODELS(w_rocket, v_rocket)
@@ -282,28 +211,28 @@ rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 //float(float times) attack = {return(hitscan(times)); };
-equip = rocket_equip;
+//equip = rocket_equip;
 RUNTIME(weapon_rocket_runtime)
 ENDCLASS
-void() rocket_equip = WEAPONEQUIP(weapon_rocket);
+//void() rocket_equip = WEAPONEQUIP(weapon_rocket);
 
-void() smg_equip;
+//void() smg_equip;
 runtime_t weapon_smg_runtime;
 CLASSDEF(weapon_class, weapon_smg, "sentinel smg")
-WEAPONMODELS(w_smg, v_smg)
+//WEAPONMODELS(w_smg, v_smg)
 FLOAT(currentammo, 140, "starting ammo")
 rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 //float (float times) attack = {return(hitscan(times)); };
-equip = smg_equip;
+//equip = smg_equip;
 RUNTIME(weapon_smg_runtime)
 ENDCLASS
-void() smg_equip = WEAPONEQUIP(weapon_smg);
+//void() smg_equip = WEAPONEQUIP(weapon_smg);
 
 #define w_spear gamemodels "qp_spear.mdl"
 #define v_spear gamemodels "qp_spear.mdl"
-void() spear_equip;
+//void() spear_equip;
 runtime_t weapon_spear_runtime;
 CLASSDEF(weapon_class, weapon_spear, "sentinel spear")
 WEAPONMODELS(w_spear, v_spear)
@@ -312,7 +241,7 @@ rateoffire = 1;
 attackvelocity = 100;
 attacktimes = 1;
 //float (float times) attack = {return(hitscan(times));};
-equip = spear_equip;
+//equip = spear_equip;
 RUNTIME(weapon_spear_runtime)
 ENDCLASS
-void() spear_equip = WEAPONEQUIP(weapon_spear);
+//void() spear_equip = WEAPONEQUIP(weapon_spear);
