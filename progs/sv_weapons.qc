@@ -13,6 +13,7 @@ const float WEAPON_BATTLERIFLE = 2;
 void() weapon_print = {dprint("weapon_use\n");}
 
 void(entity targ, entity inflictor, entity attacker, float damage) TakeDamage = {
+//inflictor can = projectile
 targ.health -= damage;
 entity oself = self;
 self = targ;
@@ -57,8 +58,35 @@ float attackvelocity;
 float attacktimes;
 float attackdamage;
 float attackdelay;
-
+virtual void() projectile_touch = {
+  if (other == this.owner) return;
+  if (other.solid == SOLID_TRIGGER) return;
+  TakeDamage(other, this, this.owner, this.attackdamage);
+  remove(this);
+};
 virtual void(float times) attackdo = {dprint("placeholder attack\n");};
+virtual void(float times) projectile = {
+  float rof = this.rateoffire;
+  float speed = this.attackvelocity;
+  //dprint("hitscan()!\n");
+  entity ent = this.owner;
+  vector org = ent.origin + '0 0 30';
+  makevectors(ent.v_angle);
+  vector dir = v_forward;
+  vector end = dir * 2048 + org;
+  //dprint(vtos(end));
+  float flags = 0;
+  //not multidamage
+
+  //could be a projectile_class projectile_x
+  entity proj = spawn();
+  proj.origin = org;
+  proj.velocity = dir * 100;
+  proj.movetype = MOVETYPE_NOCLIP;
+  setmodel(proj, w_smg);
+  proj.touch = projectile_touch;
+
+};
 virtual void (float times) hitscan = {
   float rof = this.rateoffire;
   float speed = this.attackvelocity;
@@ -72,12 +100,6 @@ virtual void (float times) hitscan = {
   float flags = 0;
   ClearMultiDamage();
   traceline(org, end, flags, ent);
-
-  entity projectile = spawn();
-  projectile.origin = org;
-  projectile.velocity = dir * 100;
-  projectile.movetype = MOVETYPE_NOCLIP;
-  setmodel(projectile, w_smg);
 
   local float i = 0;
   if (trace_fraction != 1.0) {

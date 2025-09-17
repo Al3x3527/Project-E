@@ -10,5 +10,6 @@ class func_target: entity {
     setmodel(this, this.model);
     touch = targ_touch;
     th_pain = targ_pain;
+
   };
 };
