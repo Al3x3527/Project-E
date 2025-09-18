@@ -55,3 +55,26 @@ class func_target: entity {
 
   };
 };
+
+void() use_active = {
+  other = self;
+  self = self.active_weapon;
+  self.weapon_use();
+  self = other;
+  //old other lost
+  return;
+}
+
+void(entity new) switch_weapon = {
+ //expect other = player, self = new.enemy
+ other.weapon = new.weapon;
+ other.active_weapon = new;
+ new.owner = other;
+ other.weaponmodel = new.weaponmodel;
+ other.currentammo = new.currentammo;
+ other.weapon_use = use_active;
+ new.impulse = time + 0.6;
+ sprint(other, 1, "you switched to the ");
+ sprint(other, 1, new.classname);
+ sprint(other, 1, "!\n");
+}

@@ -12,7 +12,7 @@ netname = #CLASSdesc;\
 fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc" [");
 //fgd description = #CLASSdesc placed on map.
 /*#message "#+FGD_class #CLASSname"*/
-#define ENDCLASS fgdprint("@fgd ]");};};
+#define ENDCLASS fgdprint("@fgd ]");};}
 
 #define WEAPONEQUIP(aclass) {\
  aclass new = spawn(aclass);\
@@ -27,12 +27,12 @@ fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"
   switch_weapon(new);\
 }
 
-#define WEAPONMODELS(wmdl, vmdl) {\
-fgdprint("@fgd model({ path :"wmdl" })");\
-precache_model(wmdl);\
-precache_model(vmdl);\
-setmodel(this, wmdl);\
-this.weaponmodel = vmdl;}
+#define WEAPONMODELS(wmdl, vmdl)\
+fgdprint("@fgd model({ path :"gamemodels wmdl" })");\
+precache_model(gamemodels wmdl);\
+precache_model(gamemodels vmdl);\
+setmodel(this, gamemodels wmdl);\
+this.weaponmodel = gamemodels vmdl
 
 #define WPCLASS(WPname, WPdesc)\
   runtime_t WPname ## _runtime;\
@@ -42,15 +42,16 @@ this.weaponmodel = vmdl;}
   void() WPname = {\
   classname = #WPname;\
   netname = #WPdesc;\
-  WEAPONMODELS(w_ ## WPname, v_ ## WPname)\
   RUNTIME(WPname ## _runtime)\
-dprint(#WPname "spawn function\n");
+//dprint(#WPname "spawn function\n");
 
-#define FLOAT(FLOATfield, FLOATfloat, FLOATdesc) {\
+#define FLOAT(FLOATfield, FLOATfloat, FLOATdesc)\
 if (!this.FLOATfield) this.FLOATfield = FLOATfloat;\
-fgdprint("@fgd "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat);}
+fgdprint("@fgd "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
 
 #define STARTINGAMMO(startingammo) FLOAT(currentammo, startingammo, "starting ammo")
+
+#define RESPAWNTIME(spawntime) FLOAT(respawntime, spawntime, "respawn time")
 
 #define COLOR(color) fgdprint("@fgd color("#color")");
 //fallback models

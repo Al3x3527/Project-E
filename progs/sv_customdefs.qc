@@ -112,7 +112,7 @@ typedef struct
 	runtime_maximum = &class_runtime.runtime_maximum;\
 	dprint(#class_runtime "runtime current");\
 	dprint(ftos(*this.runtime_current));\
-	dprint("\n");
+	dprint("\n")
   /*
 typedef struct
 {
