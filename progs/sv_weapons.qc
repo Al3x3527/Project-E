@@ -20,6 +20,17 @@ void() plasma_touch = {
   remove(self);
 };
 
+class projectile_class : entity {
+  float projectilespeed;
+  void() projectile_class = {
+    movetype = MOVETYPE_FLYMISSILE;
+    solid = SOLID_TRIGGER;
+    setmodel(this, e_plasma);
+    touch = plasma_touch;
+    projectilespeed = 200;
+  };
+};
+
 class weapon_class : entity {
 float rateoffire;
 float attackvelocity;
@@ -29,28 +40,24 @@ float attackdelay;
 
 virtual void(float times) attackdo = {dprint("placeholder attack\n");};
 
+virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn = {
+  projectile_class proj = spawn(projectile_class);
+  proj.origin = org;
+  proj.velocity = dir * proj.projectilespeed;
+  proj.health = damage;
+  proj.owner = ent;
+  dprint(ftos(damage)); dprint(" projectile\n");
+};
+
 virtual void(float times) projectile = {
   float rof = this.rateoffire;
-  float speed = this.attackvelocity;
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
   makevectors(ent.v_angle);
   vector dir = v_forward;
-  vector end = dir * 2048 + org;
-  float flags = 0;
+//  float flags = 0;
   float damage = this.attackdamage;
-  //not multidamage
-  //could be a projectile_class projectile_x
-  entity proj = spawn();
-  proj.origin = org;
-  proj.velocity = dir * 100;
-  proj.health = damage;
-  proj.movetype = MOVETYPE_FLYMISSILE;
-  proj.solid = SOLID_TRIGGER;
-  proj.owner = ent;
-  setmodel(proj, e_plasma);
-  proj.touch = plasma_touch;
-  dprint(ftos(damage)); dprint(" projectile\n");
+  projectile_spawn(dir, org, damage, ent);
 };
 
  virtual void(float times) weapon_plasmarifle_attack = {projectile(times);};
