@@ -10,9 +10,13 @@ const float WEAPON_SPEAR = 256;
 #define e_plasma gamemodels "qp_bomb.mdl"
 
 void() plasma_touch = {
+  //dprint("plasma touch\n");
   if (other == self.owner) return;
   if (other.solid == SOLID_TRIGGER) return;
-  TakeDamage(other, self, self.owner, self.impulse);
+  float damage = self.health;
+  entity ent = self.owner;
+  //dprint(ftos(damage)); dprint("plasma touch tdamage\n");
+  TakeDamage(other, self, ent, damage);
   remove(self);
 };
 
@@ -34,15 +38,19 @@ virtual void(float times) projectile = {
   vector dir = v_forward;
   vector end = dir * 2048 + org;
   float flags = 0;
+  float damage = this.attackdamage;
   //not multidamage
   //could be a projectile_class projectile_x
   entity proj = spawn();
   proj.origin = org;
   proj.velocity = dir * 100;
-  proj.impulse = this.attackdamage;
+  proj.health = damage;
   proj.movetype = MOVETYPE_FLYMISSILE;
+  proj.solid = SOLID_TRIGGER;
+  proj.owner = ent;
   setmodel(proj, e_plasma);
   proj.touch = plasma_touch;
+  dprint(ftos(damage)); dprint(" projectile\n");
 };
 
  virtual void(float times) weapon_plasmarifle_attack = {projectile(times);};
@@ -133,6 +141,7 @@ rateoffire = 8;
 attackvelocity = 80;
 attacktimes = 3;
 attackdelay = 0.8;
+attackdamage = 20;
 ENDCLASS;
 
 WPCLASS(weapon_browning, "machine gun");

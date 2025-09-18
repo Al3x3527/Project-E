@@ -2,13 +2,12 @@ void() weapon_print = {dprint("weapon_use\n");}
 
 void(entity targ, entity inflictor, entity attacker, float damage) TakeDamage = {
 //inflictor can = projectile
+if !(targ) return;
 targ.health -= damage;
 entity oself = self;
 self = targ;
-targ.th_pain(inflictor, damage);
+if (targ.th_pain) targ.th_pain(inflictor, damage);
 self = oself;
-//dprint(ftos(targ.health));
-//dprint(" targ health\n");
 };
 
 entity multi_ent;
