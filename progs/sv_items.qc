@@ -42,6 +42,7 @@ void() RespawnItemTry = {
 }
 
 void() DespawnItem = {
+  dprint(self.classname); dprint(" despawned\n");
   self.solid = SOLID_NOT;
   self.modelindex = 0;
 }
@@ -61,8 +62,8 @@ void() ConsumeItem = {
 
 void() PickupItem ={
   DespawnItem();
-  self.equip(); //because we don't know the class
   if (self.spawnflags | ITEM_HELD) self.spawnflags += ITEM_HELD;
+  self.equip(); //because we don't know the class
 }
 
 void() UseItemDo = {
@@ -93,6 +94,7 @@ void() IsUsable = {
   IsItem();
 };
 void() IsConsumable = {
+  if (self.spawnflags & ITEM_HELD) return;
   self.use = PickupItem;
   IsUsable();
 };

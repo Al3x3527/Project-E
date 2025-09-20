@@ -18,10 +18,17 @@ fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"
   new.currentammo = this.currentammo;\
   new.enemy = this;\
   new.solid = SOLID_NOT;\
-  if !(other.primary) other.primary = new;\
-  else if !(other.secondary) other.secondary = new;\
-  else if (other.weapon == other.primary.weapon) other.primary = new;\
-  else other.secondary = new;\
+  new.owner = other;\
+  new.modelindex = 0;\
+  if !(other.primary) {other.primary = new;\
+    dprint("new primary "); dprint(other.primary.classname); dprint("\n");}\
+  else if !(other.secondary) {other.secondary = new;\
+    dprint("new secondary "); dprint(other.secondary.classname); dprint("\n");}\
+  else if (other.weapon == other.primary.weapon){ other.primary = new;\
+    dprint("swap primary\n");}\
+  else {other.secondary = new;\
+    dprint("swap secondary\n");}\
+  this = other;\
   switch_weapon(new);\
 }
 
@@ -35,10 +42,10 @@ this.weaponmodel = gamemodels vmdl
 #define WPCLASS(WPname, WPdesc)\
   runtime_t WPname ## _runtime;\
   class WPname : weapon_class {\
-  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc"placed on map. [");\
   virtual void(float times) attack = {WPname ## _attack(times);};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
+  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc"placed on map. [");\
   classname = #WPname;\
   netname = #WPdesc;\
   RUNTIME(WPname ## _runtime)

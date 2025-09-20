@@ -20,6 +20,8 @@ void() CheckImpulses =
 {
 	switch (self.impulse)
 	{
+	case 2: if(self.primary) switch_weapon(self.primary); break;
+	case 3: if (self.secondary) switch_weapon(self.secondary); break;
 	default: break;
 	}
 //	self.impulse = 0;
@@ -53,6 +55,7 @@ void() PlayerPreThink =
 
 void() PlayerPostThink =
 {
+	self.impulse = 0;
 };
 
 void() ClientKill =
