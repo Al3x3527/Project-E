@@ -9,8 +9,7 @@ const float WEAPON_SPEAR = 256;
 
 #define e_plasma gamemodels "qp_bomb.mdl"
 
-void() plasma_touch = {
-  //dprint("plasma touch\n");
+void() projectile_touch = {
   if (other == self.owner) return;
   if (other.solid == SOLID_TRIGGER) return;
   float damage = self.health;
@@ -26,13 +25,12 @@ class projectile_class : entity {
     movetype = MOVETYPE_FLYMISSILE;
     solid = SOLID_TRIGGER;
     setmodel(this, e_plasma);
-    touch = plasma_touch;
+    touch = projectile_touch;
     projectilespeed = 200;
   };
 };
 
 class weapon_class : entity {
-float rateoffire;
 float attackvelocity;
 float attacktimes;
 float attackdamage;
@@ -50,12 +48,10 @@ virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn 
 };
 
 virtual void(float times) projectile = {
-  float rof = this.rateoffire;
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
   makevectors(ent.v_angle);
   vector dir = v_forward;
-//  float flags = 0;
   float damage = this.attackdamage;
   projectile_spawn(dir, org, damage, ent);
 };
@@ -69,7 +65,6 @@ virtual void(float times) projectile = {
  virtual void(float times) weapon_spear_attack = {};
 
  virtual void (float times) hitscan = {
-  float rof = this.rateoffire;
   float speed = this.attackvelocity;
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
@@ -105,7 +100,7 @@ virtual void(float times) projectile = {
     if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;
     this.attack(times);
     if (!this.currentammo) CONSUMEITEM
-                             };
+  };
 
 void() weapon_class = {
 FGDbase(Spawnflags Targetname)
@@ -128,13 +123,12 @@ void () weapon_battlerifle = {
 WEAPONMODELS("w_ad70.mdl", "v_ad70.mdl");
 FLOAT(currentammo, 150, "starting ammo");
 weapon = WEAPON_BATTLERIFLE;
-rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 attackdamage = 20;
 attackdelay = 0.6;
 RUNTIME(weapon_battlerifle_runtime);
-//default respawn time
+RESPAWNTIME(40);
 dprint("weapon_battlerifle spawn function\n");
 };
 };
@@ -144,7 +138,6 @@ WEAPONMODELS("w_plasma_rifle.mdl", "v_plasma_rifle.mdl");
 STARTINGAMMO(140);
 RESPAWNTIME(40);
 weapon = WEAPON_PLASMARIFLE;
-rateoffire = 8;
 attackvelocity = 80;
 attacktimes = 3;
 attackdelay = 0.8;
@@ -156,7 +149,6 @@ WEAPONMODELS("browning.mdl", "browning.mdl");
 STARTINGAMMO(400);
 RESPAWNTIME(40);
 weapon = WEAPON_BROWNING;
-rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 attackdelay = 0.2;
@@ -167,7 +159,6 @@ WEAPONMODELS("qp_cannon.mdl", "qp_cannon.mdl");
 STARTINGAMMO(10);
 RESPAWNTIME(40);
 weapon = WEAPON_CANNON;
-rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 attackdelay = 0.6;
@@ -178,7 +169,6 @@ WEAPONMODELS("qp_m40a5.mdl", "qp_m40a5.mdl");
 STARTINGAMMO(40);
 RESPAWNTIME(40);
 weapon = WEAPON_SNIPER;
-rateoffire = 4;
 attackvelocity = 120;
 attacktimes = 1;
 attackdelay = 0.6;
@@ -189,7 +179,6 @@ WEAPONMODELS("qp_rocket_launcher.mdl", "qp_rocket_launcher.mdl");
 STARTINGAMMO(10);
 RESPAWNTIME(40);
 weapon = WEAPON_ROCKET;
-rateoffire = 1;
 attackvelocity = 60;
 attacktimes = 1;
 attackdelay = 0.6;
@@ -200,7 +189,6 @@ WEAPONMODELS("qp_sentinelsmg.mdl", "qp_sentinelsmg.mdl");
 STARTINGAMMO(140);
 RESPAWNTIME(40);
 weapon = WEAPON_SMG;
-rateoffire = 8;
 attackvelocity = 120;
 attacktimes = 1;
 attackdelay = 0.2;
@@ -211,7 +199,6 @@ WEAPONMODELS("qp_spear.mdl", "qp_spear.mdl");
 STARTINGAMMO(40);
 RESPAWNTIME(40);
 weapon = WEAPON_SPEAR;
-rateoffire = 1;
 attackvelocity = 100;
 attacktimes = 1;
 attackdelay = 0.6;
