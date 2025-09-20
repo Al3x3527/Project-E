@@ -8,10 +8,8 @@ class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = #CLASSname;\
 netname = #CLASSdesc;\
-//dprint("net name"); dprint(netname);\
-fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc" [");
-//fgd description = #CLASSdesc placed on map.
-/*#message "#+FGD_class #CLASSname"*/
+fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"placed on map. [");
+
 #define ENDCLASS fgdprint("@fgd ]");};}
 
 #define WEAPONEQUIP(aclass) {\
@@ -37,13 +35,13 @@ this.weaponmodel = gamemodels vmdl
 #define WPCLASS(WPname, WPdesc)\
   runtime_t WPname ## _runtime;\
   class WPname : weapon_class {\
+  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc"placed on map. [");\
   virtual void(float times) attack = {WPname ## _attack(times);};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
   classname = #WPname;\
   netname = #WPdesc;\
-  RUNTIME(WPname ## _runtime)\
-//dprint(#WPname "spawn function\n");
+  RUNTIME(WPname ## _runtime)
 
 #define FLOAT(FLOATfield, FLOATfloat, FLOATdesc)\
 if (!this.FLOATfield) this.FLOATfield = FLOATfloat;\
@@ -54,8 +52,7 @@ fgdprint("@fgd "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
 #define RESPAWNTIME(spawntime) FLOAT(respawntime, spawntime, "respawn time")
 
 #define COLOR(color) fgdprint("@fgd color("#color")");
-//fallback models
+
 #define MODELdefault(modelstring) {\
 precache_model(modelstring);\
 if (!this.model) setmodel(this, modelstring);}
-//spawnfunctions
