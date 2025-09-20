@@ -64,6 +64,17 @@ void() use_active = {
   return;
 }
 
+void(entity old) drop_weapon = {
+  entity oself = self;
+  self = old;
+  setorigin(self, other.origin);
+  self.spawnflags -= ITEM_HELD;
+  self.use = PickupItem;
+  self.touch = UseItemTry;
+  RespawnItemDo();
+  self = oself;
+};
+
 void(entity new) switch_weapon = {
  //expect other = player, self = new.enemy, on pickup
  self.weapon = new.weapon;

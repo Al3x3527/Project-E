@@ -24,9 +24,11 @@ fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"
     dprint("new primary "); dprint(other.primary.classname); dprint("\n");}\
   else if !(other.secondary) {other.secondary = new;\
     dprint("new secondary "); dprint(other.secondary.classname); dprint("\n");}\
-  else if (other.weapon == other.primary.weapon){ other.primary = new;\
+  else if (other.weapon == other.primary.weapon){ drop_weapon(other.primary);\
+    other.primary = new;\
     dprint("swap primary\n");}\
-  else {other.secondary = new;\
+  else {drop_weapon(other.secondary);\
+    other.secondary = new;\
     dprint("swap secondary\n");}\
   this = other;\
   switch_weapon(new);\
