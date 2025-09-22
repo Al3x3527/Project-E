@@ -55,23 +55,18 @@ virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn 
 };
 
 virtual void() projectile = {
+  //this.projectilespawn and this.attacksound?
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
   makevectors(ent.v_angle);
   vector dir = v_forward;
   float damage = this.attackdamage;
   projectile_spawn(dir, org, damage, ent);
+  weapon_sound(ent, "sounds/weapons/ar_shot.wav");
 };
 
- virtual void() weapon_plasmarifle_attack = {projectile();};
- virtual void() weapon_browning_attack = {};
- virtual void() weapon_cannon_attack = {};
- virtual void() weapon_sniper_attack = {};
- virtual void() weapon_rocket_attack = {};
- virtual void() weapon_smg_attack = {};
- virtual void() weapon_spear_attack = {};
-
  virtual void () hitscan = {
+   //this.attacksound and this.particlespawn?
   float speed = this.attackvelocity;
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
@@ -82,16 +77,27 @@ virtual void() projectile = {
   ClearMultiDamage();
   traceline(org, end, flags, ent);
   weapon_sound(ent, "sounds/weapons/ar_shot.wav");
-  //weapon_sound(ent, "weapons/ric1.wav");
 
   local float i = 0;
   if (trace_fraction != 1.0) {
     BulletHit(this.attackdamage, dir);
+    vector delta = end - org;
+    delta *= trace_fraction;
+    delta += org;
+    te_gunshot(delta);
     dprint(trace_ent.classname); dprint("\n");
   }
   else dprint("hit nothing\n");
   ApplyMultiDamage();
  };
+
+ virtual void() weapon_plasmarifle_attack = {projectile();};
+ virtual void() weapon_browning_attack = {hitscan();};
+ virtual void() weapon_cannon_attack = {projectile();};
+ virtual void() weapon_sniper_attack = {hitscan();};
+ virtual void() weapon_rocket_attack = {projectile();};
+ virtual void() weapon_smg_attack = {hitscan();};
+ virtual void() weapon_spear_attack = {projectile();};
 
  virtual void() weapon_muse = {
    while (this.ammo_clip > 0){
@@ -116,7 +122,7 @@ virtual void() projectile = {
     if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;{
       this.ammo_clip = times;
       this.think = weapon_muse;
-      this.nextthink = time + rateoffire;
+      this.nextthink = time + 0.05;
       }
     if (!this.currentammo) CONSUMEITEM
   };
@@ -162,10 +168,11 @@ attackvelocity = 80;
 attacktimes = 3;
 attackdelay = 0.8;
 attackdamage = 20;
+rateoffire = 0.1;
 ENDCLASS;
 
 WPCLASS(weapon_browning, "machine gun");
-WEAPONMODELS("browning.mdl", "browning.mdl");
+WEAPONMODELS("browning.mdl", "v_browning.mdl");
 STARTINGAMMO(400);
 RESPAWNTIME(40);
 weapon = WEAPON_BROWNING;
@@ -176,17 +183,18 @@ attackdamage = 20;
 ENDCLASS;
 
 WPCLASS(weapon_cannon, "sentinel cannon");
-WEAPONMODELS("qp_cannon.mdl", "qp_cannon.mdl");
+WEAPONMODELS("qp_cannon.mdl", "v_cannon.mdl");
 STARTINGAMMO(10);
 RESPAWNTIME(40);
 weapon = WEAPON_CANNON;
 attackvelocity = 60;
 attacktimes = 1;
 attackdelay = 0.6;
+attackdamage = 120;
 ENDCLASS;
 
 WPCLASS(weapon_sniper, "sniper");
-WEAPONMODELS("qp_m40a5.mdl", "qp_m40a5.mdl");
+WEAPONMODELS("qp_m40a5.mdl", "v_m40a5.mdl");
 STARTINGAMMO(40);
 RESPAWNTIME(40);
 weapon = WEAPON_SNIPER;
@@ -196,27 +204,27 @@ attackdelay = 0.6;
 ENDCLASS;
 
 WPCLASS(weapon_rocket, "rocket launcher");
-WEAPONMODELS("qp_rocket_launcher.mdl", "qp_rocket_launcher.mdl");
+WEAPONMODELS("qp_rocket_launcher.mdl", "v_rocket_launcher.mdl");
 STARTINGAMMO(10);
 RESPAWNTIME(40);
 weapon = WEAPON_ROCKET;
-attackvelocity = 60;
+attackvelocity = 80;
 attacktimes = 1;
 attackdelay = 0.6;
 ENDCLASS;
 
 WPCLASS(weapon_smg, "sentinel smg");
-WEAPONMODELS("qp_sentinelsmg.mdl", "qp_sentinelsmg.mdl");
+WEAPONMODELS("qp_sentinelsmg.mdl", "v_smg.mdl");
 STARTINGAMMO(140);
 RESPAWNTIME(40);
 weapon = WEAPON_SMG;
 attackvelocity = 120;
 attacktimes = 1;
-attackdelay = 0.2;
+attackdelay = 0.08;
 ENDCLASS;
 
 WPCLASS(weapon_spear, "sentinel spear");
-WEAPONMODELS("qp_spear.mdl", "qp_spear.mdl");
+WEAPONMODELS("qp_spear.mdl", "v_spear.mdl");
 STARTINGAMMO(40);
 RESPAWNTIME(40);
 weapon = WEAPON_SPEAR;
