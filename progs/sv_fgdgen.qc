@@ -44,7 +44,7 @@ this.weaponmodel = gamemodels vmdl
 #define WPCLASS(WPname, WPdesc)\
   runtime_t WPname ## _runtime;\
   class WPname : weapon_class {\
-  virtual void(float times) attack = {WPname ## _attack(times);};\
+  virtual void() attack = {WPname ## _attack();};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
   fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc"placed on map. [");\

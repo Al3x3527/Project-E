@@ -19,6 +19,11 @@ void() projectile_touch = {
   remove(self);
 };
 
+void(entity ent, string path) weapon_sound = {
+sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
+dprint(path); dprint(" weapon_sound\n");
+};
+
 class projectile_class : entity {
   float projectilespeed;
   void() projectile_class = {
@@ -35,8 +40,10 @@ float attackvelocity;
 float attacktimes;
 float attackdamage;
 float attackdelay;
+float rateoffire; //burst
+float ammo_clip; //burst
 
-virtual void(float times) attackdo = {dprint("placeholder attack\n");};
+virtual void() attackdo = {dprint("placeholder attack\n");};
 
 virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn = {
   projectile_class proj = spawn(projectile_class);
@@ -47,7 +54,7 @@ virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn 
   dprint(ftos(damage)); dprint(" projectile\n");
 };
 
-virtual void(float times) projectile = {
+virtual void() projectile = {
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
   makevectors(ent.v_angle);
@@ -56,15 +63,15 @@ virtual void(float times) projectile = {
   projectile_spawn(dir, org, damage, ent);
 };
 
- virtual void(float times) weapon_plasmarifle_attack = {projectile(times);};
- virtual void(float times) weapon_browning_attack = {};
- virtual void(float times) weapon_cannon_attack = {};
- virtual void(float times) weapon_sniper_attack = {};
- virtual void(float times) weapon_rocket_attack = {};
- virtual void(float times) weapon_smg_attack = {};
- virtual void(float times) weapon_spear_attack = {};
+ virtual void() weapon_plasmarifle_attack = {projectile();};
+ virtual void() weapon_browning_attack = {};
+ virtual void() weapon_cannon_attack = {};
+ virtual void() weapon_sniper_attack = {};
+ virtual void() weapon_rocket_attack = {};
+ virtual void() weapon_smg_attack = {};
+ virtual void() weapon_spear_attack = {};
 
- virtual void (float times) hitscan = {
+ virtual void () hitscan = {
   float speed = this.attackvelocity;
   entity ent = this.owner;
   vector org = ent.origin + '0 0 30';
@@ -74,16 +81,25 @@ virtual void(float times) projectile = {
   float flags = 0;
   ClearMultiDamage();
   traceline(org, end, flags, ent);
+  weapon_sound(ent, "sounds/weapons/ar_shot.wav");
+  //weapon_sound(ent, "weapons/ric1.wav");
 
   local float i = 0;
   if (trace_fraction != 1.0) {
-    while (i < times) {i++;
     BulletHit(this.attackdamage, dir);
-    }
     dprint(trace_ent.classname); dprint("\n");
   }
   else dprint("hit nothing\n");
   ApplyMultiDamage();
+ };
+
+ virtual void() weapon_muse = {
+   while (this.ammo_clip > 0){
+     this.ammo_clip --;
+     this.attack();
+     this.nextthink = time + this.rateoffire;
+     return;
+   }
  };
 
  virtual void() weapon_use = {
@@ -97,8 +113,11 @@ virtual void(float times) projectile = {
   this.impulse = time + this.attackdelay;
     float times = this.attacktimes;
     if (this.currentammo == BOTTOMLESS_CLIP) times = 0; //not congruous
-    if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;
-    this.attack(times);
+    if (this.currentammo != UNLIMITED_AMMO) this.currentammo -= times;{
+      this.ammo_clip = times;
+      this.think = weapon_muse;
+      this.nextthink = time + rateoffire;
+      }
     if (!this.currentammo) CONSUMEITEM
   };
 
@@ -109,14 +128,14 @@ COLOR(206 18 18)
 think = IsConsumable;
 nextthink = time + 0.3;
 setsize (this, '-16 -24 0', '16 24 16');
-void(float times) attack = attackdo;
+void() attack = attackdo;
 precache_model(gamemodels "qp_bomb.mdl");
 };
 };
 
 runtime_t weapon_battlerifle_runtime;
 class weapon_battlerifle : weapon_class {
-virtual void(float times) attack = {hitscan(times);};
+virtual void() attack = {hitscan();};
 virtual void() equip = WEAPONEQUIP(weapon_battlerifle);
 void () weapon_battlerifle = {
   classname = "weapon_battlerifle";
@@ -124,9 +143,10 @@ WEAPONMODELS("w_ad70.mdl", "v_ad70.mdl");
 FLOAT(currentammo, 150, "starting ammo");
 weapon = WEAPON_BATTLERIFLE;
 attackvelocity = 120;
-attacktimes = 1;
+attacktimes = 3;
 attackdamage = 20;
-attackdelay = 0.6;
+attackdelay = 0.8;
+rateoffire = 0.1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
 dprint("weapon_battlerifle spawn function\n");
@@ -152,6 +172,7 @@ weapon = WEAPON_BROWNING;
 attackvelocity = 120;
 attacktimes = 1;
 attackdelay = 0.2;
+attackdamage = 20;
 ENDCLASS;
 
 WPCLASS(weapon_cannon, "sentinel cannon");

@@ -125,7 +125,7 @@ typedef struct
 .game_type currentgametype;
 */
 //useful defs
-.float(float times) attack; //returns TRUE or FALSE
+.float() attack; //returns TRUE or FALSE
 #define gamemodels "mdls/"
 .void() equip;
 .void() weapon_use;
