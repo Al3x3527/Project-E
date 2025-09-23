@@ -7,6 +7,8 @@ Project Enoch game for idtech 2/Quake engine
 + FTE Manifest
 ** weapon-classes
 + implementation of weapon classes using class inheritance.
+** entity-classes
++ implementation of brain-dead biped classes.
 * Manifest
 ** Release
 #+begin_src emacs-lisp
