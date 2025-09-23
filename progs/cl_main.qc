@@ -40,8 +40,8 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	camang = getproperty(VF_ANGLES);
 
 	//autoadd entities received from servers for drawing	
-	addentities(MASK_ENGINE);
-	
+	//addentities(MASK_ENGINE);
+	addentities( ( intermission ? 0 : MASK_VIEWMODEL ) | MASK_ENGINE );
 	//does what you think it does
 	renderscene();
 	
