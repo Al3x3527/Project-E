@@ -10,6 +10,29 @@ if (targ.th_pain) targ.th_pain(inflictor, damage);
 self = oself;
 };
 
+void(entity inflictor, entity attacker, float damage, float radius) TakeRadiusDamage = {
+  float points;
+  entity head;
+  vector org;
+dprint("radius damage\n");
+  if (!radius) radius = damage + 40;
+  head = findradius(inflictor.origin, radius);
+
+  while (head) {
+    if (head) {
+      org = head.origin + (head.mins + head.maxs)*0.5; //center
+      points = 0.5*vlen(inflictor.origin - org);
+      if (points < 0) points = 0;
+      points = damage - points;
+      if (head == attacker) points *= 0.5;
+      if (points > 0) {
+        TakeDamage(head, inflictor, attacker, points);
+      }
+    }
+    head = head.chain;
+  }
+};
+
 entity multi_ent;
 float multi_damage;
 

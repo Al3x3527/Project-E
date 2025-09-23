@@ -19,9 +19,20 @@ void() projectile_touch = {
   remove(self);
 };
 
+void() rocket_touch = {
+ float damage = self.health;
+ entity ent = self.owner;
+ float radius = 48;
+ te_explosion(self.origin);
+ dprint(other.classname); dprint("rocket_touch\n");
+ sound(self, CHAN_WEAPON, "sounds/weapons/ar_shot.wav", 1, ATTN_NORM);
+ TakeRadiusDamage(self, ent, damage, radius);
+ remove(self);
+}
+
 void(entity ent, string path) weapon_sound = {
 sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
-dprint(path); dprint(" weapon_sound\n");
+//dprint(path); dprint(" weapon_sound\n");
 };
 
 class projectile_class : entity {
@@ -32,6 +43,13 @@ class projectile_class : entity {
     setmodel(this, e_plasma);
     touch = projectile_touch;
     projectilespeed = 200;
+  };
+};
+
+class projectile_rocket : projectile_class {
+  void() projectile_rocket = {
+    //touch = rocket_touch;
+    //dprint("rocket spawned\n");
   };
 };
 
@@ -65,6 +83,27 @@ virtual void() projectile = {
   weapon_sound(ent, "sounds/weapons/ar_shot.wav");
 };
 
+ virtual void(vector dir, vector org, float damage, entity ent) rocket_spawn = {
+  projectile_rocket proj = spawn(projectile_rocket);
+  proj.origin = org;
+  proj.velocity = dir * proj.projectilespeed;
+  proj.health = damage;
+  proj.owner = ent;
+  proj.touch = rocket_touch;
+};
+
+ virtual void() fire_rocket = {
+  entity ent = this.owner;
+  vector org = ent.origin + '0 0 30';
+  makevectors(ent.v_angle);
+  vector dir = v_forward;
+  float damage = this.attackdamage;
+  dir = normalize(dir);
+  org += dir * 24;
+  rocket_spawn(dir, org, damage, ent);
+  weapon_sound(ent, "sounds/weapons/ar_shot.wav");
+ };
+
  virtual void () hitscan = {
    //this.attacksound and this.particlespawn?
   float speed = this.attackvelocity;
@@ -95,7 +134,7 @@ virtual void() projectile = {
  virtual void() weapon_browning_attack = {hitscan();};
  virtual void() weapon_cannon_attack = {projectile();};
  virtual void() weapon_sniper_attack = {hitscan();};
- virtual void() weapon_rocket_attack = {projectile();};
+ virtual void() weapon_rocket_attack = {fire_rocket();};
  virtual void() weapon_smg_attack = {hitscan();};
  virtual void() weapon_spear_attack = {projectile();};
 
@@ -211,6 +250,7 @@ weapon = WEAPON_ROCKET;
 attackvelocity = 80;
 attacktimes = 1;
 attackdelay = 0.6;
+attackdamage = 80;
 ENDCLASS;
 
 WPCLASS(weapon_smg, "sentinel smg");
