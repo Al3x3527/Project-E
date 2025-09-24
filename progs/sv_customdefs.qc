@@ -90,7 +90,9 @@ void(entity removing) player_chain_remove =
 .int *runtime_maximum;
 float DONT_PLACE_AT_START = 1;
 float GAMETYPE_SPECIFIC = 2;
-//float gametype; //entity game type
+float INHIBIT_RESPAWN = 4;
+float SPAWNED_ACTIVE = 8;
+
 .entity primary;
 .entity secondary;
 .entity active_weapon;
@@ -120,7 +122,7 @@ typedef struct
 	string description;
 	float mode;
 	float rules; //flags
-	void player_traits();
+	void basictraits;
 } game_type;
 .game_type currentgametype;
 */
@@ -129,20 +131,8 @@ typedef struct
 #define gamemodels "mdls/"
 .void() equip;
 .void() weapon_use;
+.void() drops;
+.vector lastseen; //where the prop was last perceived.
+
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
-/*
-float GT_SHOW_CLOCK = 1;
-class parms_test : entity {
-	void() parms_test = {
-		//test_mode parms
-	};
-};
-void() test_traits = {parms_test foo = spawn(parms_test);};
-game_type test_mode = {
-	"test mode",
-	"for testing",
-	TEST_MODE = 1,
-	GT_SHOW_CLOCK,
-	test_traits
-}; */

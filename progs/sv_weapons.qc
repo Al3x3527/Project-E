@@ -167,8 +167,8 @@ virtual void() projectile = {
   };
 
 void() weapon_class = {
-FGDbase(Spawnflags Targetname)
-COLOR(206 18 18)
+FGDbase(Spawnflags Targetname);
+COLOR(206 18 18);
 //if (SUB_Inhibit()) return;
 think = IsConsumable;
 nextthink = time + 0.3;

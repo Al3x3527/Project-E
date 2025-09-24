@@ -47,7 +47,7 @@ this.weaponmodel = gamemodels vmdl
   virtual void() attack = {WPname ## _attack();};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
-  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc"placed on map. [");\
+  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc" placed on map. [");\
   classname = #WPname;\
   netname = #WPdesc;\
   RUNTIME(WPname ## _runtime)
@@ -60,8 +60,22 @@ fgdprint("@fgd "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
 
 #define RESPAWNTIME(spawntime) FLOAT(respawntime, spawntime, "respawn time")
 
-#define COLOR(color) fgdprint("@fgd color("#color")");
+#define COLOR(color) fgdprint("@fgd color("#color")")
 
 #define MODELdefault(modelstring) {\
 precache_model(modelstring);\
 if (!this.model) setmodel(this, modelstring);}
+
+#define BPCLASS(BPname, BPdesc)\
+  runtime_t BPname ## _runtime;\
+  class BPname : biped_class {\
+  void() BPname = {\
+  fgdprint("@fgd @Pointclass base(biped_class) @fgd = "#BPname" : "#BPdesc" placed on map. [");\
+  classname = #BPname;\
+  netname = #BPdesc;\
+  RUNTIME(BPname ## _runtime)
+
+#define ENTMODEL(amodel)\
+  fgdprint("@fgd model({ path :"gamemodels amodel" })");\
+  precache_model(gamemodels amodel);\
+  setmodel(this, gamemodels amodel)

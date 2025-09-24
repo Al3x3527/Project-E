@@ -1,9 +1,13 @@
-float BIPED_DONTRESPAWN = 4;
-float BIPED_SPAWNED = 8;
+float BIPED_DONTRESPAWN = INHIBIT_RESPAWN;
+float BIPED_SPAWNED = SPAWNED_ACTIVE;
+
+void() StateMachineGo = {};
 
 void() RespawnBipedDo = { //walkmonster start, do
   setmodel(self, self.model);
   self.solid = SOLID_TRIGGER;
+  self.think = StateMachineGo;
+  self.nextthink = time + 0.3;
 }
 
 void() RespawnBipedTry = {
@@ -59,11 +63,135 @@ void() IsAlive = {
   IsSpawner();
 };
 
-class biped_class : entity = { //biped spawn point definition
+class biped_class : entity { //biped spawn point definition
+  //entity() enemies;
+  //entity() tracked;
+  entity squad;
+  float traitor;
+  entity leader;
+  float control;
+  float action;
+  float status;
+  entity objective;
+  void commandlist;
+  entity firingpoint;
+  string firinggroup;
+
   void() biped_class = {
     FGDbase(Spawnflags Targetname);
     COLOR();
     think = IsAlive;
     nextthink = time + 0.3;
   };
+};
+
+BPCLASS(biped_man, "human biped");
+ENTMODEL("cubeman.mdl");
+ENDCLASS;
+
+//class player_class : entity = {
+//  void() player_class = {
+//    currentgame.basictraits();
+//  };
+//};
+
+class cmdlist_c : entity {
+  int step;
+  string step0; //like targetn
+  string step1;
+  string step2;
+  string step3;
+  string step4;
+  string step5;
+  string step6;
+  string step7;
+
+nonvirtual string (int i) cmdindex = {
+    //it is what it is.
+    switch (i) {
+      case 0 : return(step0);
+      case 1 : return(step1);
+      case 2 : return(step2);
+      case 3 : return(step3);
+      case 4 : return(step4);
+      case 5 : return(step5);
+      case 6 : return(step6);
+      case 7 : return(step7);
+      default: return("");
+      }
+};
+  void() cmdlist_c = {
+    fgdprint("@fgd @baseclass = cmdlist : command list designed in editor. [");
+    fgdprint("@fgd step(int) : command list step index");
+    fgdprint("@fgd step0(string) : target controller: up tp step7");
+    fgdprint("@fgd ]");
+  };
+};
+
+class tracked_c : entity {
+  entity prop0;
+  entity prop1;
+  entity prop2;
+  entity prop3;
+  entity prop4;
+  entity prop5;
+  entity prop6;
+  entity prop7;
+  entity prop8;
+  entity prop9;
+  entity prop10;
+  entity prop11;
+  entity prop12;
+  entity prop13;
+  entity prop14;
+  entity prop15;
+  entity prop16;
+  entity prop17;
+  entity prop18;
+  entity prop19;
+  nonvirtual entity (int i) propindex = {
+    //it is what it is.
+    switch (i) {
+      case 0 : return(prop0);
+      case 1 : return(prop1);
+      case 2 : return(prop2);
+      case 3 : return(prop3);
+      case 4 : return(prop4);
+      case 5 : return(prop5);
+      case 6 : return(prop6);
+      case 7 : return(prop7);
+      case 8 : return(prop8);
+      case 9 : return(prop9);
+      case 10 : return(prop10);
+      case 11 : return(prop11);
+      case 12 : return(prop12);
+      case 13 : return(prop13);
+      case 14 : return(prop14);
+      case 15 : return(prop15);
+      case 16 : return(prop16);
+      case 17 : return(prop17);
+      case 18 : return(prop18);
+      case 19 : return(prop19);
+      default : return(world);
+    }
+  };
+  void() tracked_c = {
+  };
+};
+
+class enemylist_c : entity {
+  entity foe0;
+  entity foe1;
+  entity foe2;
+  entity foe3;
+  nonvirtual entity(int i) enemyindex = {
+    switch (i) {
+      case 0: return(foe0);
+      case 1: return(foe1);
+      case 2: return(foe2);
+      case 3: return(foe3);
+      default: return(world);
+    }
+  };
+  void() enemylist_c = {};
 };
