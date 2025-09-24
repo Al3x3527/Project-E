@@ -108,22 +108,50 @@ class enemylist_c : entity {
     refzero = findentityfield("foe0");
   };
 };
+cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search));};
 
-cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search));}
+class firingpoint_c : entity {
+  void() firingpoint_c = {
+
+  };
+};
+
+class zone_c : entity {
+  float refzero;
+  firingpoint_c point0;
+  firingpoint_c point1;
+  firingpoint_c point2;
+  firingpoint_c point3;
+  firingpoint_c point4;
+  firingpoint_c point5;
+  firingpoint_c point6;
+  firingpoint_c point7;
+  firingpoint_c point8;
+  firingpoint_c point9;
+  firingpoint_c point10;
+  firingpoint_c point11;
+  firingpoint_c point12;
+  firingpoint_c point13;
+  firingpoint_c point14;
+  firingpoint_c point15;
+  void() zone_c = {
+    refzero = findentityfield("point0");
+  };
+};
 
 class biped_class : entity { //biped spawn point definition
   enemylist_c enemies;
   tracked_c tracked;
-  entity squad;
+  //squad_c squad;
   float traitor;
   entity leader;
   float control;
   float action;
-  float status;
-  entity objective;
+  //float status;
+  //objective_c objective;
   string targetcmdlist;
   cmdlist_c commandlist;
-  entity firingpoint;
+  firingpoint_c firingpoint;
   string firinggroup;
 
 nonvirtual void() StateMachineGo = {};
@@ -198,6 +226,55 @@ void() IsAlive = {
     think = IsAlive;
     nextthink = time + 0.3;
   };
+};
+
+class squad_c : entity {
+  //objective_c objective;
+  float traitor;
+  float strength;
+  //platoon_c platoon;
+  float squadtype;
+  tracked_c tracked;
+  float refzero;
+  biped_class member0;
+  biped_class member1;
+  biped_class member2;
+  biped_class member3;
+  biped_class member4;
+  biped_class member5;
+  biped_class member6;
+  biped_class member7;
+  biped_class leader;
+  void() squad_c = {
+    refzero = findentityfield("member0");
+  };
+};
+
+class platoon_c : entity {
+ // objective_c objective;
+  float traitor;
+  float refzero;
+  squad_c squad0;
+  squad_c squad1;
+  squad_c squad2;
+  squad_c squad3;
+  void() platoon_c = {
+    refzero = findentityfield("squad0");
+  };
+};
+
+class objective_c : entity {
+  string firinggroup;
+  zone_c zone;
+  float control;
+  float style;
+  float type;
+  float popcap;
+  platoon_c platoon;
+  float minstrength;
+  cmdlist_c conditions;
+  float squadtype;
+  void() objective_c = {};
 };
 
 BPCLASS(biped_man, "human biped");

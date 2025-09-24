@@ -96,6 +96,33 @@ float SPAWNED_ACTIVE = 8;
 .entity primary;
 .entity secondary;
 .entity active_weapon;
+//AI defs
+.vector lastseen; //where the prop was last perceived.
+.float scary; //last scary factor.
+// I paid for the whole float.
+float ACT_NONE = 0;
+float ACT_SLEEP = 2;
+float ACT_FIGHT = 4;
+float ACT_FLEE = 8;
+float ACT_UNCOVER = 16;
+float ACT_GUARD = 32;
+float ACT_SEARCH = 64;
+float ACT_WAIT = 128;
+float ACT_VEHICLE = 256;
+float ACT_CHARGE = 512;
+float ACT_OBEY = 1024;
+float ACT_CONVERSE = 2048;
+float ACT_AVOID = 4096;
+float STA_NONE = 0;
+float STA_IDLE = 8192;
+float STA_ACTIVE = 16384;
+float STA_COMBAT = 32768;
+float STA_SEARCHING = 65536;
+float STA_UNCERTAIN = 131072;
+float STA_CERTAIN = 262144;
+float STA_SIGHT = 524288;
+float STA_NEAR = 1048576;
+float STA_KRIEG = 2097152;
 
 float UNLIMITED_AMMO;
 float BOTTOMLESS_CLIP;
@@ -132,7 +159,6 @@ typedef struct
 .void() equip;
 .void() weapon_use;
 .void() drops;
-.vector lastseen; //where the prop was last perceived.
 
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
