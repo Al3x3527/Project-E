@@ -138,10 +138,10 @@ typedef struct
 	runtime_current = &class_runtime.runtime_current;\
 	class_runtime.runtime_current += 1;\
 	runtime_minimum = &class_runtime.runtime_minimum;\
-	runtime_maximum = &class_runtime.runtime_maximum;\
-	dprint(#class_runtime "runtime current");\
-	dprint(ftos(*this.runtime_current));\
-	dprint("\n")
+	runtime_maximum = &class_runtime.runtime_maximum
+	//dprint(#class_runtime "runtime current");\
+	//dprint(ftos(*this.runtime_current));\
+	//dprint("\n")
   /*
 typedef struct
 {

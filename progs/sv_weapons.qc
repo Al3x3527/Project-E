@@ -124,7 +124,7 @@ virtual void() projectile = {
     delta *= trace_fraction;
     delta += org;
     te_gunshot(delta);
-    dprint(trace_ent.classname); dprint("\n");
+   // dprint(trace_ent.classname); dprint("\n");
   }
   else dprint("hit nothing\n");
   ApplyMultiDamage();

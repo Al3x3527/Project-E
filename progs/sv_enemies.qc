@@ -1,16 +1,40 @@
 float BIPED_DONTRESPAWN = INHIBIT_RESPAWN;
 float BIPED_SPAWNED = SPAWNED_ACTIVE;
 
+void(float behavior) dothink = {
+  field_t thinkField = entityfieldref(behavior);
+  if !(other.thinkField) return;
+  other.think = other.thinkField;
+  other.nextthink = time + 0.3;
+}
+void() stand = {dothink(findentityfield("th_stand"));};
+void() die = {dothink(findentityfield("th_die"));};
+
+entity(string name) findfunc = {return(find(world, classname, name));};
+
+.string step0; //like targetn
+.string step1;
+.string step2;
+.string step3;
+.string step4;
+.string step5;
+.string step6;
+.string step7;
+.string targetcmdlist;
 class cmdlist_c : entity {
-  int step;
-  string step0; //like targetn
-  string step1;
-  string step2;
-  string step3;
-  string step4;
-  string step5;
-  string step6;
-  string step7;
+  float refzero;
+  float step;
+
+virtual void() cmduse = {
+  //this = cmdlist, other = biped
+  if (this.step > (this.refzero + 8)) return; //no more steps
+  //dprint(other.classname); dprint(" cmduse\n");
+  field_t stepField = entityfieldref(this.step);
+  string stepn = stepField;// dprint(stepn); dprint(" stepn\n");
+  if (isfunction(stepn)) callfunction(stepn);
+  //else {dprint(stepn); dprint(" is not a function\n");}
+  this.step ++;
+};
 
 nonvirtual string (int i) cmdindex = {
     //use entityfieldref instead? float step current fieldref?
@@ -26,15 +50,30 @@ nonvirtual string (int i) cmdindex = {
       default: return(__NULL__);
       }
 };
+ virtual void(entity inflictor, float damage) th_pain = {
+   this.enemy = inflictor;
+   dprint(this.enemy.classname); dprint(" cmd ememy\n");
+ };
+ //prop list?
+
   void() cmdlist_c = {
     fgdprint("@fgd @baseclass = cmdlist : command list designed in editor. [");
     fgdprint("@fgd step(int) : command list step index");
     fgdprint("@fgd step0(string) : target controller: up tp step7");
     fgdprint("@fgd ]");
-
-    step = findentityfield("step0");
+    dprint(this.targetname);dprint(" command list spawn\n");
+    dprint(step0); dprint(" step0\n");
+    step = refzero = findentityfield("step0");
+    dprint(ftos(entityfieldtype(this.step))); dprint(" step0 field type\n"); //1 str 2 fl
+    classname = "commandlist";
+    if !(step) dprint("field ref failed\n");
+    else {dprint(ftos(step)); dprint ("step0 ref\n");}
+    use = cmduse;
+    dprint(step0); dprint(" is step0\n");
   };
 };
+
+.cmdlist_c commandlist;
 
 class tracked_c : entity {
   float refzero;
@@ -149,8 +188,8 @@ class biped_class : entity { //biped spawn point definition
   float action;
   //float status;
   //objective_c objective;
-  string targetcmdlist;
-  cmdlist_c commandlist;
+  //string targetcmdlist;
+  //cmdlist_c commandlist;
   firingpoint_c firingpoint;
   string firinggroup;
 
@@ -168,6 +207,8 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   this.nextthink = time + 0.3;
   //dprint("respawn biped do\n");
   this.commandlist = findcmdlist(this.targetcmdlist);
+  if(this.commandlist) this.commandlist.th_pain(this,0);
+  else {dprint(this.targetcmdlist);dprint("no command list\n");}
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
 };

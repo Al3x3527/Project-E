@@ -14,7 +14,7 @@ void(entity inflictor, entity attacker, float damage, float radius) TakeRadiusDa
   float points;
   entity head;
   vector org;
-dprint("radius damage\n");
+//dprint("radius damage\n");
   if (!radius) radius = damage + 40;
   head = findradius(inflictor.origin, radius);
 
@@ -42,7 +42,7 @@ void() ClearMultiDamage = //from Copper?
   multi_damage = 0;
 };
 void() ApplyMultiDamage = {
-  dprint(ftos(multi_damage)); dprint(" damage apply multi damage\n");
+  //dprint(ftos(multi_damage)); dprint(" damage apply multi damage\n");
   if(!multi_ent) return;
   TakeDamage(multi_ent, other, other, multi_damage);
 };

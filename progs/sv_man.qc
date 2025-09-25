@@ -3,8 +3,15 @@
 void() man_stand1 = {dprint("man_stand1\n");};
 void() man_walk1 = {dprint("man_walk1\n");};
 void() man_run1 = {dprint("man_run1\n");};
-void(entity inflictor, float damage) man_pain1 = {dprint("man_pain1\n");};
-void() man_die1 = {dprint("man_die1\n");};
+void(entity inflictor, float damage) man_pain1 = {
+  dprint("man_pain1\n");
+  if (self.commandlist){
+    other = self;
+    self = self.commandlist;
+    self.use();}
+  else dprint("no command list\n");
+};
+void() man_die1 = {dprint("man_die1\n");remove(self);};
 void() man_charge1 = {};
 void() man_shoot1 = {};
 void() man_melee1 = {};
