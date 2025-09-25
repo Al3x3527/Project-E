@@ -162,3 +162,30 @@ typedef struct
 
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
+.void() th_stand;
+.void() th_walk;
+.void() th_run;
+.void() th_die;
+.void() th_charge;
+//other behaviors
+.void() th_shoot;
+.void() th_melee;
+.void() th_bark;
+.void() th_reload;
+.void() th_aggro;
+.void() th_evade;
+.void() th_grenade;
+.void() th_board;
+.void() th_unboard;
+.void() th_crouch;
+.void() th_shield;
+.void() th_jump;
+.void() th_drive;
+.void() th_turret;
+//.void() th_staggar;
+.void() th_uncover;
+.void() th_avoid;
+.void() th_sleep;
+.void() th_alert;
+.void() th_flee;
+.void() th_converse;

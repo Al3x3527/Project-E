@@ -158,72 +158,81 @@ nonvirtual void() StateMachineGo = {};
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   setmodel(this, this.model);
-  this.solid = SOLID_TRIGGER;
+  this.solid = SOLID_SLIDEBOX;
+  this.movetype = MOVETYPE_STEP;
+  this.flags += FL_MONSTER;
+  droptofloor();
+  if (!walkmove(0,0)){dprint(this.classname);dprint("stuck at ");dprint(vtos(this.origin));dprint("\n");}
+
   this.think = StateMachineGo;
   this.nextthink = time + 0.3;
-
+  //dprint("respawn biped do\n");
   this.commandlist = findcmdlist(this.targetcmdlist);
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
 };
 
-void() RespawnBipedTry = {
-  switch (self.spawnflags) {
+nonvirtual void() RespawnBipedTry = {
+  switch (this.spawnflags) {
     case BIPED_DONTRESPAWN : {
-      self.think = sub_noop;
+      this.think = sub_noop;
       break;
     }
   case BIPED_SPAWNED : {
     //if checkruntime() RespawnItemDo; else - clear behavior
-    if (self.runtime_current < self.runtime_minimum) {
+    if (this.runtime_current < this.runtime_minimum) {
       RespawnBipedDo();
-      self.runtime_current += 1;
+      this.runtime_current += 1;
       break;
     }
     else {
-    self.nextthink = time + self.respawntime;
+    this.nextthink = time + this.respawntime;
     break;
     }
   }
   default : {
-    if !(self.runtime_maximum) {
+    if !(this.runtime_maximum) {
         RespawnBipedDo();
-        self.runtime_current += 1;
+        this.runtime_current += 1;
         break;
       }
-    if (self.runtime_current < self.runtime_maximum) {
+    if (this.runtime_current < this.runtime_maximum) {
       RespawnBipedDo();
-      self.runtime_current += 1;
+      this.runtime_current += 1;
       break;
     }
     else {
-      self.nextthink = time + self.respawntime;
+      this.nextthink = time + this.respawntime;
       break;
     }
   }
   }
 };
 
-void() DespawnBiped = {
-  self.health = 0;
-  remove(self);
-};
+ nonvirtual void() DespawnBiped = {
+  this.health = 0;
+  remove(this);
+ };
 
-void() IsSpawner = {
-  self.nextthink = time + 0.3;
-  self.think = RespawnBipedTry;
-  self.modelindex = 0;
-};
+ nonvirtual void() IsSpawner = {
+  this.nextthink = time + 0.3;
+  this.think = RespawnBipedTry;
+  this.modelindex = 0;
+  //dprint("is spawner\n");
+ };
 
-void() IsAlive = {
-  if (self.spawnflags & BIPED_SPAWNED) return;
+ nonvirtual void() IsAlive = {
+  //dprint("is alive\n");
+  if (this.spawnflags & BIPED_SPAWNED) return;
   IsSpawner();
-};
+ };
 
-  void() biped_class = {
+
+ void() biped_class = {
     FGDbase(Spawnflags Targetname);
     COLOR();
     think = IsAlive;
+    //dprint("biped spawn function\n");
     nextthink = time + 0.3;
   };
 };
@@ -276,10 +285,6 @@ class objective_c : entity {
   float squadtype;
   void() objective_c = {};
 };
-
-BPCLASS(biped_man, "human biped");
-ENTMODEL("cubeman.mdl");
-ENDCLASS;
 
 //class player_class : entity = {
 //  void() player_class = {

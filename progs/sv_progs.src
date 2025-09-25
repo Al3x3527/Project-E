@@ -6,6 +6,7 @@ sv_customdefs.qc
 sv_items.qc
 sv_combat.qc
 sv_enemies.qc
+sv_man.qc
 sv_triggers.qc
 sv_player.qc
 sv_weapons.qc
