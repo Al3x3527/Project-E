@@ -1,79 +1,24 @@
 float BIPED_DONTRESPAWN = INHIBIT_RESPAWN;
 float BIPED_SPAWNED = SPAWNED_ACTIVE;
 
+void() spawn_corpse = {
+  entity corpse = spawn();
+  setmodel(corpse, self.model);
+  setorigin(corpse, self.origin);
+  corpse.angles = self.angles;
+  corpse.frame = self.frame;
+};
+
 void(float behavior) dothink = {
   field_t thinkField = entityfieldref(behavior);
   if !(other.thinkField) return;
   other.think = other.thinkField;
-  other.nextthink = time + 0.3;
+  other.nextthink = time + 0.1;
 }
 void() stand = {dothink(findentityfield("th_stand"));};
 void() die = {dothink(findentityfield("th_die"));};
-
-entity(string name) findfunc = {return(find(world, classname, name));};
-
-.string step0; //like targetn
-.string step1;
-.string step2;
-.string step3;
-.string step4;
-.string step5;
-.string step6;
-.string step7;
-.string targetcmdlist;
-class cmdlist_c : entity {
-  float refzero;
-  float step;
-
-virtual void() cmduse = {
-  //this = cmdlist, other = biped
-  if (this.step > (this.refzero + 8)) return; //no more steps
-  //dprint(other.classname); dprint(" cmduse\n");
-  field_t stepField = entityfieldref(this.step);
-  string stepn = stepField;// dprint(stepn); dprint(" stepn\n");
-  if (isfunction(stepn)) callfunction(stepn);
-  //else {dprint(stepn); dprint(" is not a function\n");}
-  this.step ++;
-};
-
-nonvirtual string (int i) cmdindex = {
-    //use entityfieldref instead? float step current fieldref?
-    switch (i) {
-      case 0 : return(step0);
-      case 1 : return(step1);
-      case 2 : return(step2);
-      case 3 : return(step3);
-      case 4 : return(step4);
-      case 5 : return(step5);
-      case 6 : return(step6);
-      case 7 : return(step7);
-      default: return(__NULL__);
-      }
-};
- virtual void(entity inflictor, float damage) th_pain = {
-   this.enemy = inflictor;
-   dprint(this.enemy.classname); dprint(" cmd ememy\n");
- };
- //prop list?
-
-  void() cmdlist_c = {
-    fgdprint("@fgd @baseclass = cmdlist : command list designed in editor. [");
-    fgdprint("@fgd step(int) : command list step index");
-    fgdprint("@fgd step0(string) : target controller: up tp step7");
-    fgdprint("@fgd ]");
-    dprint(this.targetname);dprint(" command list spawn\n");
-    dprint(step0); dprint(" step0\n");
-    step = refzero = findentityfield("step0");
-    dprint(ftos(entityfieldtype(this.step))); dprint(" step0 field type\n"); //1 str 2 fl
-    classname = "commandlist";
-    if !(step) dprint("field ref failed\n");
-    else {dprint(ftos(step)); dprint ("step0 ref\n");}
-    use = cmduse;
-    dprint(step0); dprint(" is step0\n");
-  };
-};
-
-.cmdlist_c commandlist;
+void() walk = {dothink(findentityfield("th_walk"));};
+void() pain = {dothink(findentityfield("th_pain"));};
 
 class tracked_c : entity {
   float refzero;
@@ -97,36 +42,73 @@ class tracked_c : entity {
   entity prop17;
   entity prop18;
   entity prop19;
-  nonvirtual entity (int i) propindex = {
-    //float propref prop0 ref?
-    switch (i) {
-      case 0 : return(prop0);
-      case 1 : return(prop1);
-      case 2 : return(prop2);
-      case 3 : return(prop3);
-      case 4 : return(prop4);
-      case 5 : return(prop5);
-      case 6 : return(prop6);
-      case 7 : return(prop7);
-      case 8 : return(prop8);
-      case 9 : return(prop9);
-      case 10 : return(prop10);
-      case 11 : return(prop11);
-      case 12 : return(prop12);
-      case 13 : return(prop13);
-      case 14 : return(prop14);
-      case 15 : return(prop15);
-      case 16 : return(prop16);
-      case 17 : return(prop17);
-      case 18 : return(prop18);
-      case 19 : return(prop19);
-      default : return(world);
-    }
-  };
   void() tracked_c = {
     refzero = findentityfield("prop0");
   };
 };
+
+.string step0; //like targetn
+.string step1;
+.string step2;
+.string step3;
+.string step4;
+.string step5;
+.string step6;
+.string step7;
+.string targetcmdlist;
+class cmdlist_c : entity {
+  float refzero;
+  float step;
+  tracked_c cmdtracked;
+
+virtual void() cmduse = {
+  //this = cmdlist, other = biped
+  if (this.step > (this.refzero + 7)) return; //no more steps
+  //dprint(other.classname); dprint(" cmduse\n");
+  field_t stepField = entityfieldref(this.step);
+  string stepn = stepField;
+  if (isfunction(stepn)) callfunction(stepn);
+  //else {dprint(stepn); dprint(" is not a function\n");}
+  this.step ++;
+};
+
+ virtual void(entity inflictor, float damage) th_pain = {
+   this.enemy = inflictor;
+   dprint(this.enemy.classname); dprint(" cmd ememy\n");
+   tracked_c tracked = this.cmdtracked;
+   float ref = tracked.refzero;
+   float zero = ref;
+   field_t currentf = entityfieldref(ref);
+   entity trackent = tracked.currentf;
+   while (trackent) {
+     ref ++;
+     currentf = entityfieldref(ref);
+     if (ref > (zero + 19)) {dprint("full cmd list\n"); return;}
+     trackent = tracked.currentf;
+   }
+   tracked.currentf = inflictor;
+ };
+ //prop list?
+
+  void() cmdlist_c = {
+    fgdprint("@fgd @baseclass = cmdlist : command list designed in editor. [");
+    fgdprint("@fgd step(int) : command list step index");
+    fgdprint("@fgd step0(string) : target controller: up tp step7");
+    fgdprint("@fgd ]");
+    dprint(this.targetname);dprint(" command list spawn\n");
+    dprint(step0); dprint(" step0\n");
+    step = refzero = findentityfield("step0");
+    dprint(ftos(entityfieldtype(this.step))); dprint(" step0 field type\n"); //1 str 2 fl
+    classname = "commandlist";
+    if !(step) dprint("field ref failed\n");
+    else {dprint(ftos(step)); dprint ("step0 ref\n");}
+    use = cmduse;
+    dprint(step0); dprint(" is step0\n");
+    cmdtracked = spawn(tracked_c);
+  };
+};
+
+.cmdlist_c commandlist;
 
 class enemylist_c : entity {
   float refzero;
@@ -134,15 +116,7 @@ class enemylist_c : entity {
   entity foe1;
   entity foe2;
   entity foe3;
-  nonvirtual entity(int i) enemyindex = {
-    switch (i) {
-      case 0: return(foe0);
-      case 1: return(foe1);
-      case 2: return(foe2);
-      case 3: return(foe3);
-      default: return(world);
-    }
-  };
+
   void() enemylist_c = {
     refzero = findentityfield("foe0");
   };
