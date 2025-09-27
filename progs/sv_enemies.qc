@@ -11,8 +11,8 @@ void() spawn_corpse = {
 
 void(float behavior) dothink = {
   field_t thinkField = entityfieldref(behavior);
-  if !(other.thinkField) return;
   other.think = other.thinkField;
+  if !(other.think) return;
   other.nextthink = time + 0.1;
 }
 void() stand = {dothink(findentityfield("th_stand"));};

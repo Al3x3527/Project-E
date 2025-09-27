@@ -90,17 +90,16 @@ void() man_grenade4 = [$grenade4, man_grenade5]{};
 void() man_grenade5 = [$grenade5, man_grenade6]{};
 void() man_grenade6 = [$grenade6, man_grenade7]{};
 void() man_grenade7 = [$grenade7, man_stand1]{};
-//ANIMATE(man, grenade, 7) = {man_grenade() = while(frame><)++
-#define ANIMATE(nick, key, max) void() nick ## _ ## key = {\
-if (this.frame < $ ## key ## 1) this.frame = $ ## key ## 1;\
- else this.frame ++;                                      \
- this.nextthink = time + 0.1;\
-if (this.frame == $ ## key ## max) this.frame = $ ## key ## 1\
-//if (this.frame == i) {};
-#define END };
-void() man_board1 = {};
-void() man_unboard1 = {};
-void() man_crouch1 = {};
+
+void() man_board1 = [$board1, man_board2]{};
+void() man_board2 = [$drive1, man_board2]{};
+
+void() man_unboard1 = [$board1, man_stand1]{};
+
+void() man_crouch1 = [$crouch1, man_crouch2]{};
+void() man_crouch2 = [$crouch2, man_crouch3]{};
+void() man_crouch3 = [$crouch1, man_stand1]{};
+
 void() man_shield1 = {};
 void() man_jump1 = {};
 void() man_drive1 = {};
@@ -117,7 +116,6 @@ ENTMODEL("cubeman.mdl");
 setsize(this, '-16 -16 0', '16 16 80');
 health = 80;
 BPTHINK(man);
-ANIMATE(man, crouch, 2); END
-th_crouch = man_crouch;
+//ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
 //dprint("man spawn function\n");
 ENDCLASS;
