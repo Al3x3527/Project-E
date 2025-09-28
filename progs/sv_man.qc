@@ -13,6 +13,7 @@ $frame reload1 reload2
 $frame aggro1 aggro2
 $frame evade1 evade2 evade3 evade4 evade5 evade6
 $frame grenade1 grenade2 grenade3 grenade4 grenade5 grenade6 grenade7
+$frame key39
 $frame run1 run2 run3 run4 run5 run6
 $frame board1 drive1
 $frame crouch1 crouch2
@@ -52,17 +53,18 @@ void() man_pain3 = [$pain3, man_stand1]{};
 void() man_die1 = [$die1, man_die2]{dprint("man_die1\n");};
 void() man_die2 = [$die2, man_die2] {spawn_corpse(); remove(self);};
 
-void() man_charge1 = [$run1, man_charge2] {};
+void() man_charge1 = [$run1, man_charge2] {dprint("man charge1\n");};
 void() man_charge2 = [$run2, man_charge3]{};
 void() man_charge3 = [$run3, man_charge4]{};
 void() man_charge4 = [$run4, man_charge5]{};
 void() man_charge5 = [$run5, man_charge6]{};
-void() man_charge6 = [$run6, man_charge1]{};
+void() man_charge6 = [$run6, man_shoot1]{};
 //void() man_charge7 = [$walk7, man_charge8]{};
 //void() man_charge8 = [$walk8, man_charge1]{};
 
-void() man_shoot1 = [$shoot1, man_shoot2]{};
-void() man_shoot2 = [$shoot2, man_stand1]{};
+void() man_shoot1 = [$shoot1, man_shoot2]{dprint("man shoot1\n");};
+void() man_shoot2 = [$shoot2, man_shoot3]{};
+void() man_shoot3 = [$shoot1, man_crouch1]{};
 
 void() man_melee1 = [$melee1, man_melee2]{};
 void() man_melee2 = [$melee2, man_stand1]{};
@@ -71,7 +73,8 @@ void() man_bark1 = [$bark1, man_bark2]{};
 void() man_bark2 = [$bark2, man_stand1]{};
 
 void() man_reload1 = [$reload1, man_reload2]{};
-void() man_reload2 = [$reload2, man_stand1]{};
+void() man_reload2 = [$reload2, man_reload3]{};
+void() man_reload3 = [$reload1, man_run1]{};
 
 void() man_aggro1 = [$aggro1, man_aggro2]{};
 void() man_aggro2 = [$aggro2, man_stand1]{};
@@ -97,8 +100,8 @@ void() man_board2 = [$drive1, man_board2]{};
 void() man_unboard1 = [$board1, man_stand1]{};
 
 void() man_crouch1 = [$crouch1, man_crouch2]{};
-void() man_crouch2 = [$crouch2, man_crouch3]{};
-void() man_crouch3 = [$crouch1, man_stand1]{};
+void() man_crouch2 = [$crouch2, man_crouch3]{self.nextthink += 0.1;};
+void() man_crouch3 = [$crouch1, man_reload1]{};
 
 void() man_shield1 = {};
 void() man_jump1 = {};

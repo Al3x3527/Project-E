@@ -18,7 +18,15 @@ void(float behavior) dothink = {
 void() stand = {dothink(findentityfield("th_stand"));};
 void() die = {dothink(findentityfield("th_die"));};
 void() walk = {dothink(findentityfield("th_walk"));};
+void() run = {dothink(findentityfield("th_run"));};
 void() pain = {dothink(findentityfield("th_pain"));};
+void() charge = {dothink(findentityfield("th_charge"));};
+void() evade = {dothink(findentityfield("th_evade"));};
+void() grenade = {dothink(findentityfield("th_grenade"));};
+void() crouch = {dothink(findentityfield("th_crouch"));};
+
+
+//void() tactical = {other.think = tacthink; other.nextthink = time + 0.1;}
 
 class tracked_c : entity {
   float refzero;
