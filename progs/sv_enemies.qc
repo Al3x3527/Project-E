@@ -13,6 +13,7 @@ void(float behavior) dothink = {
   field_t thinkField = entityfieldref(behavior);
   other.think = other.thinkField;
   if !(other.think) return;
+  other.impulse = TRUE;
   other.nextthink = time + 0.1;
 }
 void() stand = {dothink(findentityfield("th_stand"));};
@@ -24,6 +25,13 @@ void() charge = {dothink(findentityfield("th_charge"));};
 void() evade = {dothink(findentityfield("th_evade"));};
 void() grenade = {dothink(findentityfield("th_grenade"));};
 void() crouch = {dothink(findentityfield("th_crouch"));};
+
+void() usebyname = {
+  entity use_ent = find(world, targetname, self.target); //self = cmd?
+  use_ent.use();
+  other.impulse = TRUE; //other = trigger
+};
+
 
 
 //void() tactical = {other.think = tacthink; other.nextthink = time + 0.1;}
@@ -71,13 +79,15 @@ class cmdlist_c : entity {
 
 virtual void() cmduse = {
   //this = cmdlist, other = biped
+  other.impulse = 0; // to test
   if (this.step > (this.refzero + 7)) return; //no more steps
   //dprint(other.classname); dprint(" cmduse\n");
   field_t stepField = entityfieldref(this.step);
   string stepn = stepField;
   if (isfunction(stepn)) callfunction(stepn);
   //else {dprint(stepn); dprint(" is not a function\n");}
-  this.step ++;
+  if (other.impulse) this.step ++;
+  other.impulse = FALSE;
 };
 
  virtual void(entity inflictor, float damage) th_pain = {
@@ -86,15 +96,6 @@ virtual void() cmduse = {
    tracked_c tracked = this.cmdtracked;
    float ref = tracked.refzero;
    float zero = ref;
-   field_t currentf = entityfieldref(ref);
-   entity trackent = tracked.currentf;
-   while (trackent) {
-     ref ++;
-     currentf = entityfieldref(ref);
-     if (ref > (zero + 19)) {dprint("full cmd list\n"); return;}
-     trackent = tracked.currentf;
-   }
-   tracked.currentf = inflictor;
  };
  //prop list?
 
@@ -137,7 +138,7 @@ class firingpoint_c : entity {
   };
 };
 
-class zone_c : entity {
+class trigger_zone : entity {
   float refzero;
   firingpoint_c point0;
   firingpoint_c point1;
@@ -147,16 +148,18 @@ class zone_c : entity {
   firingpoint_c point5;
   firingpoint_c point6;
   firingpoint_c point7;
-  firingpoint_c point8;
-  firingpoint_c point9;
-  firingpoint_c point10;
-  firingpoint_c point11;
-  firingpoint_c point12;
-  firingpoint_c point13;
-  firingpoint_c point14;
-  firingpoint_c point15;
-  void() zone_c = {
+  //firingpoint_c point8;
+  //firingpoint_c point9;
+  //firingpoint_c point10;
+  //firingpoint_c point11;
+  //firingpoint_c point12;
+  //firingpoint_c point13;
+  //firingpoint_c point14;
+  //firingpoint_c point15;
+  void() trigger_zone = {
     refzero = findentityfield("point0");
+    setmodel(this, this.model);
+    modelindex = 0;
   };
 };
 
@@ -175,7 +178,7 @@ class biped_class : entity { //biped spawn point definition
   firingpoint_c firingpoint;
   string firinggroup;
 
-nonvirtual void() StateMachineGo = {};
+//nonvirtual void() StateMachineGo = {};
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   setmodel(this, this.model);
@@ -185,8 +188,8 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   droptofloor();
   if (!walkmove(0,0)){dprint(this.classname);dprint("stuck at ");dprint(vtos(this.origin));dprint("\n");}
 
-  this.think = StateMachineGo;
-  this.nextthink = time + 0.3;
+  //this.think = StateMachineGo;
+  //this.nextthink = time + 0.3;
   //dprint("respawn biped do\n");
   this.commandlist = findcmdlist(this.targetcmdlist);
   if(this.commandlist) this.commandlist.th_pain(this,0);
@@ -296,16 +299,25 @@ class platoon_c : entity {
 };
 
 class objective_c : entity {
-  string firinggroup;
-  zone_c zone;
-  float control;
-  float style;
+  string firinggroup; //to find zones
+  trigger_zone zone1;
+  trigger_zone zone2;
+  trigger_zone zone3;
+  trigger_zone zone4;
+  float control; //block action flags
+  float style; //force action flags
   float type;
-  float popcap;
-  platoon_c platoon;
-  float minstrength;
-  cmdlist_c conditions;
-  float squadtype;
+  float popcap; //max pop of all squads
+  platoon_c platoon; //list of all squads
+  float minstrength; //self-imposed condition
+  //cmdlist_c conditions; //targetname
+  float squadtype; //type of squad to create
+  //float team
+
+  virtual void() use = {
+    dprint("objective use\n");
+  };
+
   void() objective_c = {};
 };
 
