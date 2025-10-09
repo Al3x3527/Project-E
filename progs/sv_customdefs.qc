@@ -160,6 +160,50 @@ typedef struct
 .void() weapon_use;
 .void() drops;
 
+//make enumflags class squadstyle or macros
+//pick one
+const float FL_NOSQUAD = 1;
+const float FL_UNASSIGNED = 2;
+const float FL_ASSIGNED = 4;
+//pick one
+const float MAN_GRUNT = 8;
+const float MAN_HEAVY = 16;
+const float MAN_ELITE = 32;
+const float PAN_GRUNT = 64;
+const float PAN_HEAVY = 128;
+const float PAN_ELITE = 256;
+const float DRA_GRUNT = 512;
+const float DRA_HEAVY = 1024;
+const float DRA_ELITE = 2048;
+const float FRO_GRUNT = 4096;
+const float FRO_HEAVY = 8192;
+const float FRO_ELITE;
+const float WIG_ULTRA;
+const float FPV_GRUNT;
+const float FPV_HEAVY;
+const float FPV_ELITE;
+const float FPV_ULTRA;
+const float MAN_PILOT;
+const float PAN_PILOT;
+const float DRA_PILOT;
+const float FRO_PILOT;
+const float ZOM_GRUNT;
+const float ZOM_HEAVY;
+const float ZOM_ELITE;
+const float ZOM_ULTRA;
+const float SEN_GRUNT;
+const float SEN_HEAVY;
+const float SEN_ELITE = 2^30;
+//squad styles
+const float PAN_LIGHT = PAN_GRUNT + FRO_GRUNT + FRO_HEAVY;
+
+const float TEAM_NATO = 2;
+const float TEAM_NAZI = 4;
+const float TEAM_HYPE = 8;
+const float TEAM_ARMY = 16;
+const float TEAM_LIST = 32;
+const float TEAM_HELL = 64;
+
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
 .void() th_stand;

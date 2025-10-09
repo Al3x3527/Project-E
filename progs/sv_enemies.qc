@@ -196,6 +196,9 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   else {dprint(this.targetcmdlist);dprint("no command list\n");}
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
+
+  //if !(this.squad) this.squad = spawn(squad_c);
+  //this.squad.style = this.style + FL_NOSQUAD; in spawn function
 };
 
 nonvirtual void() RespawnBipedTry = {
@@ -249,7 +252,7 @@ nonvirtual void() RespawnBipedTry = {
 
  nonvirtual void() IsAlive = {
   //dprint("is alive\n");
-  if (this.spawnflags & BIPED_SPAWNED) return;
+  //if (this.spawnflags & BIPED_SPAWNED) return;
   IsSpawner();
  };
 
@@ -257,7 +260,7 @@ nonvirtual void() RespawnBipedTry = {
  void() biped_class = {
     FGDbase(Spawnflags Targetname);
     COLOR();
-    think = IsAlive;
+    think = RespawnBipedDo;
     //dprint("biped spawn function\n");
     nextthink = time + 0.3;
   };
@@ -268,7 +271,7 @@ class squad_c : entity {
   float traitor;
   float strength;
   //platoon_c platoon;
-  float squadtype;
+  float squadtype; //what is it doing? 0 no squad, 1 no platoon, 2 forward...
   tracked_c tracked;
   float refzero;
   biped_class member0;
@@ -282,21 +285,112 @@ class squad_c : entity {
   biped_class leader;
   void() squad_c = {
     refzero = findentityfield("member0");
+    squadtype = 0;
+  };
+};
+
+class squad_nosquad : squad_c {
+  void() squad_nosquad = {
+    style = FL_NOSQUAD;
+  };
+};
+
+typedef struct
+{
+	squad_c squad0;
+} squadlist_t[20];
+squadlist_t unassignedlist;
+
+void(squad_c squad) unassigned = {
+  int i = 0;
+  squad_c test;
+  while (i < 20) {
+    test = unassignedlist[i].squad0;
+    if !(test) {
+        unassignedlist[i].squad0 = squad;
+        dprint("unassigned list "); dprint(ftos(i + 1)); dprint(" squads\n");
+        break;
+      }
+    i++;
+  }
+  //else give up
+};
+
+class spawnpoint_c : entity {
+  float respawns;
+  float count;
+
+  virtual void() spawndo = {};
+
+//make biped do respawn biped do
+nonvirtual void() RespawnBipedTry = {
+  switch (this.spawnflags) {
+    case BIPED_DONTRESPAWN : {
+      this.think = sub_noop;
+      break;
+    }
+  case BIPED_SPAWNED : {
+    if (this.runtime_current < this.runtime_minimum) {
+      if (this.count < this.respawns) {
+        this.spawndo();
+        this.runtime_current += 1;
+      }
+      //else this.think = sub_noop; do nothing
+      break;
+    }
+    else {
+    this.nextthink = time + this.respawntime;
+    break;
+    }
+  }
+  default : {
+    if !(this.runtime_maximum) {
+        this.spawndo();
+        //dprint("called spawndo\n");
+        this.runtime_current += 1;
+        break;
+      }
+    if (this.runtime_current < this.runtime_maximum) {
+      this.spawndo();
+      this.runtime_current += 1;
+      break;
+    }
+    else {
+      this.nextthink = time + this.respawntime;
+      break;
+    }
+  }
+  }
+};
+
+  nonvirtual void() IsSpawner = {
+  this.nextthink = time + 0.3;
+  this.think = RespawnBipedTry;
+  //this.modelindex = 0;
+  //dprint("is spawner\n");
+ };
+
+  void() spawnpoint_c = {
+    think = RespawnBipedTry;
+    nextthink = time + 0.3;
+    //setmodel(this, gamemodels "cubeman.mdl");
   };
 };
 
 class platoon_c : entity {
  // objective_c objective;
   float traitor;
-  float refzero;
+  float pop;
   squad_c squad0;
   squad_c squad1;
   squad_c squad2;
   squad_c squad3;
+
   void() platoon_c = {
-    refzero = findentityfield("squad0");
+    //refzero = findentityfield("squad0");
   };
 };
+
 
 class objective_c : entity {
   string firinggroup; //to find zones
@@ -308,14 +402,41 @@ class objective_c : entity {
   float style; //force action flags
   float type;
   float popcap; //max pop of all squads
+  float pop;
   platoon_c platoon; //list of all squads
   float minstrength; //self-imposed condition
   //cmdlist_c conditions; //targetname
   float squadtype; //type of squad to create
   //float team
 
+  nonvirtual float() fillPlatoon = {
+  float popnow = this.pop;
+  float maxpop = this.popcap;
+  float minpop = this.minstrength;
+  //find squad not assigned type
+  //(from a global tracked_c?) unassigned manager function?
+  //if nosquad type reassign biped
+  //check max and
+  //assign type to squad
+  //assign squad to platoon
+  //check min and loop
+  //if can't find check min
+  //if < min return 0 else 1
+  return(1);
+};
+
   virtual void() use = {
     dprint("objective use\n");
+    //make platoon
+    platoon_c currentplatoon = this.platoon;
+    if !(currentplatoon) this.platoon = currentplatoon = spawn(platoon_c);
+    //make squads
+    //check population
+    //assign style to platoon
+    fillPlatoon();
+    //assign firing group to platoon
+    //else cry about it
+    //keep checking platoon state until inactive
   };
 
   void() objective_c = {};

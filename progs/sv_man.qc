@@ -122,3 +122,26 @@ BPTHINK(man);
 //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
 //dprint("man spawn function\n");
 ENDCLASS;
+
+//SQCLASS(man, "human biped spawnpoint");
+class spawn_man : spawnpoint_c {
+    virtual void() spawndo = {
+      biped_man man = spawn(biped_man);
+      setorigin(man, this.origin);
+      man.angles = this.angles;
+      //assign to nosquad
+      squad_nosquad squad = spawn(squad_nosquad);
+      squad.member0 = man;
+      squad.style += this.style;
+      //register with unassigned_t
+      unassigned(squad);
+    };
+  void() spawn_man = {
+    precache_model(gamemodels "cubeman.mdl");
+    //biped_man man = spawn(biped_man);
+    //man.squad = this;
+    //choices MAN_GRUNT, MAN_HEAVY, MAN_ELITE
+    if !(style) style = MAN_GRUNT;
+    //style = FL_SPAWNER; no style case multiple instances no squad
+  };
+};
