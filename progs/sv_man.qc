@@ -23,14 +23,17 @@ $frame crouch1 crouch2
 class biped_man : biped_class {
 nonvirtual void() man_stand1 = [$key9, man_stand1] {ai_idle();};
 
-nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(4);};
-nonvirtual void() man_walk7 = [$walk7, man_walk8]{};
-nonvirtual void() man_walk6 = [$walk6, man_walk7]{};
-nonvirtual void() man_walk5 = [$walk5, man_walk6]{};
-nonvirtual void() man_walk4 = [$walk4, man_walk5]{};
-nonvirtual void() man_walk3 = [$walk3, man_walk4]{};
-nonvirtual void() man_walk2 = [$walk2, man_walk3]{};
-nonvirtual void() man_walk1 = [$walk1, man_walk2] {dprint("man_walk1\n");};
+nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
+nonvirtual void() man_walk7 = [$walk7, man_walk8]{movetogoal(8);};
+nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8);};
+nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8);};
+nonvirtual void() man_walk4 = [$walk4, man_walk5]{movetogoal(8);};
+nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);};
+nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);};
+nonvirtual void() man_walk1 = [$walk1, man_walk2] {
+  dprint("man_walk1\n");
+  movetogoal(8);
+};
 
 void() man_run1 = {
 

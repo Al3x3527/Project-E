@@ -209,7 +209,8 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   setmodel(this, this.model);
   this.solid = SOLID_SLIDEBOX;
   this.movetype = MOVETYPE_STEP;
-  this.flags += FL_MONSTER;
+  this.flags += FL_MONSTER + FL_ONGROUND;
+  setorigin(this, this.origin + '0 0 80');
   droptofloor();
   if (!walkmove(0,0)){dprint(this.classname);dprint("stuck at ");dprint(vtos(this.origin));dprint("\n");}
 
