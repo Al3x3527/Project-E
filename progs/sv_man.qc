@@ -135,6 +135,8 @@ class spawn_man : spawnpoint_c {
       squad.style += this.style;
       //register with unassigned_t
       unassigned(squad);
+      //stylize biped
+
     };
   void() spawn_man = {
     precache_model(gamemodels "cubeman.mdl");

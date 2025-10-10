@@ -265,15 +265,20 @@ nonvirtual void() RespawnBipedTry = {
     nextthink = time + 0.3;
   };
 };
+float(float f) floatoffield = {
+  field_t testfield = entityfieldref(f);
+  return(self.testfield);
+};
 
 class squad_c : entity {
   //objective_c objective;
   float traitor;
   float strength;
+  float population;
   //platoon_c platoon;
   float squadtype; //what is it doing? 0 no squad, 1 no platoon, 2 forward...
   tracked_c tracked;
-  float refzero;
+  //float refzero;
   biped_class member0;
   biped_class member1;
   biped_class member2;
@@ -284,7 +289,6 @@ class squad_c : entity {
   biped_class member7;
   biped_class leader;
   void() squad_c = {
-    refzero = findentityfield("member0");
     squadtype = 0;
   };
 };
@@ -391,6 +395,11 @@ class platoon_c : entity {
   };
 };
 
+biped_class (float f, squad_c squad) memberref = {
+  field_t checkfield = entityfieldref (findentityfield (strcat (
+                                                                "squad_c::__mmember",
+                                                                ftos (f))));
+  return (squad.checkfield); }
 
 class objective_c : entity {
   string firinggroup; //to find zones
@@ -406,14 +415,164 @@ class objective_c : entity {
   platoon_c platoon; //list of all squads
   float minstrength; //self-imposed condition
   //cmdlist_c conditions; //targetname
-  float squadtype; //type of squad to create
   //float team
+
+  nonvirtual void() objectiveDo = {
+    platoon_c plat = this.platoon;
+
+    squad_c squad = plat.squad0;
+    if !(squad) dprint("objDo with no squad!\n");
+    //else dprint("objDo squad found\n");
+    if !(squad.member0) dprint("no members in squad!/n");
+    //else dprint(squad.member0.classname);
+    //dprint(squad.member1.classname); dprint("is member1\n");
+    //float ref = squad.refzero;
+    //float ref = squadmember0;
+    float ref = 0;
+    //dprint(ftos(ref)); dprint(entityfieldname(ref));
+    float maxref = ref + 8;
+    float f = ref;
+    biped_class member;
+    if !(squad.leader) squad.leader = squad.member0;
+    while (f < maxref) {
+      member = memberref(f, squad);
+      if !(member) break;
+      dprint("a member was found\n");
+      member.control = this.control;
+      member.firinggroup = this.firinggroup;
+      member.leader = squad.leader;
+      member.action = this.style;
+      member = FALSE;
+      f++;
+    } f = ref;
+    if !(plat.squad1) return;
+    squad = plat.squad1;
+    if !(squad.leader) squad.leader = squad.member0;
+    while (f < maxref) {
+      member = memberref(f, squad);
+      if !(member) break;
+      member.control = this.control;
+      member.firinggroup = this.firinggroup;
+      member.leader = squad.leader;
+      member.action = this.style;
+      member = FALSE;
+      f++;
+    } f = ref;
+    if !(plat.squad2) return;
+    squad = plat.squad2;
+    if !(squad.leader) squad.leader = squad.member0;
+    while (f < maxref) {
+      member = memberref(f, squad);
+      if !(member) break;
+      member.control = this.control;
+      member.firinggroup = this.firinggroup;
+      member.leader = squad.leader;
+      member.action = this.style;
+      member = FALSE;
+      f++;
+    } f = ref;
+    if !(plat.squad3) return;
+    squad = plat.squad3;
+    if !(squad.leader) squad.leader = squad.member0;
+    while (f < maxref) {
+      member = memberref(f, squad);
+      if !(member) break;
+      member.control = this.control;
+      member.firinggroup = this.firinggroup;
+      member.leader = squad.leader;
+      member.action = this.style;
+      member = FALSE;
+      f++;
+    }
+
+  };
 
   nonvirtual float() fillPlatoon = {
   float popnow = this.pop;
   float maxpop = this.popcap;
   float minpop = this.minstrength;
+  platoon_c plat = this.platoon;
   //find squad not assigned type
+  int i = 0;
+  squad_c test;
+  if !(plat.squad0){
+      while (i < 20) {
+        test = unassignedlist[i].squad0;
+        if !(test.population > (maxpop - popnow)) {
+          if (test.style & FL_NOSQUAD){
+            test.style -= FL_NOSQUAD;
+          }
+          else test.style -= FL_UNASSIGNED;
+          test.style += FL_ASSIGNED;
+          plat.squad0 = test;
+          unassignedlist[i].squad0 = FALSE;
+          popnow += test.population;
+          dprint("squad added\n");
+          if (popnow == maxpop) return (1);
+          break;
+        }
+        i++;
+      }
+      i = 0;
+    }
+  if !(plat.squad1){
+      while (i < 20) {
+        test = unassignedlist[i].squad0;
+        if !(test.population > (maxpop - popnow)) {
+          if (test.style & FL_NOSQUAD){
+            test.style -= FL_NOSQUAD;
+          }
+          else test.style -= FL_UNASSIGNED;
+          test.style += FL_ASSIGNED;
+          plat.squad1 = test;
+          unassignedlist[i].squad0 = FALSE;
+          popnow += test.population;
+          dprint("squad added\n");
+          if (popnow == maxpop) return (1);
+          break;
+        }
+        i++;
+      }
+      i = 0;
+    }
+  if !(plat.squad2){
+      while (i < 20) {
+        test = unassignedlist[i].squad0;
+        if !(test.population > (maxpop - popnow)) {
+          if (test.style & FL_NOSQUAD){
+            test.style -= FL_NOSQUAD;
+          }
+          else test.style -= FL_UNASSIGNED;
+          test.style += FL_ASSIGNED;
+          plat.squad2 = test;
+          unassignedlist[i].squad0 = FALSE;
+          popnow += test.population;
+          dprint("squad added\n");
+          if (popnow == maxpop) return (1);
+          break;
+        } i++;
+      } i = 0;
+    }
+  if !(plat.squad3){
+      while (i < 20) {
+        test = unassignedlist[i].squad0;
+        if !(test.population > (maxpop - popnow)) {
+          if (test.style & FL_NOSQUAD){
+            test.style -= FL_NOSQUAD;
+          }
+          else test.style -= FL_UNASSIGNED;
+          test.style += FL_ASSIGNED;
+          plat.squad3 = test;
+          unassignedlist[i].squad0 = FALSE;
+          popnow += test.population;
+          dprint("squad added\n");
+          if (popnow == maxpop) return (1);
+          break;
+        } i++;
+      } i = 0;
+    }
+return (popnow > minpop);
+//if (popnow > minpop) return (1);
   //(from a global tracked_c?) unassigned manager function?
   //if nosquad type reassign biped
   //check max and
@@ -422,7 +581,7 @@ class objective_c : entity {
   //check min and loop
   //if can't find check min
   //if < min return 0 else 1
-  return(1);
+return(0);
 };
 
   virtual void() use = {
@@ -433,7 +592,7 @@ class objective_c : entity {
     //make squads
     //check population
     //assign style to platoon
-    fillPlatoon();
+    if (fillPlatoon()) objectiveDo();
     //assign firing group to platoon
     //else cry about it
     //keep checking platoon state until inactive

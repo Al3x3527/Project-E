@@ -11,9 +11,10 @@ void() StartFrame =
 {
 };
 
+
 void() worldspawn =
-{	
-	precache_everything();
+{
+  precache_everything();
 };
 
 void() SpectatorConnect =
