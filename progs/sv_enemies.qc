@@ -163,6 +163,10 @@ class trigger_zone : entity {
   };
 };
 
+entity (string name) findtarget = {
+  name = "test_points"; //force
+  return(find(world, targetname, name));};
+
 class biped_class : entity { //biped spawn point definition
   enemylist_c enemies;
   tracked_c tracked;
@@ -180,6 +184,27 @@ class biped_class : entity { //biped spawn point definition
 
 //nonvirtual void() StateMachineGo = {};
 
+nonvirtual void() findgoal = {
+  dprint("findgoal\n");
+  if (this.goalentity) return;
+  this.goalentity = findtarget(this.firinggroup);
+  if (this.goalentity) this.firingpoint = this.goalentity;
+  else this.goalentity = findtarget(this.target);
+  if (this.goalentity){
+    this.action = STA_ACTIVE + ACT_GUARD;
+    this.think = th_walk;
+    dprint("found goal\n");
+  }
+  else dprint("no goal found\n");
+};
+
+nonvirtual void() ai_idle = {
+  //dprint("ai_idle\n");
+  if !(this.action) return; //actually return
+  if (this.action & STA_IDLE) return; //look for enemies
+  findgoal();
+};
+
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   setmodel(this, this.model);
   this.solid = SOLID_SLIDEBOX;
@@ -188,6 +213,8 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   droptofloor();
   if (!walkmove(0,0)){dprint(this.classname);dprint("stuck at ");dprint(vtos(this.origin));dprint("\n");}
 
+  this.think = this.th_stand;
+  this.nextthink = time + 0.1;
   //this.think = StateMachineGo;
   //this.nextthink = time + 0.3;
   //dprint("respawn biped do\n");
@@ -265,6 +292,15 @@ nonvirtual void() RespawnBipedTry = {
     nextthink = time + 0.3;
   };
 };
+
+void() usecmdlist = {
+    if (self.commandlist){
+    other = self;
+    self = self.commandlist;
+    self.use();}
+  else dprint("no command list\n");
+};
+
 float(float f) floatoffield = {
   field_t testfield = entityfieldref(f);
   return(self.testfield);
@@ -419,7 +455,7 @@ class objective_c : entity {
 
   nonvirtual void() objectiveDo = {
     platoon_c plat = this.platoon;
-
+    this.style = STA_ACTIVE; //force
     squad_c squad = plat.squad0;
     if !(squad) dprint("objDo with no squad!\n");
     //else dprint("objDo squad found\n");
@@ -442,6 +478,7 @@ class objective_c : entity {
       member.firinggroup = this.firinggroup;
       member.leader = squad.leader;
       member.action = this.style;
+      dprint(ftos(this.style), " action set\n");
       member = FALSE;
       f++;
     } f = ref;
@@ -589,6 +626,8 @@ return(0);
     //make platoon
     platoon_c currentplatoon = this.platoon;
     if !(currentplatoon) this.platoon = currentplatoon = spawn(platoon_c);
+    currentplatoon.style = this.style;
+    dprint(ftos(this.style), " platoon style set\n");
     //make squads
     //check population
     //assign style to platoon
@@ -598,7 +637,11 @@ return(0);
     //keep checking platoon state until inactive
   };
 
-  void() objective_c = {};
+  void() objective_c = {
+   if !(this.style) this.style = STA_ACTIVE;
+   //this.style = 16384;
+   dprint(ftos(this.style), "objective style set\n");
+  };
 };
 
 //class player_class : entity = {

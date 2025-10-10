@@ -34,3 +34,8 @@ void() trigger_multiple = {
 	self.solid = SOLID_TRIGGER;
 	self.touch = UseTarget;
 };
+
+void() trigger_zone = {
+	setmodel(self, self.model);
+	self.modelindex = 0;
+};
