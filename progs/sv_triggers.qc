@@ -35,7 +35,4 @@ void() trigger_multiple = {
 	self.touch = UseTarget;
 };
 
-void() trigger_zone = {
-	setmodel(self, self.model);
-	self.modelindex = 0;
-};
+//trigger zone in enemies.qc

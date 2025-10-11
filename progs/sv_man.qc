@@ -27,12 +27,12 @@ nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
 nonvirtual void() man_walk7 = [$walk7, man_walk8]{movetogoal(8);};
 nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8);};
 nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8);};
-nonvirtual void() man_walk4 = [$walk4, man_walk5]{movetogoal(8);};
+nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8);};
 nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);};
 nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);};
 nonvirtual void() man_walk1 = [$walk1, man_walk2] {
   dprint("man_walk1\n");
-  movetogoal(8);
+  ai_walk(6);
 };
 
 void() man_run1 = {
@@ -49,7 +49,13 @@ void(entity inflictor, float damage) man_pain1 = [$pain1, man_pain2] {
 void() man_die2 = [$die2, man_die2] {spawn_corpse(); remove(this);};
 void() man_die1 = [$die1, man_die2]{dprint("man_die1\n");};
 
-void() man_charge1 = {};
+void() man_charge1 = {
+  ai_charge(8);
+  this.frame++;
+  if (this.frame < $run1) this.frame = $run1;
+  else if (this.frame > $run6) this.frame = $run1;
+  this.nextthink = time + 0.1;
+};
 
 void() man_shoot1 = {};
 
@@ -82,9 +88,11 @@ void() man_converse1 = {};
 
  void() biped_man = {
    ENTMODEL("cubeman.mdl");
-   setsize(this, '-16 -16 0', '16 16 80');
+   setsize(this, '-16 -16 16', '16 16 160');
    health = 80;
    BPTHINK(man);
+   team = TEAM_NAZI;
+   yaw_speed = 8;
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
  };

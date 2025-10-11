@@ -133,8 +133,15 @@ class enemylist_c : entity {
 cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search));};
 
 class firingpoint_c : entity {
+  nonvirtual void() point_touch = {
+    dprint("point touch\n");
+    if (other.goalentity != this) return;
+    other.goalentity = world;
+  };
   void() firingpoint_c = {
-
+    touch = point_touch;
+    solid = SOLID_TRIGGER;
+    setsize(this, '-8 -8 0', '8 8 16');
   };
 };
 
@@ -167,6 +174,20 @@ entity (string name) findtarget = {
   name = "test_points"; //force
   return(find(world, targetname, name));};
 
+float (entity ent) CheckAlive = {dprint("check alive\n"); if (ent) return(1);};
+
+float (entity ent) CheckLine = {dprint("check line\n");
+  traceline(self.origin, ent.origin, MOVE_NOMONSTERS, self);
+  if (trace_fraction == 1)
+    return(1);
+  return(0);
+};
+
+float (entity ent) addenemy = {
+  self.enemy = ent;
+  dprint("enemy found\n");
+};
+
 class biped_class : entity { //biped spawn point definition
   enemylist_c enemies;
   tracked_c tracked;
@@ -183,6 +204,46 @@ class biped_class : entity { //biped spawn point definition
   string firinggroup;
 
 //nonvirtual void() StateMachineGo = {};
+nonvirtual void() findstuff = {
+  float nomonsters = 0;
+  entity ent = this;
+  float entyaw;
+  float thisyaw = vectoyaw(this.angles) + 90;
+  float maxyaw = 70;
+  float deltayaw;
+  vector mins = '-96 0 -32';
+  vector maxs = '96 500 32';
+  makevectors(this.angles);
+  vector dir = v_forward * 500;
+  dprint("find stuff\n");
+  //modify bounds by dir?
+  tracebox(this.origin, mins, maxs, dir, nomonsters, ent);
+  int i = 0;
+  while (i < 20) {
+    ent = trace_ent;
+    if (CheckAlive(ent))
+      if (CheckLine(ent))
+        if (ent.team != this.team){
+          //dprint("potential enemy found\n");
+          dprint(ent.classname);
+          entyaw = vectoyaw(ent.origin - this.origin);
+          deltayaw = fabs(thisyaw - entyaw);
+          if (deltayaw > 180) deltayaw -= 180;
+          dprint(ftos(thisyaw), " thisyaw\n");
+          dprint(ftos(entyaw), " entyaw\n");
+          //dprint(ftos(deltayaw), " deltayaw\n");
+          if (deltayaw < maxyaw) {
+           // if (entyaw > minyaw) {
+              //dprint("enemy found\n");
+              if (ent.flags & FL_CLIENT) addenemy(ent);
+              else if (ent.flags & FL_MONSTER) addenemy(ent);
+            }
+        }
+    tracebox(this.origin, mins, maxs, dir, nomonsters, ent);
+    i++;
+  }
+
+};
 
 nonvirtual void() findgoal = {
   dprint("findgoal\n");
@@ -201,16 +262,41 @@ nonvirtual void() findgoal = {
 nonvirtual void() ai_idle = {
   //dprint("ai_idle\n");
   if !(this.action) return; //actually return
-  if (this.action & STA_IDLE) return; //look for enemies
-  findgoal();
+  if (this.action & STA_IDLE) {
+    findstuff();
+    if (this.enemy) this.think = this.th_charge;
+    return;
+  } //look for enemies
+  if !(this.firingpoint) findgoal();
+};
+
+nonvirtual void(float dist) ai_walk = {
+  findstuff();
+  if (this.enemy) this.think = this.th_charge;
+  if !(this.goalentity) this.think = this.th_stand;
+  this.ideal_yaw = vectoyaw(this.goalentity.origin - this.origin);
+  ChangeYaw();
+  movetogoal(dist);
+};
+
+nonvirtual void(float dist) ai_charge = {
+  if !(this.enemy) {
+    this.think = this.th_stand;
+    return;
+  }
+  this.goalentity = this.enemy;
+  this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
+  changeyaw();
+  movetogoal(dist);
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   setmodel(this, this.model);
+  setsize(this, '-16 -16 0', '16 16 80'); //TODO make universal
   this.solid = SOLID_SLIDEBOX;
   this.movetype = MOVETYPE_STEP;
   this.flags += FL_MONSTER + FL_ONGROUND;
-  setorigin(this, this.origin + '0 0 80');
+  setorigin(this, this.origin + '0 0 0');
   droptofloor();
   if (!walkmove(0,0)){dprint(this.classname);dprint("stuck at ");dprint(vtos(this.origin));dprint("\n");}
 

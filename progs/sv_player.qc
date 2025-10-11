@@ -79,6 +79,9 @@ void() PlayerSpawn =
 	self.fixangle = TRUE;
 	setsize(self, [-16, -16, 0], [16, 16, 56]);
 	self.view_ofs = [0, 0, 48];
+
+	self.team = TEAM_NATO;//placeholder
+	self.flags = FL_CLIENT;
 };
 
 void() PutClientInServer =
