@@ -115,6 +115,7 @@ class spawn_man : spawnpoint_c {
       biped_man man = spawn(biped_man);
       setorigin(man, this.origin);
       man.angles = this.angles;
+      man.weapon = this.weapon;
       //assign to nosquad
       squad_nosquad squad = spawn(squad_nosquad);
       squad.member0 = man;

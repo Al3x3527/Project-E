@@ -272,3 +272,16 @@ attackvelocity = 100;
 attacktimes = 1;
 attackdelay = 0.6;
 ENDCLASS;
+
+void() VirtualWeapon = { //TODO pull pointers from struct instead?
+  weapon_class held = FALSE;
+  switch (self.weapon) {
+    case WEAPON_BATTLERIFLE : held = spawn(weapon_battlerifle); break;
+    case WEAPON_PLASMARIFLE : held = spawn(weapon_plasmarifle); break;
+    default : return;
+  }
+  if !(held) return;
+  self.movechain = held;
+  held.spawnflags = ITEM_HELD;
+  setorigin(held, self.origin + '0 0 40');
+}

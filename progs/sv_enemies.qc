@@ -186,6 +186,8 @@ float (entity ent) addenemy = {
   dprint("enemy found\n");
 };
 
+void() VirtualWeapon;
+
 class biped_class : entity { //biped spawn point definition
   enemylist_c enemies;
   tracked_c tracked;
@@ -323,6 +325,7 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
 
+  if(this.weapon) VirtualWeapon();
   //if !(this.squad) this.squad = spawn(squad_c);
   //this.squad.style = this.style + FL_NOSQUAD; in spawn function
 };
