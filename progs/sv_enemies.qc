@@ -275,7 +275,7 @@ nonvirtual void(float dist) ai_walk = {
   if (this.enemy) this.think = this.th_charge;
   if !(this.goalentity) this.think = this.th_stand;
   this.ideal_yaw = vectoyaw(this.goalentity.origin - this.origin);
-  ChangeYaw();
+  sub_changeyaw();
   movetogoal(dist);
 };
 
@@ -286,7 +286,7 @@ nonvirtual void(float dist) ai_charge = {
   }
   this.goalentity = this.enemy;
   this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
-  changeyaw();
+  sub_changeyaw();
   movetogoal(dist);
   if (random() > 0.8) this.think = this.th_shoot;
 };

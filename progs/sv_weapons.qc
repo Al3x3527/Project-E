@@ -281,7 +281,12 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
     default : return;
   }
   if !(held) return;
-  self.movechain = held;
+  self.movechain = held; //TODO: add rotational corrections myself
+  held.owner = self;
+  //held.chainmoved = sub_chainmoved;
   held.spawnflags = ITEM_HELD;
-  setorigin(held, self.origin + '0 0 40');
+  self.view_ofs = '0 0 60';//TODO
+  setorigin(held, self.origin + self.view_ofs - held.view_ofs);
+  held.angles = self.angles;
+  held.modelindex = getmodelindex(held.weaponmodel);
 }

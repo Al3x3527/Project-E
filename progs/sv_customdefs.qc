@@ -160,6 +160,30 @@ typedef struct
 .void() weapon_use;
 .void() drops;
 
+void() sub_chainmoved = {
+	entity parent = self.owner;
+	self.angles = parent.angles + self.v_angle;
+	self.avelocity = parent.avelocity;
+	setorigin(self, self.origin + parent.view_ofs - self.view_ofs);
+};
+
+void() sub_changeyaw = {
+	float ang = self.ideal_yaw;
+	vector angle = '0 0 0';
+	angle_z = ang;
+	float avel = self.yaw_speed;
+	entity parent = self;
+	ChangeYaw();
+	self = self.movechain;
+	self.yaw_speed = avel * 2;
+	self.ideal_yaw = ang;
+	ChangeYaw();
+	v_forward = parent.view_ofs - self.view_ofs;
+	rotatevectorsbyangle(angle);
+	setorigin(self, parent.origin + v_forward);
+	self = parent;
+};
+
 //make enumflags class squadstyle or macros
 //pick one
 const float FL_NOSQUAD = 1;
