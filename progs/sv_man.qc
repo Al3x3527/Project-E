@@ -57,7 +57,17 @@ void() man_charge1 = {
   this.nextthink = time + 0.1;
 };
 
-void() man_shoot1 = {};
+void() man_shoot1 = {
+  this.frame++;
+  if (this.frame < $shoot1) this.frame = $shoot1;
+  else if (this.frame > $shoot2) this.frame = $shoot1;
+  if (this.frame == $shoot1) {
+    ai_shoot();
+    //this.think = this.th_charge;
+  }
+  else if (this.frame == $shoot2) this.think = this.th_charge;
+  this.nextthink = time + 0.1;
+};
 
 void() man_melee1 = {};
 
@@ -93,6 +103,7 @@ void() man_converse1 = {};
    BPTHINK(man);
    team = TEAM_NAZI;
    yaw_speed = 8;
+   weapon_use = sub_noop;
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
  };

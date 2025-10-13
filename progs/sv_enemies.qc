@@ -146,7 +146,6 @@ class firingpoint_c : entity {
 };
 
 class trigger_zone : entity {
-  float refzero;
   firingpoint_c point0;
   firingpoint_c point1;
   firingpoint_c point2;
@@ -164,7 +163,6 @@ class trigger_zone : entity {
   //firingpoint_c point14;
   //firingpoint_c point15;
   void() trigger_zone = {
-    refzero = findentityfield("point0");
     setmodel(this, this.model);
     modelindex = 0;
   };
@@ -288,10 +286,24 @@ nonvirtual void(float dist) ai_charge = {
   this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
   changeyaw();
   movetogoal(dist);
+  if (random() > 0.8) this.think = this.th_shoot;
+};
+
+nonvirtual void() ai_shoot = {
+  if (this.enemy) {
+    if (CheckLine(this.enemy)) {
+      this.weapon_use();
+      this.action = ACT_CHARGE + STA_SIGHT; //FIXME
+      return;
+      }
+  } else {
+    this.think = this.th_charge;
+    this.action = ACT_CHARGE + STA_UNCERTAIN; //FIXME
+    }
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
-  setmodel(this, this.model);
+  setmodel(this, this.model); //TODO set model index instead
   setsize(this, '-16 -16 0', '16 16 80'); //TODO make universal
   this.solid = SOLID_SLIDEBOX;
   this.movetype = MOVETYPE_STEP;
