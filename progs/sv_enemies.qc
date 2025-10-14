@@ -172,19 +172,78 @@ entity (string name) findtarget = {
   name = "test_points"; //force
   return(find(world, targetname, name));};
 
-float (entity ent) CheckAlive = {dprint("check alive\n"); if (ent) return(1);};
+int (entity e) CheckDist = {
+  vector vec = e.origin - self.origin;
+  float len = vlen(vec);
+  if (len < 16) return(DIST_KREIG);
+  if (len < 64) return(DIST_NEAR);
+  if (len < 256) return(DIST_MED);
+  return(DIST_FAR);
+};
+
+class searchpoint_c : entity {
+  //style SEARCH_X
+  //weapon
+  //team
+  //origin
+  //enemy lookingfor
+  virtual void() think = {
+    if (this.style == SEARCH_SCRIPTED) return;
+    this.enemy = world;
+    remove(this);
+  };
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    this.enemy = world;
+    other.think = other.th_fooled;
+    other.goalentity = world;
+    remove(this);
+  };
+  void() searchpoint_c = {
+    nextthink = time + 15;
+    classname = "searchpoint";
+  };
+};
+
+float (entity ent) CheckAlive = {dprint("check alive\n"); if (ent) return(1); return(0);};
 
 float (entity ent) CheckLine = {dprint("check line\n");
   traceline(self.origin, ent.origin, MOVE_NOMONSTERS, self);
-  if (trace_fraction == 1)
+  if (trace_fraction == 1) {
+    //if (self.status < STA_SIGHT) self.status = STA_SIGHT;
     return(1);
+  }
+  //if (self.status > STA_UNCERTAIN) self.status = STA_UNCERTAIN;
   return(0);
-};
+};// NOTE: not oo function
 
-float (entity ent) addenemy = {
+float (entity ent) addenemy = { //FIXME biped class
+  //TODO
+  //if (ent.classname == "searchpoint") {
+  //  if (self.status < STA_CERTAIN) self.status = STA_CERTAIN;
+  //}
   self.enemy = ent;
   dprint("enemy found\n");
+  return (1);
 };
+
+float (entity ent) addprop = { //FIXME biped class
+  //TODO
+  return (0);
+};
+
+entity (float dist) RequestSearch = {
+  //dprint("search requested\n");
+if (self == searchent) {
+  if (time < searchtime + 0.5) return (world);
+ }
+ else if (CheckDist(searchent) < DIST_FAR)
+   if (time < searchtime + 0.25) return (world);
+//dprint("request granted\n");
+searchent = self;
+searchtime = time;
+return(findradius(self.origin, dist, searchchain));
+}
 
 void() VirtualWeapon;
 
@@ -192,57 +251,80 @@ class biped_class : entity { //biped spawn point definition
   enemylist_c enemies;
   tracked_c tracked;
   //squad_c squad;
-  float traitor;
+  int traitor;
   entity leader;
-  float control;
-  float action;
-  //float status;
+  int control;
+  int action;
+  int status;
   //objective_c objective;
   //string targetcmdlist;
   //cmdlist_c commandlist;
   firingpoint_c firingpoint;
   string firinggroup;
 
+  nonvirtual void() find_status = { //might not use
+    entity e;
+    int dist;
+    if (this.goalentity){ //active
+      if (this.enemy) { //combat
+        e = this.enemy;
+        dist = CheckDist(e);
+        if (dist < DIST_FAR) { //uncertain
+          if (CheckLine(e)) { //sight
+            if (dist < DIST_MED) { //near
+              if (dist < DIST_NEAR) { //krieg
+               this.status = STA_KRIEG;
+              } else this.status = STA_NEAR;
+            } else this.status = STA_SIGHT;
+          } else this.status = STA_UNCERTAIN; //may search here, may be certain
+        } else this.status = STA_COMBAT; //may search here
+      } else this.status = STA_ACTIVE;
+    } else this.status = STA_IDLE;
+  }; //TODO: access searching, certain by message
+     //NOTE: in weaponsound
+
 //nonvirtual void() StateMachineGo = {};
 nonvirtual void() findstuff = {
-  float nomonsters = 0;
   entity ent = this;
   float entyaw;
   float thisyaw = vectoyaw(this.angles) + 90;
   float maxyaw = 70;
   float deltayaw;
-  vector mins = '-96 0 -32';
-  vector maxs = '96 500 32';
-  makevectors(this.angles);
-  vector dir = v_forward * 500;
-  dprint("find stuff\n");
-  //modify bounds by dir?
-  tracebox(this.origin, mins, maxs, dir, nomonsters, ent);
-  int i = 0;
-  while (i < 20) {
-    ent = trace_ent;
-    if (CheckAlive(ent))
-      if (CheckLine(ent))
-        if (ent.team != this.team){
-          //dprint("potential enemy found\n");
-          dprint(ent.classname);
-          entyaw = vectoyaw(ent.origin - this.origin);
-          deltayaw = fabs(thisyaw - entyaw);
-          if (deltayaw > 180) deltayaw -= 180;
-          dprint(ftos(thisyaw), " thisyaw\n");
-          dprint(ftos(entyaw), " entyaw\n");
-          //dprint(ftos(deltayaw), " deltayaw\n");
-          if (deltayaw < maxyaw) {
-           // if (entyaw > minyaw) {
-              //dprint("enemy found\n");
-              if (ent.flags & FL_CLIENT) addenemy(ent);
-              else if (ent.flags & FL_MONSTER) addenemy(ent);
-            }
+  float dist = 500;
+  //dprint("find stuff\n");
+  ent = RequestSearch(dist);
+  if !(ent) return;
+  while (ent) {
+    if (ent.classname == "searchpoint") { //else real
+      if !(CheckLine(ent.enemy)) { //visible ignore
+          if (CheckAlive(ent)) {//prop ignore
+            if (ent.team != this.team) { //ignore
+              addenemy(ent);
+              if (this.status < STA_CERTAIN) this.status = STA_CERTAIN;
+              } //team ignore
+            } //prop ignore
         }
-    tracebox(this.origin, mins, maxs, dir, nomonsters, ent);
-    i++;
+    } else{ //real
+      //dprint("real found\n");
+      if (CheckLine(ent)) { //else ignore
+        if (CheckAlive(ent)) { //see prop
+          if (ent.team != this.team) { //ignore
+            //dprint("potential enemy found\n");
+            entyaw = vectoyaw (ent.origin - this.origin);
+            deltayaw = fabs(thisyaw - entyaw);
+            if (deltayaw > 180) deltayaw -= 180;
+            if (deltayaw < maxyaw) { //ignore
+              addenemy(ent);
+              if (this.status < STA_SIGHT) this.status = STA_SIGHT;
+            }
+          }
+      } else {
+         addprop(ent);
+        }
+      }
+    }
+    ent = ent.searchchain;
   }
-
 };
 
 nonvirtual void() findgoal = {
@@ -252,7 +334,8 @@ nonvirtual void() findgoal = {
   if (this.goalentity) this.firingpoint = this.goalentity;
   else this.goalentity = findtarget(this.target);
   if (this.goalentity){
-    this.action = STA_ACTIVE + ACT_GUARD;
+    this.action = ACT_GUARD;
+    this.status = STA_ACTIVE;
     this.think = th_walk;
     dprint("found goal\n");
   }
@@ -262,7 +345,7 @@ nonvirtual void() findgoal = {
 nonvirtual void() ai_idle = {
   //dprint("ai_idle\n");
   if !(this.action) return; //actually return
-  if (this.action & STA_IDLE) {
+  if (this.status & STA_IDLE) {
     findstuff();
     if (this.enemy) this.think = this.th_charge;
     return;
@@ -282,26 +365,25 @@ nonvirtual void(float dist) ai_walk = {
 nonvirtual void(float dist) ai_charge = {
   if !(this.enemy) {
     this.think = this.th_stand;
+    //check tracked
+    this.status = STA_COMBAT;
     return;
   }
   this.goalentity = this.enemy;
+  if (this.enemy.classname != "searchpoint") //FIXME: flags instead?
+    if (CheckLine(this.enemy)) this.status = STA_SIGHT;
+    else this.status = STA_UNCERTAIN;
+  //TODO: searchpoint at enemy.lastseen
   this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
   sub_changeyaw();
   movetogoal(dist);
-  if (random() > 0.8) this.think = this.th_shoot;
+  if (this.status > STA_CERTAIN) //TODO: other attacks
+    if (random() > 0.8)
+      this.think = this.th_shoot;
 };
 
 nonvirtual void() ai_shoot = {
-  if (this.enemy) {
-    if (CheckLine(this.enemy)) {
-      this.weapon_use();
-      this.action = ACT_CHARGE + STA_SIGHT; //FIXME
-      return;
-      }
-  } else {
-    this.think = this.th_charge;
-    this.action = ACT_CHARGE + STA_UNCERTAIN; //FIXME
-    }
+  this.weapon_use();
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
@@ -557,7 +639,7 @@ class objective_c : entity {
 
   nonvirtual void() objectiveDo = {
     platoon_c plat = this.platoon;
-    this.style = STA_ACTIVE; //force
+    this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
     if !(squad) dprint("objDo with no squad!\n");
     //else dprint("objDo squad found\n");
@@ -740,7 +822,7 @@ return(0);
   };
 
   void() objective_c = {
-   if !(this.style) this.style = STA_ACTIVE;
+   if !(this.style) this.style = ACT_GUARD; //default objective
    //this.style = 16384;
    dprint(ftos(this.style), "objective style set\n");
   };

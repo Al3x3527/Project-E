@@ -32,6 +32,16 @@ void() rocket_touch = {
 
 void(entity ent, string path) weapon_sound = {
 sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
+//alert !DIST_FAR >> create  searchpoint (memory waypoint) can find without line
+searchpoint_c point = spawn(searchpoint_c);
+setorigin(point, ent.origin);
+point.weapon = ent.weapon;
+point.enemy = ent;
+point.team = ent.team;
+point.style = SEARCH_SOUND;
+//TODO: in findstuff
+//if entity.enemies >> ent STA_CERTAIN
+//else if STA_IDLE/ACTIVE && possible enemy >> STA_SEARCHING -dont force action
 //dprint(path); dprint(" weapon_sound\n");
 };
 

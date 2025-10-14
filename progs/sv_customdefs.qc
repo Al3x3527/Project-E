@@ -99,30 +99,37 @@ float SPAWNED_ACTIVE = 8;
 //AI defs
 .vector lastseen; //where the prop was last perceived.
 .float scary; //last scary factor.
-// I paid for the whole float.
-float ACT_NONE = 0;
-float ACT_SLEEP = 2;
-float ACT_FIGHT = 4;
-float ACT_FLEE = 8;
-float ACT_UNCOVER = 16;
-float ACT_GUARD = 32;
-float ACT_SEARCH = 64;
-float ACT_WAIT = 128;
-float ACT_VEHICLE = 256;
-float ACT_CHARGE = 512;
-float ACT_OBEY = 1024;
-float ACT_CONVERSE = 2048;
-float ACT_AVOID = 4096;
-float STA_NONE = 0;
-float STA_IDLE = 8192;
-float STA_ACTIVE = 16384;
-float STA_COMBAT = 32768;
-float STA_SEARCHING = 65536;
-float STA_UNCERTAIN = 131072;
-float STA_CERTAIN = 262144;
-float STA_SIGHT = 524288;
-float STA_NEAR = 1048576;
-float STA_KRIEG = 2097152;
+
+enum int
+{
+	ACT_NONE,
+		ACT_SLEEP,
+		ACT_FIGHT,
+		ACT_FLEE,
+		ACT_UNCOVER,
+		ACT_GUARD,
+		ACT_SEARCH,
+		ACT_WAIT,
+		ACT_VEHICLE,
+		ACT_CHARGE,
+		ACT_OBEY,
+		ACT_CONVERSE,
+		ACT_AVOID
+};
+
+enum int
+{
+	STA_NONE,
+		STA_IDLE,
+		STA_ACTIVE,
+		STA_COMBAT,
+		STA_SEARCHING,
+		STA_UNCERTAIN,
+		STA_CERTAIN,
+		STA_SIGHT,
+		STA_NEAR,
+		STA_KRIEG
+};
 
 float UNLIMITED_AMMO;
 float BOTTOMLESS_CLIP;
@@ -154,6 +161,10 @@ typedef struct
 .game_type currentgametype;
 */
 //useful defs
+entity searchent;
+float searchtime;
+.entity searchchain;
+//entity searchhead;
 .float() attack; //returns TRUE or FALSE
 #define gamemodels "mdls/"
 .void() equip;
@@ -228,6 +239,15 @@ const float TEAM_ARMY = 16;
 const float TEAM_LIST = 32;
 const float TEAM_HELL = 64;
 
+const int DIST_KREIG = 1;
+const int DIST_NEAR = 2;
+const int DIST_MED = 3;
+const int DIST_FAR = 4;
+
+const int SEARCH_SOUND = 1;
+const int SEARCH_SEEN = 2;
+const int SEARCH_SCRIPTED = 3;
+
 //Quake defs
 .void(entity inflictor, float damage) th_pain;
 .void() th_stand;
@@ -257,3 +277,4 @@ const float TEAM_HELL = 64;
 .void() th_alert;
 .void() th_flee;
 .void() th_converse;
+.void() th_fooled;
