@@ -202,6 +202,7 @@ class searchpoint_c : entity {
   void() searchpoint_c = {
     nextthink = time + 15;
     classname = "searchpoint";
+    flags = FL_SEARCHPOINT;
   };
 };
 
@@ -216,21 +217,6 @@ float (entity ent) CheckLine = {dprint("check line\n");
   //if (self.status > STA_UNCERTAIN) self.status = STA_UNCERTAIN;
   return(0);
 };// NOTE: not oo function
-
-float (entity ent) addenemy = { //FIXME biped class
-  //TODO
-  //if (ent.classname == "searchpoint") {
-  //  if (self.status < STA_CERTAIN) self.status = STA_CERTAIN;
-  //}
-  self.enemy = ent;
-  dprint("enemy found\n");
-  return (1);
-};
-
-float (entity ent) addprop = { //FIXME biped class
-  //TODO
-  return (0);
-};
 
 entity (float dist) RequestSearch = {
   //dprint("search requested\n");
@@ -262,7 +248,20 @@ class biped_class : entity { //biped spawn point definition
   firingpoint_c firingpoint;
   string firinggroup;
 
-  nonvirtual void() find_status = { //might not use
+  float (entity ent) addenemy = {   //TODO
+  //if (ent.classname == "searchpoint") {
+  //  if (self.status < STA_CERTAIN) self.status = STA_CERTAIN;
+  //}
+  this.enemy = ent;
+  dprint("enemy found\n");
+  return (1);
+};
+
+float (entity ent) addprop = {   //TODO
+  return (0);
+};
+
+ nonvirtual void() find_status = { //backup system
     entity e;
     int dist;
     if (this.goalentity){ //active
@@ -295,7 +294,7 @@ nonvirtual void() findstuff = {
   ent = RequestSearch(dist);
   if !(ent) return;
   while (ent) {
-    if (ent.classname == "searchpoint") { //else real
+    if (ent.flags & FL_SEARCHPOINT) { //else real
       if !(CheckLine(ent.enemy)) { //visible ignore
           if (CheckAlive(ent)) {//prop ignore
             if (ent.team != this.team) { //ignore
@@ -370,7 +369,7 @@ nonvirtual void(float dist) ai_charge = {
     return;
   }
   this.goalentity = this.enemy;
-  if (this.enemy.classname != "searchpoint") //FIXME: flags instead?
+  if (this.enemy.flags != FL_SEARCHPOINT)
     if (CheckLine(this.enemy)) this.status = STA_SIGHT;
     else this.status = STA_UNCERTAIN;
   //TODO: searchpoint at enemy.lastseen

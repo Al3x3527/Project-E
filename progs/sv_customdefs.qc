@@ -195,6 +195,7 @@ void() sub_changeyaw = {
 	self = parent;
 };
 
+const float FL_SEARCHPOINT = 4096; //4096, 8192 not taken
 //make enumflags class squadstyle or macros
 //pick one
 const float FL_NOSQUAD = 1;
