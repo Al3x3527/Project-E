@@ -120,14 +120,13 @@ virtual void() cmduse = {
 .cmdlist_c commandlist;
 
 class enemylist_c : entity {
-  float refzero;
   entity foe0;
   entity foe1;
   entity foe2;
   entity foe3;
 
   void() enemylist_c = {
-    refzero = findentityfield("foe0");
+
   };
 };
 cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search));};
@@ -169,7 +168,7 @@ class trigger_zone : entity {
 };
 
 entity (string name) findtarget = {
-  name = "test_points"; //force
+  //string name = self.target;
   return(find(world, targetname, name));};
 
 int (entity e) CheckDist = {
@@ -181,7 +180,7 @@ int (entity e) CheckDist = {
   return(DIST_FAR);
 };
 
-class searchpoint_c : entity {
+class path_search : entity {
   //style SEARCH_X
   //weapon
   //team
@@ -199,14 +198,46 @@ class searchpoint_c : entity {
     other.goalentity = world;
     remove(this);
   };
-  void() searchpoint_c = {
+  void() path_search = {
     nextthink = time + 15;
-    classname = "searchpoint";
+    classname = "path_search";
     flags = FL_SEARCHPOINT;
   };
 };
 
-float (entity ent) CheckAlive = {dprint("check alive\n"); if (ent) return(1); return(0);};
+class path_cover : entity {
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    other.think = other.th_cover;
+  };
+  void() path_cover = {
+    flags = FL_COVER;
+  };
+};
+
+class path_corner : entity {
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    if (this.target != FALSE) {
+      entity targ = findtarget(this.target);
+      if (targ) other.goalentity = targ;
+      return;
+    }
+    other.think = other.th_wait;
+    other.wait = this.wait;
+  };
+  void() path_corner = {
+    flags = FL_COVER;
+  };
+};
+
+float (entity ent) CheckAlive = {
+  dprint("check alive\n");
+  if (ent.flags & FL_COVER) return (0);
+  if !(ent.health > 0) return(0);
+  if (ent) return(1);
+  return(0);
+};
 
 float (entity ent) CheckLine = {dprint("check line\n");
   traceline(self.origin, ent.origin, MOVE_NOMONSTERS, self);
@@ -233,35 +264,106 @@ return(findradius(self.origin, dist, searchchain));
 
 void() VirtualWeapon;
 
+float (int i, tracked_c test, entity ent) testpropref = {
+ field_t checkfield = entityfieldref( findentityfield (strcat (
+                                                               "tracked_c::__mprop",
+                                                               itos (i))));
+ return(ent == test.checkfield);
+};
+
+void(int i, tracked_c shift) shiftpropfields = {
+  field_t oldfield = entityfieldref( findentityfield (strcat (
+                                                              "tracked_c::__mprop",
+                                                              itos (i+1))));
+  field_t newfield = entityfieldref( findentityfield (strcat (
+                                                              "tracked_c::__mprop",
+                                                              itos (i))));
+  shift.newfield = shift.oldfield;
+};
+
 class biped_class : entity { //biped spawn point definition
-  enemylist_c enemies;
-  tracked_c tracked;
+  enemylist_c enemies; //4
+  tracked_c tracked; //20
   //squad_c squad;
   int traitor;
   entity leader;
   int control;
   int action;
   int status;
+  float strength;
   //objective_c objective;
   //string targetcmdlist;
   //cmdlist_c commandlist;
   firingpoint_c firingpoint;
   string firinggroup;
 
-  float (entity ent) addenemy = {   //TODO
-  //if (ent.classname == "searchpoint") {
-  //  if (self.status < STA_CERTAIN) self.status = STA_CERTAIN;
-  //}
-  this.enemy = ent;
+nonvirtual float (entity ent) addprop = {
+  int i = 0;
+  entity test;
+  //check for open field
+  while (i < 20) {
+    if (testpropref(i, this.tracked, ent)) return(1);
+    i++;
+  }
+  //shift prop fields
+  i = 0;
+  while (i < 19) {
+    shiftpropfields(i, this.tracked);
+    i++;
+  }
+  this.tracked.prop19 = ent;
+  return (1);
+};
+
+nonvirtual float (entity ent) addenemy = {
+  entity least = ent;
+  if !(this.enemies) this.enemies = spawn(enemylist_c);
+
+  if !(this.enemies.foe0) this.enemies.foe0 = ent;
+  else {
+    if (this.enemies.foe0 == ent) return(0);
+    if (this.enemies.foe0.scary < least.scary) least = this.enemies.foe0;
+    if !(this.enemies.foe1) this.enemies.foe1 = ent;
+    else {
+      if (this.enemies.foe1 == ent) return(0);
+      if (this.enemies.foe1.scary < least.scary) least = this.enemies.foe1;
+      if !(this.enemies.foe2) this.enemies.foe2 = ent;
+      else {
+        if (this.enemies.foe2 == ent) return(0);
+        if (this.enemies.foe2.scary < least.scary) least = this.enemies.foe2;
+        if !(this.enemies.foe3) this.enemies.foe3 = ent;
+        else {
+          if (this.enemies.foe3 == ent) return(0);
+          if (this.enemies.foe3.scary < least.scary) least = this.enemies.foe3;
+        }
+      }
+    }
+  }
+  if (least == ent) {
+    addprop(ent);
+    return(0);
+  }
+  if !(this.enemy) this.enemy = ent;
+  if (this.enemies.foe0 == least) this.enemies.foe0 = ent;
+  else if (this.enemies.foe1 == least) this.enemies.foe1 = ent;
+  else if (this.enemies.foe2 == least) this.enemies.foe2 = ent;
+  else if (this.enemies.foe3 == least) this.enemies.foe3 = ent;
+  else dprint("problem in addenemy!\n");
   dprint("enemy found\n");
   return (1);
 };
 
-float (entity ent) addprop = {   //TODO
-  return (0);
+nonvirtual float () findfear = {
+  //TODO decide if this should flee
+  return(0);
 };
 
- nonvirtual void() find_status = { //backup system
+ nonvirtual float () findcover = {
+   //TODO test FL_COVER props against enemy, create path_cover
+   return(0);
+ };
+
+ nonvirtual void() find_status = { //fallback
     entity e;
     int dist;
     if (this.goalentity){ //active
@@ -281,6 +383,164 @@ float (entity ent) addprop = {   //TODO
     } else this.status = STA_IDLE;
   }; //TODO: access searching, certain by message
      //NOTE: in weaponsound
+
+ nonvirtual void() find_action = { //fallback
+   if (this.control & this.action) this.action = ACT_NONE;
+   //NOTE: ACT_WAIT, ACT_UNCOVER, ACT_NONE never supressed
+   if !(this.status) {
+     if !(this.action) return;
+     if (this.action == ACT_SLEEP) return; //by message
+     this.action = ACT_NONE;
+     this.think = this.th_stand;
+     return;
+     //alert by message
+   }
+   if (this.status < 2) {
+     if (this.action == ACT_WAIT) return;
+     this.action = ACT_WAIT;
+     this.think = this.th_wait;
+     return;
+     //converse by message
+     //alert by message
+   }
+   if (this.status == 2) {
+     if (this.action == ACT_GUARD) return;
+     if (this.action == ACT_WAIT) return;
+     if (this.action == ACT_VEHICLE) return; //by message
+     if (this.action == ACT_OBEY) return; //by message
+     if (this.firingpoint && (this.control | ACT_GUARD)) {
+       this.action = ACT_GUARD;
+       this.think = this.th_run;
+       return;
+     }
+     this.action = ACT_WAIT;
+     this.think = this.th_wait;
+     return;
+     //alert by message
+   }
+   if (this.status == 3) {
+     if (this.action == ACT_GUARD) return;
+     if (this.action == ACT_WAIT) return;
+     if (this.action == ACT_VEHICLE) return;
+     if (this.action == ACT_CHARGE) return;
+     if (this.action == ACT_OBEY) return;
+     if (this.action == ACT_AVOID) {
+       this.action = ACT_UNCOVER;
+       this.think = this.th_uncover;
+       return;
+     }
+     if ((this.strength < 0.5) && (this.control | ACT_CHARGE)) {
+       //character of think by class
+       //ineffectual rage
+       this.action = ACT_CHARGE;
+       this.think = this.th_charge;
+     }
+     if (this.firingpoint && (this.control | ACT_GUARD)) {
+       this.action = ACT_GUARD;
+       this.think = this.th_guard;
+       return;
+     }
+     this.action = ACT_WAIT;
+     this.think = this.th_wait;
+     return;
+   }
+   if (this.status == 4) {
+     if (this.action == ACT_SEARCH) return;
+     if (this.action == ACT_OBEY) return;
+     this.action = ACT_SEARCH;
+     this.think = this.th_search;
+     return;
+     //alert by message
+     //uncover by message
+   }
+   if (this.action == ACT_FIGHT) return;
+   if (this.action == ACT_FLEE) return;
+   if (this.action == ACT_GUARD) return;
+   if (this.action == ACT_CHARGE) return;
+   if (this.status < 7) {
+     if (this.action == ACT_WAIT) return;
+     if (this.action == ACT_VEHICLE) return;
+     if (this.action == ACT_OBEY) return;
+     if ((this.control | ACT_FLEE) && findfear()) {
+       this.action = ACT_FLEE;
+       this.think = th_flee;
+       return;
+     }
+     if ((this.control | ACT_CHARGE) && (this.strength < 0.5)) {
+       this.action = ACT_CHARGE;
+       this.think = this.th_charge;
+       return;
+     }
+     if ((this.control | ACT_GUARD) && this.firingpoint) {
+       this.action = ACT_GUARD;
+       this.think = this.th_guard;
+       return;
+     }
+     if (this.control | ACT_FIGHT) {
+       this.action = ACT_FIGHT;
+       this.think = this.th_run;
+       return;
+       }
+     this.action = ACT_WAIT;
+     this.think = this.th_wait;
+     return;
+   }
+   if ((this.action == ACT_VEHICLE) && (this.owner.flags & FL_VEHICLE)) return;
+   if (this.action == ACT_AVOID) return;
+   if (this.action == ACT_CHARGE) return;
+   if (this.status == 7) {
+     if ((this.control | ACT_CHARGE) && (this.strength < 0.5)) {
+       this.action = ACT_CHARGE;
+       this.think = this.th_charge;
+       return;
+     }
+     if ((this.control | ACT_FLEE) && findfear()) {
+       this.action = ACT_FLEE;
+       this.think = this.th_flee;
+       return;
+     }
+     if ((this.control | ACT_GUARD) && this.firingpoint) {
+       this.action = ACT_GUARD;
+       this.think = this.th_guard;
+       return;
+     }
+     if (this.control | ACT_FIGHT) {
+       this.action = ACT_FIGHT;
+       this.think = this.th_run;
+       return;
+       }
+     this.action = ACT_WAIT;
+     this.think = this.th_wait;
+     return;
+   }
+   if ((this.control | ACT_AVOID) && findcover()) {
+     this.action = ACT_AVOID;
+     this.think = this.th_avoid;
+     return;
+   }
+   if ((this.control | ACT_CHARGE) && this.strength < 0.5) {
+     this.action = ACT_CHARGE;
+     this.think = this.th_charge;
+     return;
+   }
+   if ((this.control | ACT_FLEE) && findfear()) {
+     this.action = ACT_FLEE;
+     this.think = this.th_flee;
+     return;
+   }
+   if ((this.control & ACT_GUARD) && this.firingpoint) {
+     this.action = ACT_GUARD;
+     this.think = this.th_guard;
+     return;
+   }
+   if (this.control | ACT_FIGHT) {
+     this.action = ACT_FIGHT;
+     this.think = this.th_run;
+     return;
+     }
+   this.action = ACT_WAIT;
+   this.think = this.th_wait;
+ };
 
 //nonvirtual void() StateMachineGo = {};
 nonvirtual void() findstuff = {
@@ -305,7 +565,7 @@ nonvirtual void() findstuff = {
         }
     } else{ //real
       //dprint("real found\n");
-      if (CheckLine(ent)) { //else ignore
+      if (CheckLine(ent)) { //else check path
         if (CheckAlive(ent)) { //see prop
           if (ent.team != this.team) { //ignore
             //dprint("potential enemy found\n");
@@ -319,6 +579,10 @@ nonvirtual void() findstuff = {
           }
       } else {
          addprop(ent);
+        }
+      } else { //always see path entities
+        if (ent.flags & FL_COVER) {
+          addprop(ent);
         }
       }
     }

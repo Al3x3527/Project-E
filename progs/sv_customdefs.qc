@@ -100,9 +100,9 @@ float SPAWNED_ACTIVE = 8;
 .vector lastseen; //where the prop was last perceived.
 .float scary; //last scary factor.
 
-enum int
+enumflags int //have to be flags for control
 {
-	ACT_NONE,
+	ACT_NONE = 0,
 		ACT_SLEEP,
 		ACT_FIGHT,
 		ACT_FLEE,
@@ -117,7 +117,7 @@ enum int
 		ACT_AVOID
 };
 
-enum int
+enumflags int
 {
 	STA_NONE,
 		STA_IDLE,
@@ -170,6 +170,7 @@ float searchtime;
 .void() equip;
 .void() weapon_use;
 .void() drops;
+.float wait;
 
 void() sub_chainmoved = {
 	entity parent = self.owner;
@@ -195,7 +196,9 @@ void() sub_changeyaw = {
 	self = parent;
 };
 
-const float FL_SEARCHPOINT = 4096; //4096, 8192 not taken
+const float FL_SEARCHPOINT = 4096;
+const float FL_COVER = 8192;
+const float FL_VEHICLE = 32768;
 //make enumflags class squadstyle or macros
 //pick one
 const float FL_NOSQUAD = 1;
@@ -279,3 +282,8 @@ const int SEARCH_SCRIPTED = 3;
 .void() th_flee;
 .void() th_converse;
 .void() th_fooled;
+//separate behaviors from animations
+.void() th_wait; //ready for combat, may be defending
+.void() th_guard;
+.void() th_search;
+.void() th_cover; //what to do behind cover

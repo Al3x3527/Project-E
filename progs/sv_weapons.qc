@@ -33,7 +33,7 @@ void() rocket_touch = {
 void(entity ent, string path) weapon_sound = {
 sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
 //alert !DIST_FAR >> create  searchpoint (memory waypoint) can find without line
-searchpoint_c point = spawn(searchpoint_c);
+path_search point = spawn(path_search);
 setorigin(point, ent.origin);
 point.weapon = ent.weapon;
 point.enemy = ent;
