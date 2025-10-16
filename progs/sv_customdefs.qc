@@ -196,9 +196,11 @@ void() sub_changeyaw = {
 	self = parent;
 };
 
+const float FL_CORNER = 2048; //FL_WATERJUMP not meaningful
 const float FL_SEARCHPOINT = 4096;
 const float FL_COVER = 8192;
 const float FL_VEHICLE = 32768;
+
 //make enumflags class squadstyle or macros
 //pick one
 const float FL_NOSQUAD = 1;

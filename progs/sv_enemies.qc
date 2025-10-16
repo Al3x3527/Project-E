@@ -137,6 +137,9 @@ class firingpoint_c : entity {
     if (other.goalentity != this) return;
     other.goalentity = world;
   };
+  virtual void() think = {
+    remove(this); //for cover points
+  };
   void() firingpoint_c = {
     touch = point_touch;
     solid = SOLID_TRIGGER;
@@ -210,12 +213,16 @@ class path_cover : entity {
     if (other.goalentity != this) return;
     other.think = other.th_cover;
   };
+  virtual void() think = {
+    remove(this); //for temporary NOTE: use firingpoint
+  };
   void() path_cover = {
     flags = FL_COVER;
   };
 };
 
 class path_corner : entity {
+  //NOTE view_ofs = fwd, r, tp firing point org
   virtual void() touch = {
     if (other.goalentity != this) return;
     if (this.target != FALSE) {
@@ -281,6 +288,43 @@ void(int i, tracked_c shift) shiftpropfields = {
   shift.newfield = shift.oldfield;
 };
 
+entity(int i, tracked_c test) testpropcover = {
+  entity e = self.enemy;
+  field_t checkfield = entityfieldref( findentityfield (strcat (
+                                                                "tracked_c::__mprop",
+                                                                itos (i))));
+  entity p = test.checkfield;
+  vector vec;
+  firingpoint_c temp;
+  if (p.flags & FL_CORNER) {
+    if !(p.view_ofs) {
+        return 0;
+      }
+    //test ofs_x
+    vec = p.origin + p.view_ofs_x * '1 0 0';
+    traceline(vec, e.origin, 1 ,self);
+    if (trace_fraction == 1) {
+    //test ofs_y
+      vec = p.origin + p.view_ofs_y * '0 1 0';
+      traceline(vec, e.origin, 1, self);
+      if (trace_fraction == 1) return (FALSE);
+    }
+  }
+  else {
+    if (p.flags | FL_COVER) return (FALSE);
+    vec = p.origin - e.origin;
+    vector offset = p.maxs - p.mins;
+    vec += normalize(vec) * (offset * vec) * 1.1;
+    traceline(vec, e.origin, 1, self);
+    if (trace_fraction == 1) return (FALSE);
+  }
+  temp = spawn(firingpoint_c);
+  setorigin(temp, vec);
+  temp.nextthink = time + 15;
+  temp.flags = FL_COVER;
+  return (temp);
+}
+
 class biped_class : entity { //biped spawn point definition
   enemylist_c enemies; //4
   tracked_c tracked; //20
@@ -294,12 +338,11 @@ class biped_class : entity { //biped spawn point definition
   //objective_c objective;
   //string targetcmdlist;
   //cmdlist_c commandlist;
-  firingpoint_c firingpoint;
+  entity firingpoint; //NOTE: not guaranteed firingpoint_c
   string firinggroup;
 
 nonvirtual float (entity ent) addprop = {
   int i = 0;
-  entity test;
   //check for open field
   while (i < 20) {
     if (testpropref(i, this.tracked, ent)) return(1);
@@ -354,12 +397,27 @@ nonvirtual float (entity ent) addenemy = {
 };
 
 nonvirtual float () findfear = {
-  //TODO decide if this should flee
-  return(0);
+  entity ent = this.enemy;
+  vector sdanger = this.scary * '1 0 0' + this.movechain.scary * '0 1 0';
+  vector odanger = ent.scary * '1 0 0' + ent.movechain.scary * '0 1 0';
+  float fear = vlen(odanger - sdanger);
+
+  return(fear > 0);
 };
 
  nonvirtual float () findcover = {
-   //TODO test FL_COVER props against enemy, create path_cover
+   // test FL_COVER props against enemy, create firingpoint_c
+   entity coverpoint;
+   tracked_c test = this.tracked;
+   int i = 0;
+   while (i < 20) {
+     coverpoint = testpropcover(i, test);
+     if (coverpoint) {
+       this.goalentity = coverpoint;
+       return(1);
+     }
+     i++;
+   }
    return(0);
  };
 
