@@ -1,16 +1,16 @@
 //FGD class MACROS
 void(string text) fgdprint = {}; //exposes string in compiled program.
 //void() spawnEverything = {}; //can this be done procedurally?
-#define FGDbase(flags) fgdprint("@fgd @baseclass = base("#flags")");
+#define FGDbase(flags) fgdprint("@fgd \n@baseclass = base("#flags")");
 //#define FGDfield(field, desc)
 #define CLASSDEF(CLASSbase, CLASSname, CLASSdesc)\
 class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = #CLASSname;\
 netname = #CLASSdesc;\
-fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"placed on map. [");
+fgdprint("@fgd \n@PointClass base("#CLASSbase") "#CLASSname" :\n"#CLASSdesc"placed on map.\n [");
 
-#define ENDCLASS fgdprint("@fgd ]");};}
+#define ENDCLASS fgdprint("@fgd \n]");};}
 
 #define WEAPONEQUIP(aclass) {\
  aclass new = spawn(aclass);\
@@ -35,7 +35,7 @@ fgdprint("@fgd @Pointclass base("#CLASSbase") @fgd = "#CLASSname" : "#CLASSdesc"
 }
 
 #define WEAPONMODELS(wmdl, vmdl)\
-fgdprint("@fgd model({ path :"gamemodels wmdl" })");\
+fgdprint("@fgd\n model({ path :"gamemodels wmdl" })");\
 precache_model(gamemodels wmdl);\
 precache_model(gamemodels vmdl);\
 setmodel(this, gamemodels wmdl);\
@@ -47,20 +47,20 @@ this.weaponmodel = gamemodels vmdl
   virtual void() attack = {WPname ## _attack();};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
-  fgdprint("@fgd @Pointclass base(weapon_class) @fgd = "#WPname" : "#WPdesc" placed on map. [");\
+  fgdprint("@fgd \n@PointClass base(weapon_class) = "#WPname" :\n"#WPdesc" placed on map.\n [");\
   classname = #WPname;\
   netname = #WPdesc;\
   RUNTIME(WPname ## _runtime)
 
 #define FLOAT(FLOATfield, FLOATfloat, FLOATdesc)\
 if (!this.FLOATfield) this.FLOATfield = FLOATfloat;\
-fgdprint("@fgd "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
+fgdprint("@fgd \n "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
 
 #define STARTINGAMMO(startingammo) FLOAT(currentammo, startingammo, "starting ammo")
 
 #define RESPAWNTIME(spawntime) FLOAT(respawntime, spawntime, "respawn time")
 
-#define COLOR(color) fgdprint("@fgd color("#color")")
+#define COLOR(color) fgdprint("@fgd\n color("#color")")
 
 #define MODELdefault(modelstring) {\
 precache_model(modelstring);\
@@ -70,13 +70,13 @@ if (!this.model) setmodel(this, modelstring);}
   runtime_t BPname ## _runtime;\
   class BPname : biped_class {\
   void() BPname = {\
-  fgdprint("@fgd @Pointclass base(biped_class) @fgd = "#BPname" : "#BPdesc" placed on map. [");\
+  fgdprint("@fgd \n@PointClass base(biped_class) = "#BPname" : "#BPdesc" placed on map.\n [");\
   classname = #BPname;\
   netname = #BPdesc;\
   RUNTIME(BPname ## _runtime)
 
 #define ENTMODEL(amodel)\
-  fgdprint("@fgd model({ path :"gamemodels amodel" })");\
+  fgdprint("@fgd\n model({ path :"gamemodels amodel" })");\
   precache_model(gamemodels amodel);\
   setmodel(this, gamemodels amodel)
 
