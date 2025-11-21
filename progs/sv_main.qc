@@ -4,6 +4,7 @@
 
 void() main =
 {
+
 };
 
 //called for each frame that QC runs
@@ -20,4 +21,3 @@ void() worldspawn =
 void() SpectatorConnect =
 {	
 };
-

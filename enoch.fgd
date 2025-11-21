@@ -1,41 +1,51 @@
-@baseclass = cmdlist : command list designed in editor. [step(int) : command list step indexstep0(string) : target controller: up tp step7]
-@baseclass = base(Spawnflags Targetname)
- color()
- model({ path :mdls/cubeman.mdl })
- color(206 18 18)
- model({ path :mdls/w_ad70.mdl })
- currentammo(float) : "starting ammo" : 150
- respawntime(float) : "respawn time" : 40
-@PointClass base(weapon_class) = weapon_plasmarifle :
-"plasma rifle" placed on map.
- [
- model({ path :mdls/w_plasma_rifle.mdl })
- currentammo(float) : "starting ammo" : 140
-]
-@PointClass base(weapon_class) = weapon_browning :
-"machine gun" placed on map.
- [
- model({ path :mdls/browning.mdl })
- currentammo(float) : "starting ammo" : 400
-@PointClass base(weapon_class) = weapon_cannon :
-"sentinel cannon" placed on map.
- [
- model({ path :mdls/qp_cannon.mdl })
- currentammo(float) : "starting ammo" : 10
-@PointClass base(weapon_class) = weapon_sniper :
-"sniper" placed on map.
- [
- model({ path :mdls/qp_m40a5.mdl })
- currentammo(float) : "starting ammo" : 40
-@PointClass base(weapon_class) = weapon_rocket :
-"rocket launcher" placed on map.
- [
- model({ path :mdls/qp_rocket_launcher.mdl })
-@PointClass base(weapon_class) = weapon_smg :
-"sentinel smg" placed on map.
- [
- model({ path :mdls/qp_sentinelsmg.mdl })
-@PointClass base(weapon_class) = weapon_spear :
-"sentinel spear" placed on map.
- [
- model({ path :mdls/qp_spear.mdl })
+
+@BaseClass = Spawnflags
+  [
+  spawnflags(Flags) =
+  [
+   256 : "Not on Easy" : 0
+   512 : "Not on Normal" : 0
+   1024 : "Not on Hard or Nightmare" : 0
+   2048 : "Not in Deathmatch" : 0
+   4096 : "Not in Coop" : 0
+   8192 : "Not in Single Player" : 0
+   32768 : "Not on Hard Only" : 0
+   65536 : "Not on Nightmare Only" : 0
+  ]
+  ]
+@BaseClass = Targetname
+  [
+  targetname(target_source) : "Name"
+  ]
+@PointClass = cmdlist : "command list designed in editor."
+  [
+  step(int) : "command list step index"
+  step0(string) : "target controller: up to step7"
+  ]
+@BaseClass base(Spawnflags, Targetname) color(255 0 0) = biped_class : "base biped class" [ ]
+@PointClass base(biped_class) model({ "path": "mdls/cubeman.mdl" }) = biped_man : "human enemyplaced on map." [ ]
+@BaseClass base(Spawnflags, Targetname) color(206 18 18) = weapon_class : "base weapon class" [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/w_ad70.mdl" }) = weapon_battlerifle : "battle rifle"
+  [
+  currentammo(float) : "starting ammo" : "150"
+  respawntime(float) : "respawn time" : "40"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/w_plasma_rifle.mdl" }) = weapon_plasmarifle : "plasma rifle placed on map."
+  [
+  currentammo(float) : "starting ammo" : "140"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/browning.mdl" }) = weapon_browning : "machine gun placed on map."
+  [
+  currentammo(float) : "starting ammo" : "400"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_cannon.mdl" }) = weapon_cannon : "sentinel cannon placed on map."
+  [
+  currentammo(float) : "starting ammo" : "10"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_m40a5.mdl" }) = weapon_sniper : "sniper placed on map."
+  [
+  currentammo(float) : "starting ammo" : "40"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_rocket_launcher.mdl" }) = weapon_rocket : "rocket launcher placed on map." [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_sentinelsmg.mdl" }) = weapon_smg : "sentinel smg placed on map." [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_spear.mdl" }) = weapon_spear : "sentinel spear placed on map." [ ]

@@ -20,7 +20,9 @@ $frame crouch1 crouch2
 
 
 //BPCLASS(biped_man, "human biped");
+RTINIT(biped_man);
 class biped_man : biped_class {
+
 nonvirtual void() man_stand1 = [$key9, man_stand1] {ai_idle();};
 
 nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
@@ -97,6 +99,7 @@ void() man_flee1 = {};
 void() man_converse1 = {};
 
  void() biped_man = {
+   BPBODY(biped_man, "human enemy");
    ENTMODEL("cubeman.mdl");
    setsize(this, '-16 -16 16', '16 16 160');
    health = 80;

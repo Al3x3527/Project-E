@@ -177,7 +177,7 @@ virtual void() projectile = {
   };
 
 void() weapon_class = {
-FGDbase(Spawnflags Targetname);
+FGDbase("Spawnflags, Targetname", weapon_class, "base weapon class");
 COLOR(206 18 18);
 //if (SUB_Inhibit()) return;
 think = IsConsumable;
@@ -193,6 +193,7 @@ class weapon_battlerifle : weapon_class {
 virtual void() attack = {hitscan();};
 virtual void() equip = WEAPONEQUIP(weapon_battlerifle);
 void () weapon_battlerifle = {
+  fgdprint("@fgd\n@PointClass base(weapon_class) = weapon_battlerifle : \"battle rifle\" [");
   classname = "weapon_battlerifle";
 WEAPONMODELS("w_ad70.mdl", "v_ad70.mdl");
 FLOAT(currentammo, 150, "starting ammo");

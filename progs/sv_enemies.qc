@@ -100,10 +100,11 @@ virtual void() cmduse = {
  //prop list?
 
   void() cmdlist_c = {
-    fgdprint("@fgd @baseclass = cmdlist : command list designed in editor. [");
-    fgdprint("@fgd step(int) : command list step index");
-    fgdprint("@fgd step0(string) : target controller: up tp step7");
-    fgdprint("@fgd ]");
+    fgdprint("@fgd \n@PointClass = cmdlist : \"command list designed in editor.\"\n [");
+    fgdprint("@fgd \nstep(int) : \"command list step index\"");
+    fgdprint("@fgd \nstep0(string) : \"target controller: up to step7\"");
+    //fgdprint("@fgd \nthis is a third statement");
+    //fgdprint("@fgd \n ]");
     dprint(this.targetname);dprint(" command list spawn\n");
     dprint(step0); dprint(" step0\n");
     step = refzero = findentityfield("step0");
@@ -790,8 +791,8 @@ nonvirtual void() RespawnBipedTry = {
 
 
  void() biped_class = {
-    FGDbase(Spawnflags Targetname);
-    COLOR();
+    FGDbase("Spawnflags, Targetname", biped_class, "base biped class");
+    COLOR(255 0 0);
     think = RespawnBipedDo;
     //dprint("biped spawn function\n");
     nextthink = time + 0.3;

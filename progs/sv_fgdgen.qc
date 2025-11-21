@@ -1,16 +1,22 @@
 //FGD class MACROS
 void(string text) fgdprint = {}; //exposes string in compiled program.
 //void() spawnEverything = {}; //can this be done procedurally?
-#define FGDbase(flags) fgdprint("@fgd \n@baseclass = base("#flags")");
+#define FGDbase(flags, BASEname, BASEdesc) fgdprint("@fgd \n@BaseClass base("flags") = "#BASEname" : \""BASEdesc"\"\n [");
 //#define FGDfield(field, desc)
 #define CLASSDEF(CLASSbase, CLASSname, CLASSdesc)\
 class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = #CLASSname;\
 netname = #CLASSdesc;\
-fgdprint("@fgd \n@PointClass base("#CLASSbase") "#CLASSname" :\n"#CLASSdesc"placed on map.\n [");
+fgdprint("@fgd \n@PointClass base("#CLASSbase") "#CLASSname" : \""CLASSdesc"placed on map\"\n [");
 
-#define ENDCLASS fgdprint("@fgd \n]");};}
+#define ENDCLASS };}
+
+#define FLAGS(FLAGfield, FLAGbits, FLAGdesc)\
+  fgdprint("@fgd"#FLAGfield"(Flags) =\n"FLAGdesc);
+  //dont set flags with this
+
+#define FGDflag(FLAGname) fgdprint("@fgd \n@BaseClass = "#FLAGname" [")
 
 #define WEAPONEQUIP(aclass) {\
  aclass new = spawn(aclass);\
@@ -35,7 +41,7 @@ fgdprint("@fgd \n@PointClass base("#CLASSbase") "#CLASSname" :\n"#CLASSdesc"plac
 }
 
 #define WEAPONMODELS(wmdl, vmdl)\
-fgdprint("@fgd\n model({ path :"gamemodels wmdl" })");\
+fgdprint("@fgd\n model({ \"path\": \""gamemodels wmdl"\" })");\
 precache_model(gamemodels wmdl);\
 precache_model(gamemodels vmdl);\
 setmodel(this, gamemodels wmdl);\
@@ -47,20 +53,22 @@ this.weaponmodel = gamemodels vmdl
   virtual void() attack = {WPname ## _attack();};\
   virtual void() equip = WEAPONEQUIP(WPname);\
   void() WPname = {\
-  fgdprint("@fgd \n@PointClass base(weapon_class) = "#WPname" :\n"#WPdesc" placed on map.\n [");\
+  fgdprint("@fgd \n@PointClass base(weapon_class) = "#WPname" : \""WPdesc" placed on map.\"\n [");\
   classname = #WPname;\
-  netname = #WPdesc;\
+  netname = WPdesc;\
   RUNTIME(WPname ## _runtime)
 
 #define FLOAT(FLOATfield, FLOATfloat, FLOATdesc)\
 if (!this.FLOATfield) this.FLOATfield = FLOATfloat;\
-fgdprint("@fgd \n "#FLOATfield"(float) : "#FLOATdesc" : "#FLOATfloat)
+fgdprint("@fgd \n"#FLOATfield"(float) : "#FLOATdesc" : \""#FLOATfloat"\"")
 
 #define STARTINGAMMO(startingammo) FLOAT(currentammo, startingammo, "starting ammo")
 
 #define RESPAWNTIME(spawntime) FLOAT(respawntime, spawntime, "respawn time")
 
 #define COLOR(color) fgdprint("@fgd\n color("#color")")
+
+#define STRING(field, type, text) fgdprint("@fgd\n "#field"("#type") : "#text)
 
 #define MODELdefault(modelstring) {\
 precache_model(modelstring);\
@@ -70,13 +78,20 @@ if (!this.model) setmodel(this, modelstring);}
   runtime_t BPname ## _runtime;\
   class BPname : biped_class {\
   void() BPname = {\
-  fgdprint("@fgd \n@PointClass base(biped_class) = "#BPname" : "#BPdesc" placed on map.\n [");\
+  fgdprint("@fgd \n@PointClass base(biped_class) = "#BPname" : \""BPdesc"placed on map.\"\n [");\
   classname = #BPname;\
-  netname = #BPdesc;\
+  netname = BPdesc;\
+  RUNTIME(BPname ## _runtime)
+
+#define RTINIT(RTname) runtime_t RTname ## _runtime
+#define BPBODY(BPname, BPdesc)\
+  fgdprint("@fgd \n@PointClass base(biped_class) = "#BPname" : \""BPdesc"placed on map.\"\n [");\
+  classname = #BPname;\
+  netname = BPdesc;\
   RUNTIME(BPname ## _runtime)
 
 #define ENTMODEL(amodel)\
-  fgdprint("@fgd\n model({ path :"gamemodels amodel" })");\
+  fgdprint("@fgd\n model({ \"path\": \""gamemodels amodel"\" })");\
   precache_model(gamemodels amodel);\
   setmodel(this, gamemodels amodel)
 
@@ -107,3 +122,10 @@ if (!this.model) setmodel(this, modelstring);}
   th_alert = nick ## _alert1;\
   th_flee = nick ## _flee1;\
   th_converse = nick ## _converse1
+
+void() fgdinit = {
+  FGDflag(Spawnflags);
+  FLAGS(spawnflags, 0, "[\n 256 : \"Not on Easy\" : 0\n 512 : \"Not on Normal\" : 0\n 1024 : \"Not on Hard or Nightmare\" : 0\n 2048 : \"Not in Deathmatch\" : 0\n 4096 : \"Not in Coop\" : 0\n 8192 : \"Not in Single Player\" : 0\n 32768 : \"Not on Hard Only\" : 0\n 65536 : \"Not on Nightmare Only\" : 0\n]");
+  FGDflag(Targetname);
+  STRING(targetname, target_source, "Name");
+};
