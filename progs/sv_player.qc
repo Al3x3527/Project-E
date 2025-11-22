@@ -105,9 +105,7 @@ void() SetChangeParms =
 {
 };
 
-void() info_player_start =
-{
-};
+INFO(info_player_start, "initial spawn point");
 
 void(float elapsedtime) SV_PausedTic =
 {

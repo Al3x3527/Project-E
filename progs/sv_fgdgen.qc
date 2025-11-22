@@ -123,6 +123,11 @@ if (!this.model) setmodel(this, modelstring);}
   th_flee = nick ## _flee1;\
   th_converse = nick ## _converse1
 
+#define INFO(INFOname, INFOdesc)\
+  void() INFOname = {\
+    fgdprint("@fgd\n @PointClass color(0 255 0) = "#INFOname" : \""INFOdesc"\" [");  \
+  }
+
 void() fgdinit = {
   FGDflag(Spawnflags);
   FLAGS(spawnflags, 0, "[\n 256 : \"Not on Easy\" : 0\n 512 : \"Not on Normal\" : 0\n 1024 : \"Not on Hard or Nightmare\" : 0\n 2048 : \"Not in Deathmatch\" : 0\n 4096 : \"Not in Coop\" : 0\n 8192 : \"Not in Single Player\" : 0\n 32768 : \"Not on Hard Only\" : 0\n 65536 : \"Not on Nightmare Only\" : 0\n]");
