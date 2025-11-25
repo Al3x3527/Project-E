@@ -17,14 +17,74 @@
   [
   targetname(target_source) : "Name"
   ]
+@BaseClass = Target
+  [
+  target(target_destination) : "Name"
+  ]
+@BaseClass = ModelLight [ ]
 @PointClass = cmdlist : "command list designed in editor."
   [
   step(int) : "command list step index"
   step0(string) : "target controller: up to step7"
   ]
 @BaseClass base(Spawnflags, Targetname) color(255 0 0) = biped_class : "base biped class" [ ]
+@PointClass base(Targetname, Spawnflags) color(0 255 0) = info_monster_spawnpoint : "monster respawn location" [ ]
+@PointClass base(Target) = spawner_controller : "spawner controller" [ ]
+@PointClass base(Spawnflags, Target, Targetname) color(0 0 255) = objective_class : "objective placed on map
+control(Flags) actions blocked when assigned to this objective
+style(Flags) action flags forced when assigned to this objective"
+  [
+  firinggroup(target_dest) : "Name"
+  control(Flags) =
+  [
+  1 : "ACT_SLEEP" : 0
+  2 : "ACT_FIGHT" : 0
+  4 : "ACT_FLEE" : 0
+  8 : "ACT_UNCOVER" : 0
+  16 : "ACT_GUARD" : 0
+  32 : "ACT_SEARCH" : 0
+  64 : "ACT_WAIT" : 0
+  128 : "ACT_VEHICLE" : 0
+  256 : "ACT_CHARGE" : 0
+  512 : "ACT_OBEY" : 0
+  1024 : "ACT_CONVERSE" : 0
+  2048 : "ACT_AVOID" : 0
+  ]
+  style(Flags) =
+  [
+  1 : "ACT_SLEEP" : 0
+  2 : "ACT_FIGHT" : 0
+  4 : "ACT_FLEE" : 0
+  8 : "ACT_UNCOVER" : 0
+  16 : "ACT_GUARD" : 1
+  32 : "ACT_SEARCH" : 0
+  64 : "ACT_WAIT" : 0
+  128 : "ACT_VEHICLE" : 0
+  256 : "ACT_CHARGE" : 0
+  512 : "ACT_OBEY" : 0
+  1024 : "ACT_CONVERSE" : 0
+  2048 : "ACT_AVOID" : 0
+  ]
+  type(Flags) =
+  [
+  2 : "defend this point" : 1
+  ]
+  popcap(float) : "max bipeds assigned to task if non-zero" : "0"
+  minstrength(float) : "min bipeds assigned for task to activate" : "0"
+  team(Flags) =
+  [
+  2 : "team NATO" : 0
+  4 : "team NAZI" : 0
+  8 : "team HYPE" : 0
+  16 : "team LIST" : 0
+  32 : "team HELL" : 0
+  ]
+  ]
 @PointClass base(biped_class) model({ "path": "mdls/cubeman.mdl" }) = biped_man : "human enemyplaced on map." [ ]
- @PointClass color(0 255 0) = info_player_start : "initial spawn point" [ ]
+@PointClass base(Spawnflags) color(0 255 0) = info_null : "info null" [ ]
+@SolidClass base(ModelLight) = func_illusionary : "non-solid brush" [ ]
+@SolidClass base(Target) = trigger_multiple : "trigger multiple brush" [ ]
+@PointClass base(Spawnflags) color(0 255 0) = info_player_start : "initial spawn point" [ ]
 @BaseClass base(Spawnflags, Targetname) color(206 18 18) = weapon_class : "base weapon class" [ ]
 @PointClass base(weapon_class) model({ "path": "mdls/w_ad70.mdl" }) = weapon_battlerifle : "battle rifle"
   [

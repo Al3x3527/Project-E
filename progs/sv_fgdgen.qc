@@ -8,12 +8,12 @@ class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = #CLASSname;\
 netname = #CLASSdesc;\
-fgdprint("@fgd \n@PointClass base("#CLASSbase") "#CLASSname" : \""CLASSdesc"placed on map\"\n [");
+fgdprint("@fgd \n@PointClass base("CLASSbase") = "#CLASSname" : \""CLASSdesc"placed on map\"\n [");
 
 #define ENDCLASS };}
 
 #define FLAGS(FLAGfield, FLAGbits, FLAGdesc)\
-  fgdprint("@fgd"#FLAGfield"(Flags) =\n"FLAGdesc);
+  fgdprint("@fgd\n"#FLAGfield"(Flags) =\n"FLAGdesc);
   //dont set flags with this
 
 #define FGDflag(FLAGname) fgdprint("@fgd \n@BaseClass = "#FLAGname" [")
@@ -123,14 +123,20 @@ if (!this.model) setmodel(this, modelstring);}
   th_flee = nick ## _flee1;\
   th_converse = nick ## _converse1
 
-#define INFO(INFOname, INFOdesc)\
+#define INFO(INFOname, INFObase, INFOdesc)\
   void() INFOname = {\
-    fgdprint("@fgd\n @PointClass color(0 255 0) = "#INFOname" : \""INFOdesc"\" [");  \
+    fgdprint("@fgd\n@PointClass base("INFObase") color(0 255 0) = "#INFOname" : \""INFOdesc"\" [");  \
   }
+
+#define FUNC(FUNCname, FUNCbase, FUNCdesc)\
+  fgdprint("@fgd\n@SolidClass base("FUNCbase") = "#FUNCname" : \""FUNCdesc"\" [")
 
 void() fgdinit = {
   FGDflag(Spawnflags);
   FLAGS(spawnflags, 0, "[\n 256 : \"Not on Easy\" : 0\n 512 : \"Not on Normal\" : 0\n 1024 : \"Not on Hard or Nightmare\" : 0\n 2048 : \"Not in Deathmatch\" : 0\n 4096 : \"Not in Coop\" : 0\n 8192 : \"Not in Single Player\" : 0\n 32768 : \"Not on Hard Only\" : 0\n 65536 : \"Not on Nightmare Only\" : 0\n]");
   FGDflag(Targetname);
   STRING(targetname, target_source, "Name");
+  FGDflag(Target);
+  STRING(target, target_destination, "Name");
+  FGDflag(ModelLight);
 };

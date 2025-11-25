@@ -799,6 +799,22 @@ nonvirtual void() RespawnBipedTry = {
   };
 };
 
+INFO(info_monster_spawnpoint, "Targetname, Spawnflags", "monster respawn location");
+
+//monster spawning controller
+//decides how many bipeds, of what class and attributes to spawn at spawnpoints
+//behavior dependent on wave number
+class spawner_controller : entity {
+  float squadtype;
+  //string target
+
+  void() spawner_controller = {
+    fgdprint("@fgd \n@PointClass base(Target) = spawner_controller : \"spawner controller\" [");
+
+  };
+};
+
+
 void() usecmdlist = {
     if (self.commandlist){
     other = self;
@@ -1147,6 +1163,55 @@ return(0);
    if !(this.style) this.style = ACT_GUARD; //default objective
    //this.style = 16384;
    dprint(ftos(this.style), "objective style set\n");
+  };
+};
+
+class objective_class : objective_c {
+  void() objective_class = {
+    fgdprint("@fgd\n@PointClass base(Spawnflags, Target, Targetname) color(0 0 255) = objective_class : \"objective placed on map"
+             "\ncontrol(Flags) actions blocked when assigned to this objective"
+             "\nstyle(Flags) action flags forced when assigned to this objective\" \n[");
+    STRING(firinggroup, target_dest, "Name");
+    FLAGS(control, 0, "[\n"
+          "1 : \"ACT_SLEEP\" : 0\n"
+          "2 : \"ACT_FIGHT\" : 0\n"
+          "4 : \"ACT_FLEE\" : 0\n"
+          "8 : \"ACT_UNCOVER\" : 0\n"
+          "16 : \"ACT_GUARD\" : 0\n"
+          "32 : \"ACT_SEARCH\" : 0\n"
+          "64 : \"ACT_WAIT\" : 0\n"
+          "128 : \"ACT_VEHICLE\" : 0\n"
+          "256 : \"ACT_CHARGE\" : 0\n"
+          "512 : \"ACT_OBEY\" : 0\n"
+          "1024 : \"ACT_CONVERSE\" : 0\n"
+          "2048 : \"ACT_AVOID\" : 0\n"
+          "]");
+    FLAGS(style, 0,  "[\n"
+          "1 : \"ACT_SLEEP\" : 0\n"
+          "2 : \"ACT_FIGHT\" : 0\n"
+          "4 : \"ACT_FLEE\" : 0\n"
+          "8 : \"ACT_UNCOVER\" : 0\n"
+          "16 : \"ACT_GUARD\" : 1\n"
+          "32 : \"ACT_SEARCH\" : 0\n"
+          "64 : \"ACT_WAIT\" : 0\n"
+          "128 : \"ACT_VEHICLE\" : 0\n"
+          "256 : \"ACT_CHARGE\" : 0\n"
+          "512 : \"ACT_OBEY\" : 0\n"
+          "1024 : \"ACT_CONVERSE\" : 0\n"
+          "2048 : \"ACT_AVOID\" : 0\n"
+          "]");
+    FLAGS(type, 0, "[\n"
+          "2 : \"defend this point\" : 1\n"
+          "]");
+    FLOAT(popcap, 0, "max bipeds assigned to task if non-zero");
+    FLOAT(minstrength, 0, "min bipeds assigned for task to activate");
+    FLAGS(team, 0, "[\n"
+          "2 : \"team NATO\" : 0\n"
+          "4 : \"team NAZI\" : 0\n"
+          "8 : \"team HYPE\" : 0\n"
+          "16 : \"team LIST\" : 0\n"
+          "32 : \"team HELL\" : 0\n"
+          "]")
   };
 };
 

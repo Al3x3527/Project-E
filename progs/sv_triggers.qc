@@ -9,14 +9,13 @@ void() trigger_example =
 };
 */
 
-void() info_null =
-{
-};
+INFO(info_null, "Spawnflags", "info null");
 
 void() func_illusionary =
 {
 	setmodel(self, self.model);
 	self.solid = SOLID_NOT;
+	FUNC(func_illusionary, "ModelLight", "non-solid brush");
 };
 
 void() UseTarget = {
@@ -33,6 +32,7 @@ void() trigger_multiple = {
 	self.modelindex = 0;
 	self.solid = SOLID_TRIGGER;
 	self.touch = UseTarget;
+	FUNC(trigger_multiple, "Target", "trigger multiple brush");
 };
 
 //trigger zone in enemies.qc
