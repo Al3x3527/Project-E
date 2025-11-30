@@ -27,9 +27,22 @@
   step(int) : "command list step index"
   step0(string) : "target controller: up to step7"
   ]
+@PointClass base(Targetname, Target, Spawnflags) color(0 255 0) = info_firingpoint : "firing point placed on map."
+  [
+  firinggroup(target_source) : "Name"
+  ]
 @BaseClass base(Spawnflags, Targetname) color(255 0 0) = biped_class : "base biped class" [ ]
 @PointClass base(Targetname, Spawnflags) color(0 255 0) = info_monster_spawnpoint : "monster respawn location" [ ]
 @PointClass base(Target) = spawner_controller : "spawner controller" [ ]
+@PointClass base(Target, Targetname, Spawnflags) color(0 255 0) = wave_class : "wave controller"
+  [
+  endcond(float) : "+kill count to end wave" : "0"
+  spawns(float) : "number of spawns allotted to wave" : "0"
+  spawndelay(float) : "time between waves/biped respawns" : "3"
+  runtime_max(float) : "local runtime max spawns" : "20"
+  runtime_min(float) : "local runtime min spawns" : "0"
+   spawncontrollers(target_destination) : "Name"
+  ]
 @PointClass base(Spawnflags, Target, Targetname) color(0 0 255) = objective_class : "objective placed on map
 control(Flags) actions blocked when assigned to this objective
 style(Flags) action flags forced when assigned to this objective"

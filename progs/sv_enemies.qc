@@ -148,6 +148,13 @@ class firingpoint_c : entity {
   };
 };
 
+class info_firingpoint : firingpoint_c {
+  void() info_firingpoint = {
+    INFO(info_firingpoint, "Targetname, Target, Spawnflags", "firing point placed on map.")
+    STRING(firinggroup, target_source, "Name");
+  };
+};
+
 class trigger_zone : entity {
   firingpoint_c point0;
   firingpoint_c point1;
@@ -958,6 +965,53 @@ biped_class (float f, squad_c squad) memberref = {
                                                                 "squad_c::__mmember",
                                                                 ftos (f))));
   return (squad.checkfield); }
+
+class wave_c : entity {
+  float endcond; //+kill count to end wave
+  float spawns; //number of spawns allotted to wave
+  float spawndelay; //time between waves/biped respawn time
+  //float estate activation state
+  float runtime_max; //local runtime max
+  float runtime_min; //local runtime min
+  string spawncontrollers; //target spawn controllers
+  //string target next wave
+  //string targetname find this wave
+  //float style controller style control
+  entity lastcontroller;
+
+  nonvirtual void() spawn_request = {
+    float remaining;
+    //loop controllers
+    //try next controller (remaining)
+    //lastcontroller = next
+  };
+
+  virtual void() think = {
+    //check end cond ()
+    //check spawns
+    //check rt min
+    //delay
+    //check rt max
+    //spawn_request()
+    //nextthink = time + 1
+  };
+
+    void() wave_c {
+      //create controller links - spawn point links on controller spawn
+  };
+};
+class wave_class : wave_c {
+  void() wave_class = {
+    INFO(wave_class, "Target, Targetname, Spawnflags", "wave controller");
+    FLOAT(endcond, 0, "+kill count to end wave");
+    FLOAT(spawns, 0, "number of spawns allotted to wave");
+    FLOAT(spawndelay, 3, "time between waves/biped respawns");
+    FLOAT(runtime_max, 20, "local runtime max spawns");
+    FLOAT(runtime_min, 0, "local runtime min spawns");
+    STRING(spawncontrollers, target_destination, "Name");
+
+  };
+};
 
 class objective_c : entity {
   string firinggroup; //to find zones
