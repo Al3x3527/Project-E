@@ -243,6 +243,9 @@ class path_corner : entity {
   };
   void() path_corner = {
     flags = FL_COVER;
+    FGDbase("Spawnflags", Path, "path point classes for biped navigation");
+    COLOR(0 255 221);
+    PATH(path_corner, "Path", "corner marker for biped navigation");
   };
 };
 

@@ -31,6 +31,8 @@
   [
   firinggroup(target_source) : "Name"
   ]
+@BaseClass base(Spawnflags) color(0 255 221) = Path : "path point classes for biped navigation" [ ]
+@PointClass base(Path) = path_corner : "corner marker for biped navigation" [ ]
 @BaseClass base(Spawnflags, Targetname) color(255 0 0) = biped_class : "base biped class" [ ]
 @PointClass base(Targetname, Spawnflags) color(0 255 0) = info_monster_spawnpoint : "monster respawn location" [ ]
 @PointClass base(Target) = spawner_controller : "spawner controller" [ ]
@@ -97,6 +99,12 @@ style(Flags) action flags forced when assigned to this objective"
 @PointClass base(Spawnflags) color(0 255 0) = info_null : "info null" [ ]
 @SolidClass base(ModelLight) = func_illusionary : "non-solid brush" [ ]
 @SolidClass base(Target) = trigger_multiple : "trigger multiple brush" [ ]
+@SolidClass base(Targetname) = func_door : "door brush" [ ]
+@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : "key item placed on map" [ ]
+@SolidClass base(Spawnflags) = func_breakable : "breakable brush"
+  [
+  health(float) : "starting health value" : "20"
+  ]
 @PointClass base(Spawnflags) color(0 255 0) = info_player_start : "initial spawn point" [ ]
 @BaseClass base(Spawnflags, Targetname) color(206 18 18) = weapon_class : "base weapon class" [ ]
 @PointClass base(weapon_class) model({ "path": "mdls/w_ad70.mdl" }) = weapon_battlerifle : "battle rifle"
