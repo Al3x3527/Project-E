@@ -150,7 +150,7 @@ class firingpoint_c : entity {
 
 class info_firingpoint : firingpoint_c {
   void() info_firingpoint = {
-    INFO(info_firingpoint, "Targetname, Target, Spawnflags", "firing point placed on map.")
+    INFO(info_firingpoint, "Spawnflags", "firing point placed on map.")
     STRING(firinggroup, target_source, "Name");
   };
 };
@@ -174,6 +174,7 @@ class trigger_zone : entity {
   //firingpoint_c point15;
   void() trigger_zone = {
     setmodel(this, this.model);
+    setorigin(this, this.origin + '0 0 16');
     modelindex = 0;
   };
 };
@@ -309,8 +310,26 @@ entity(int i, tracked_c test) testpropcover = {
   firingpoint_c temp;
   if (p.flags & FL_CORNER) {
     if !(p.view_ofs) {
-        return 0;
-      }
+        //no ofs test x
+        vec = p.origin + '0 16 0';
+        //test dir
+        traceline(vec, self.origin, 1, self);
+        if (traceline_fraction != 1) {
+          vec = p.origin + '0 -16 0';
+        }
+        //test line
+        traceline(vec, e.origin, 1, self);
+        if (traceline_fraction == 1) {
+          //test y
+          vec = p.origin + '16 0 0';
+          traceline(vec, self.origin, 1, self);
+          if (traceline_fraction != 1) {
+            vec = p.origin + '-16 0 0';
+          }
+          traceline (vec, e.origin, 1, self);
+        if (traceline_fraction == 1) return 0;
+        }
+      } else{
     //test ofs_x
     vec = p.origin + p.view_ofs_x * '1 0 0';
     traceline(vec, e.origin, 1 ,self);
@@ -328,7 +347,7 @@ entity(int i, tracked_c test) testpropcover = {
     vec += normalize(vec) * (offset * vec) * 1.1;
     traceline(vec, e.origin, 1, self);
     if (trace_fraction == 1) return (FALSE);
-  }
+  }}
   temp = spawn(firingpoint_c);
   setorigin(temp, vec);
   temp.nextthink = time + 15;
@@ -703,9 +722,20 @@ nonvirtual void(float dist) ai_charge = {
   }
   this.goalentity = this.enemy;
   if (this.enemy.flags != FL_SEARCHPOINT)
-    if (CheckLine(this.enemy)) this.status = STA_SIGHT;
-    else this.status = STA_UNCERTAIN;
-  //TODO: searchpoint at enemy.lastseen
+    if (CheckLine(this.enemy)) {
+      this.status = STA_SIGHT;
+      this.enemy.lastseen = this.enemy.origin; //new update lastseen
+      }
+    else {
+      this.status = STA_UNCERTAIN;
+      //searchpoint at enemy.lastseen
+      entity old = this.enemy;
+      path_search new = spawn(path_search);
+      this.enemy = new;
+      new.lastseen = old.lastseen;
+      setorigin(new, old.lastseen);
+      new.enemy = old;
+      }
   this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
   sub_changeyaw();
   movetogoal(dist);
@@ -817,10 +847,24 @@ INFO(info_monster_spawnpoint, "Targetname, Spawnflags", "monster respawn locatio
 class spawner_controller : entity {
   float squadtype;
   //string target
+  //float style
+
+  nonvirtual float(float spawns) spawner_use = {
+    entity startingpoint = this.enemy; //last point
+    switch (this.style) {
+      case //squad type
+           //create squad_c
+           //from enemy next .enemy chain
+           //dont loop
+           //use spawns until no spawns or points
+           //spawn() weaker before stronger if(spawns < x) style = y
+    }
+    return(spawns);
+  };
 
   void() spawner_controller = {
     fgdprint("@fgd \n@PointClass base(Target) = spawner_controller : \"spawner controller\" [");
-
+    FLOAT(style, 0, "squad class style");
   };
 };
 
