@@ -314,20 +314,20 @@ entity(int i, tracked_c test) testpropcover = {
         vec = p.origin + '0 16 0';
         //test dir
         traceline(vec, self.origin, 1, self);
-        if (traceline_fraction != 1) {
+        if (trace_fraction != 1) {
           vec = p.origin + '0 -16 0';
         }
         //test line
         traceline(vec, e.origin, 1, self);
-        if (traceline_fraction == 1) {
+        if (trace_fraction == 1) {
           //test y
           vec = p.origin + '16 0 0';
           traceline(vec, self.origin, 1, self);
-          if (traceline_fraction != 1) {
+          if (trace_fraction != 1) {
             vec = p.origin + '-16 0 0';
           }
           traceline (vec, e.origin, 1, self);
-        if (traceline_fraction == 1) return 0;
+        if (trace_fraction == 1) return 0;
         }
       } else{
     //test ofs_x
@@ -339,6 +339,7 @@ entity(int i, tracked_c test) testpropcover = {
       traceline(vec, e.origin, 1, self);
       if (trace_fraction == 1) return (FALSE);
     }
+    }
   }
   else {
     if (p.flags | FL_COVER) return (FALSE);
@@ -347,7 +348,7 @@ entity(int i, tracked_c test) testpropcover = {
     vec += normalize(vec) * (offset * vec) * 1.1;
     traceline(vec, e.origin, 1, self);
     if (trace_fraction == 1) return (FALSE);
-  }}
+  }
   temp = spawn(firingpoint_c);
   setorigin(temp, vec);
   temp.nextthink = time + 15;
@@ -849,25 +850,11 @@ class spawner_controller : entity {
   //string target
   //float style
 
-  nonvirtual float(float spawns) spawner_use = {
-    entity startingpoint = this.enemy; //last point
-    switch (this.style) {
-      case //squad type
-           //create squad_c
-           //from enemy next .enemy chain
-           //dont loop
-           //use spawns until no spawns or points
-           //spawn() weaker before stronger if(spawns < x) style = y
-    }
-    return(spawns);
-  };
-
   void() spawner_controller = {
     fgdprint("@fgd \n@PointClass base(Target) = spawner_controller : \"spawner controller\" [");
     FLOAT(style, 0, "squad class style");
   };
 };
-
 
 void() usecmdlist = {
     if (self.commandlist){

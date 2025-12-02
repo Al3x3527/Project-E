@@ -218,25 +218,28 @@ const float DRA_HEAVY = 1024;
 const float DRA_ELITE = 2048;
 const float FRO_GRUNT = 4096;
 const float FRO_HEAVY = 8192;
-const float FRO_ELITE;
-const float WIG_ULTRA;
-const float FPV_GRUNT;
-const float FPV_HEAVY;
-const float FPV_ELITE;
-const float FPV_ULTRA;
-const float MAN_PILOT;
-const float PAN_PILOT;
-const float DRA_PILOT;
-const float FRO_PILOT;
-const float ZOM_GRUNT;
-const float ZOM_HEAVY;
-const float ZOM_ELITE;
-const float ZOM_ULTRA;
-const float SEN_GRUNT;
-const float SEN_HEAVY;
+const float FRO_ELITE = 2^14;
+const float WIG_ULTRA = 2^15;
+const float FPV_GRUNT = 2^16; //attack drone
+const float FPV_HEAVY = 2^17; //heavy weapons attack drone
+const float FPV_ELITE = 2^18; //player equal drone
+const float FPV_ULTRA = 2^19; //flying tank drone
+const float MAN_PILOT = 2^20;
+const float PAN_PILOT = 2^21;
+const float DRA_PILOT = 2^22;
+const float FRO_PILOT = 2^23;
+const float ZOM_GRUNT = 2^24;
+const float ZOM_HEAVY = 2^25;
+const float ZOM_ELITE = 2^26;
+const float ZOM_ULTRA = 2^27;
+const float SEN_GRUNT = 2^28;
+const float SEN_HEAVY = 2^29;
 const float SEN_ELITE = 2^30;
 //squad styles
 const float PAN_LIGHT = PAN_GRUNT + FRO_GRUNT + FRO_HEAVY;
+const float MAN_LIGHT = MAN_GRUNT;
+const float MAN_GUARD = MAN_GRUNT + MAN_HEAVY + FPV_GRUNT;
+const float MAN_KILL = MAN_HEAVY + MAN_ELITE + FPV_GRUNT + FPV_HEAVY; //no grunt fill heavy
 
 const float TEAM_NATO = 2;
 const float TEAM_NAZI = 4;
