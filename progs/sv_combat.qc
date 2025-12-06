@@ -111,3 +111,121 @@ void(entity new) switch_weapon = {
  sprint(self, 1, self.active_weapon.classname);
  sprint(self, 1, "!\n");
 }
+
+class firingpoint_c : entity {
+  nonvirtual void() point_touch = {
+    dprint("point touch\n");
+    if (other.goalentity != this) return;
+    other.goalentity = world;
+  };
+  virtual void() think = {
+    remove(this); //for cover points
+  };
+  void() firingpoint_c = {
+    touch = point_touch;
+    solid = SOLID_TRIGGER;
+    setsize(this, '-8 -8 0', '8 8 16');
+  };
+};
+
+class info_firingpoint : firingpoint_c {
+  void() info_firingpoint = {
+    INFO(info_firingpoint, "Spawnflags", "firing point placed on map.")
+    STRING(firinggroup, target_source, "Name");
+  };
+};
+
+class trigger_zone : entity {
+  firingpoint_c point0;
+  firingpoint_c point1;
+  firingpoint_c point2;
+  firingpoint_c point3;
+  firingpoint_c point4;
+  firingpoint_c point5;
+  firingpoint_c point6;
+  firingpoint_c point7;
+  //firingpoint_c point8;
+  //firingpoint_c point9;
+  //firingpoint_c point10;
+  //firingpoint_c point11;
+  //firingpoint_c point12;
+  //firingpoint_c point13;
+  //firingpoint_c point14;
+  //firingpoint_c point15;
+  void() trigger_zone = {
+    setmodel(this, this.model);
+    setorigin(this, this.origin + '0 0 16');
+    modelindex = 0;
+  };
+};
+
+entity (string name) findtarget = {
+  //string name = self.target;
+  return(find(world, targetname, name));};
+
+int (entity e) CheckDist = {
+  vector vec = e.origin - self.origin;
+  float len = vlen(vec);
+  if (len < 16) return(DIST_KREIG);
+  if (len < 64) return(DIST_NEAR);
+  if (len < 256) return(DIST_MED);
+  return(DIST_FAR);
+};
+
+class path_search : entity {
+  //style SEARCH_X
+  //weapon
+  //team
+  //origin
+  //enemy lookingfor
+  virtual void() think = {
+    if (this.style == SEARCH_SCRIPTED) return;
+    this.enemy = world;
+    remove(this);
+  };
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    this.enemy = world;
+    other.think = other.th_fooled;
+    other.goalentity = world;
+    remove(this);
+  };
+  void() path_search = {
+    nextthink = time + 15;
+    classname = "path_search";
+    flags = FL_SEARCHPOINT;
+  };
+};
+
+class path_cover : entity {
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    other.think = other.th_cover;
+  };
+  virtual void() think = {
+    remove(this); //for temporary NOTE: use firingpoint
+  };
+  void() path_cover = {
+    flags = FL_COVER;
+  };
+};
+
+class path_corner : entity {
+  //NOTE view_ofs = fwd, r, tp firing point org
+  virtual void() touch = {
+    if (other.goalentity != this) return;
+    if (this.target != FALSE) {
+      entity targ = findtarget(this.target);
+      if (targ) other.goalentity = targ;
+      return;
+    }
+    other.think = other.th_wait;
+    other.wait = this.wait;
+  };
+  void() path_corner = {
+    flags = FL_COVER;
+    FGDbase("Spawnflags", Path, "path point classes for biped navigation");
+    COLOR(0 255 221);
+    PATH(path_corner, "Path", "corner marker for biped navigation");
+  };
+};

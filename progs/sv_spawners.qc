@@ -2,9 +2,9 @@
     //self = spawner
     entity startingpoint = self.enemy; //last point
     entity test = startingpoint;
-    float flag;
+    float flag = 0;
     float i;
-    float newspawns;
+    float newspawns = 0;
     entity monster;
     float tstyle = self.style;
     while (spawns > 0) {
@@ -37,7 +37,7 @@
       }
       setorigin(monster, test.origin);
       monster.style = flag;
-      tstyle -= flag; //precision jank
+      tstyle -= flag; //NOTE float precision jank in |= over 23 bits
       newspawns ++;
       spawns --;
     }

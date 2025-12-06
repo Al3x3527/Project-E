@@ -98,9 +98,42 @@ void() man_alert1 = {};
 void() man_flee1 = {};
 void() man_converse1 = {};
 
+ nonvirtual void() style_grunt = {
+   setmodel(this, gamemodels "police.mdl"); //for demo
+   if (team == TEAM_NAZI) skin = 2;
+   else if (team == TEAM_ARMY) skin = 4;
+   //weapon - how did I make him spawn with one?
+   //respawnbipeddo >> virtualweapon() in sv_weapons.qc
+   weapon = WEAPON_BATTLERIFLE;
+ };
+
+ nonvirtual void() style_heavy = {
+   setmodel(this, gamemodels "police.mdl");
+   if (team == TEAM_NAZI) skin = 2;
+   else if (team == TEAM_ARMY) skin = 4;
+   weapon = WEAPON_ROCKET;
+ };
+
  void() biped_man = {
+  //assign to nosquad
+      squad_nosquad squad = spawn(squad_nosquad);
+      squad.member0 = this;
+      squad.style += this.style;
+      //register with unassigned_t
+      unassigned(squad);
+
+//choices MAN_GRUNT, MAN_HEAVY, MAN_ELITE
+    if !(style) style = MAN_GRUNT;
+    //ignoring precache for now
+    switch (style) {
+    case MAN_GRUNT : style_grunt(); break; //method, not unique function
+      //if (team == TEAM_NAZI);//setmodel(this, nohelmet); skin = 2; break;
+      //else if (team == TEAM_ARMY); //setmodel(this, helmet); skin = 4; break;
+    case MAN_HEAVY : style_heavy(); break;
+      }
    BPBODY(biped_man, "human enemy");
    ENTMODEL("cubeman.mdl");
+   ENTMODEL("police.mdl");
    setsize(this, '-16 -16 16', '16 16 160');
    health = 80;
    BPTHINK(man);
@@ -110,30 +143,4 @@ void() man_converse1 = {};
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
  };
-};
-
-//SQCLASS(man, "human biped spawnpoint");
-class spawn_man : spawnpoint_c {
-    virtual void() spawndo = {
-      biped_man man = spawn(biped_man);
-      setorigin(man, this.origin);
-      man.angles = this.angles;
-      man.weapon = this.weapon;
-      //assign to nosquad
-      squad_nosquad squad = spawn(squad_nosquad);
-      squad.member0 = man;
-      squad.style += this.style;
-      //register with unassigned_t
-      unassigned(squad);
-      //stylize biped
-
-    };
-  void() spawn_man = {
-    precache_model(gamemodels "cubeman.mdl");
-    //biped_man man = spawn(biped_man);
-    //man.squad = this;
-    //choices MAN_GRUNT, MAN_HEAVY, MAN_ELITE
-    if !(style) style = MAN_GRUNT;
-    //style = FL_SPAWNER; no style case multiple instances no squad
-  };
 };
