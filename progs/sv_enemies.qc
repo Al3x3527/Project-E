@@ -884,37 +884,80 @@ biped_class (float f, squad_c squad) memberref = {
                                                                 ftos (f))));
   return (squad.checkfield); }
 
+  void() spawn_request;
 class wave_c : entity {
-  float endcond; //+kill count to end wave
+  //float frags; kills to end wave
+  float endcond; //spawns + rt to end wave
   float spawns; //number of spawns allotted to wave
   float spawndelay; //time between waves/biped respawn time
   //float estate activation state
   float runtime_max; //local runtime max
   float runtime_min; //local runtime min
+  //float runtime_now; no local runtime?
   string spawncontrollers; //target spawn controllers
   //string target next wave
   //string targetname find this wave
+  //global monster runtime instead (respawning only)
   //float style controller style control
-  entity firstcontroller;
+  entity lastcontroller;
+  //float wait time to next use
 
-  virtual void() think = {
+  nonvirtual void() link_controllers = {
+    lastcontroller = findtarget("spawncontrollers");
+    if !(lastcontroller) return;
+    entity test = FALSE;
+    while(test != lastcontroller) {
+      if !(test) test = lastcontroller;
+      test.enemy = findmoretargets(test, "spawncontrollers");
+      if (test.enemy) test = test.enemy;
+      else break;
+    }
+  };
+
+  nonvirtual void() wave_end = {
+    if (this.enemy)
+      this.enemy.nextthink = time + 0.3;
+  };
+
+  nonvirtual void() calc_endcond = {
+    endcond = spawns - frags;
+  };
+
+  nonvirtual void() wave_think = {
+    if !(estate) return;
     //check end cond ()
-    //check spawns
+    if (endcond > (spawns + monsters_runtime.runtime_current)) wave_end; //keep thinking
+    //check spawns ???
     //check rt min
+    if !(monsters_runtime.runtime_current > runtime_min) spawn_request();
     //delay
-    //check rt max
-    //spawn_request()
-    //nextthink = time + 1
+    if (monsters_runtime.runtime_current < runtime_max)
+      if (time > wait) {
+        spawn_request();
+        wait = time + spawndelay;
+      }
+    if (spawns)
+      nextthink = time + 1;
+  };
+
+  nonvirtual void() wave_start = {
+    link_controllers();
+    calc_endcond();
+    estate = TRUE;
+    think = wave_think;
+    nextthink = time + 1;
   };
 
     void() wave_c {
+      think = wave_start;
+      //nextthink = time + 0.3;
       //create controller links - spawn point links on controller spawn
   };
 };
 class wave_class : wave_c {
   void() wave_class = {
     INFO(wave_class, "Target, Targetname, Spawnflags", "wave controller");
-    FLOAT(endcond, 0, "+kill count to end wave");
+    FLOAT(frags, 0, "+kill count to end wave");
     FLOAT(spawns, 0, "number of spawns allotted to wave");
     FLOAT(spawndelay, 3, "time between waves/biped respawns");
     FLOAT(runtime_max, 20, "local runtime max spawns");
@@ -926,23 +969,24 @@ class wave_class : wave_c {
 
 float(float remaining) spawner_use;
 
-  void() spawn_request = {
-    wave_c wave = self;
-    float remaining = wave.spawns;
-    entity first = wave.firstcontroller;
-    //loop controllers --assume linking set up
-    entity test = first;
-    while (remaining) {
-      if !(test) break;
-      self = test;
-      remaining = spawner_use(remaining);
-      //sv_spawners.qc 1
-      test = test.enemy;
-      if (test == first) break;
+void() spawn_request = {
+  wave_c wave = self;
+  float remaining = wave.spawns; //or another number
+  entity last = wave.lastcontroller;
+  //loop controllers --assume linking set up
+  if !(last){
+      wave.think = wave.wave_start;
+      return;
     }
-    wave.spawns = remaining;
-    self = wave;
-  };
+  self = last;
+  //one controller per think
+  remaining = spawner_use(remaining);
+  //wave.runtime_now += (wave.spawns - remaining); //update loc rt
+  wave.lastcontroller = last.enemy;
+  wave.spawns = remaining;
+  self = wave;
+  //self.nextthink = time + wave.delay; in wave.think
+};
 
 class objective_c : entity {
   string firinggroup; //to find zones

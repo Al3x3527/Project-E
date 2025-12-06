@@ -37,9 +37,11 @@
       }
       setorigin(monster, test.origin);
       monster.style = flag;
+      monster.flags += FL_MONSTER;
       tstyle -= flag; //NOTE float precision jank in |= over 23 bits
       newspawns ++;
       spawns --;
     }
+    monsters_runtime.runtime_current += newspawns;
     return(spawns);
   };

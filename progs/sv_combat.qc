@@ -1,5 +1,9 @@
 void() weapon_print = {dprint("weapon_use\n");}
 
+void() MonsterDie = {
+  if (monsters_runtime.runtime_current > 0) monsters_runtime.runtime_current -= 1;
+};
+
 void(entity targ, entity inflictor, entity attacker, float damage) TakeDamage = {
 //inflictor can = projectile
 if !(targ) return;
@@ -162,6 +166,8 @@ class trigger_zone : entity {
 entity (string name) findtarget = {
   //string name = self.target;
   return(find(world, targetname, name));};
+entity (entity start, string name) findmoretargets = {
+  return(find(start, targetname, name));};
 
 int (entity e) CheckDist = {
   vector vec = e.origin - self.origin;

@@ -146,6 +146,9 @@ typedef struct
 	class_runtime.runtime_current += 1;\
 	runtime_minimum = &class_runtime.runtime_minimum;\
 	runtime_maximum = &class_runtime.runtime_maximum
+
+runtime_t monsters_runtime;
+
 	//dprint(#class_runtime "runtime current");\
 	//dprint(ftos(*this.runtime_current));\
 	//dprint("\n")
@@ -171,6 +174,7 @@ float searchtime;
 .void() weapon_use;
 .void() drops;
 .float wait;
+.float estate;
 
 void() sub_chainmoved = {
 	entity parent = self.owner;
