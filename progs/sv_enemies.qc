@@ -914,6 +914,23 @@ class wave_c : entity {
     }
   };
 
+  nonvirtual void() wave_suspend;
+  nonvirtual void() wave_resume = {
+    entity test = this;
+    while (test.estate != TRUE) {
+      test.estate = TRUE;
+      test = test.enemy;
+      if !(test) return;
+    }
+    use = wave_suspend;
+  };
+
+  nonvirtual void() wave_suspend = {
+    estate = FALSE;
+    nextthink = time + 1;
+    use = wave_resume;
+  };
+
   nonvirtual void() wave_end = {
     if (this.enemy)
       this.enemy.nextthink = time + 0.3;
@@ -950,6 +967,7 @@ class wave_c : entity {
 
     void() wave_c {
       think = wave_start;
+      use = wave_suspend;
       //nextthink = time + 0.3;
       //create controller links - spawn point links on controller spawn
   };
@@ -1003,22 +1021,19 @@ class objective_c : entity {
   float minstrength; //self-imposed condition
   //cmdlist_c conditions; //targetname
   //float team
+  string wavetarget;
+  //enemy wave ent
 
   nonvirtual void() objectiveDo = {
     platoon_c plat = this.platoon;
     this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
     if !(squad) dprint("objDo with no squad!\n");
-    //else dprint("objDo squad found\n");
     if !(squad.member0) dprint("no members in squad!/n");
-    //else dprint(squad.member0.classname);
-    //dprint(squad.member1.classname); dprint("is member1\n");
-    //float ref = squad.refzero;
-    //float ref = squadmember0;
     float ref = 0;
-    //dprint(ftos(ref)); dprint(entityfieldname(ref));
     float maxref = ref + 8;
     float f = ref;
+    //TODO: clean up this squad-member stuff
     biped_class member;
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
@@ -1174,6 +1189,10 @@ return(0);
 
   virtual void() use = {
     dprint("objective use\n");
+    //first start waves
+    enemy = findtarget("wavetarget");
+    if !(enemy) return;
+    enemy.nextthink = time + 0.3;
     //make platoon
     platoon_c currentplatoon = this.platoon;
     if !(currentplatoon) this.platoon = currentplatoon = spawn(platoon_c);
@@ -1183,6 +1202,10 @@ return(0);
     //check population
     //assign style to platoon
     if (fillPlatoon()) objectiveDo();
+    else {
+      think = use;
+      nextthink = time + 1.4;
+    }
     //assign firing group to platoon
     //else cry about it
     //keep checking platoon state until inactive
