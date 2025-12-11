@@ -117,6 +117,8 @@ void(entity new) switch_weapon = {
 }
 
 class firingpoint_c : entity {
+  string firinggroup;
+
   nonvirtual void() point_touch = {
     dprint("point touch\n");
     if (other.goalentity != this) return;
@@ -129,13 +131,14 @@ class firingpoint_c : entity {
     touch = point_touch;
     solid = SOLID_TRIGGER;
     setsize(this, '-8 -8 0', '8 8 16');
+    firinggroup = targetname;
   };
 };
 
 class info_firingpoint : firingpoint_c {
   void() info_firingpoint = {
     INFO(info_firingpoint, "Spawnflags", "firing point placed on map.")
-    STRING(firinggroup, target_source, "Name");
+    STRING(targetname, target_source, "firing group");
   };
 };
 
@@ -160,6 +163,7 @@ class trigger_zone : entity {
     setmodel(this, this.model);
     setorigin(this, this.origin + '0 0 16');
     modelindex = 0;
+	FUNC(trigger_zone, "trigger_multiple", "trigger zone brush");
   };
 };
 
@@ -168,6 +172,12 @@ entity (string name) findtarget = {
   return(find(world, targetname, name));};
 entity (entity start, string name) findmoretargets = {
   return(find(start, targetname, name));};
+entity (string name) findcontroller = {
+  entity test = find(world, target, name);
+  if (self == test) { test = find(test, target, name); }
+  if (test.classname == test.classname) {dprint("err no controller\n"); return FALSE;}
+  return (test);
+};
 
 int (entity e) CheckDist = {
   vector vec = e.origin - self.origin;

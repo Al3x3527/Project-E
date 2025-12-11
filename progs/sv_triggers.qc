@@ -20,6 +20,7 @@ void() func_illusionary =
 
 void() UseTarget = {
 	entity use_ent = find(world, targetname, self.target);
+	if !(use_ent) return;
 	entity oself = self;
 	self = use_ent;
 	other = self;
@@ -35,7 +36,7 @@ void() trigger_multiple = {
 	FUNC(trigger_multiple, "Target", "trigger multiple brush");
 };
 
-//trigger zone in enemies.qc
+//trigger zone in combat.qc
 
 void() func_door = {
 	setmodel(self, self.model);

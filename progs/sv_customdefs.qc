@@ -88,6 +88,8 @@ void(entity removing) player_chain_remove =
 .int *runtime_current;
 .int *runtime_minimum;
 .int *runtime_maximum;
+.float runtime_min; //local to controllers
+.float runtime_max;
 float DONT_PLACE_AT_START = 1;
 float GAMETYPE_SPECIFIC = 2;
 float INHIBIT_RESPAWN = 4;
@@ -175,6 +177,8 @@ float searchtime;
 .void() drops;
 .float wait;
 .float estate;
+//.float style;
+.float control;
 
 void() sub_chainmoved = {
 	entity parent = self.owner;
@@ -222,23 +226,23 @@ const float DRA_HEAVY = 1024;
 const float DRA_ELITE = 2048;
 const float FRO_GRUNT = 4096;
 const float FRO_HEAVY = 8192;
-const float FRO_ELITE = 2^14;
-const float WIG_ULTRA = 2^15;
-const float FPV_GRUNT = 2^16; //attack drone
-const float FPV_HEAVY = 2^17; //heavy weapons attack drone
-const float FPV_ELITE = 2^18; //player equal drone
-const float FPV_ULTRA = 2^19; //flying tank drone
-const float MAN_PILOT = 2^20;
-const float PAN_PILOT = 2^21;
-const float DRA_PILOT = 2^22;
-const float FRO_PILOT = 2^23;
-const float ZOM_GRUNT = 2^24;
-const float ZOM_HEAVY = 2^25;
-const float ZOM_ELITE = 2^26;
-const float ZOM_ULTRA = 2^27;
-const float SEN_GRUNT = 2^28;
-const float SEN_HEAVY = 2^29;
-const float SEN_ELITE = 2^30;
+const float FRO_ELITE = pow(2, 14);
+const float WIG_ULTRA = pow(2, 15);
+const float FPV_GRUNT = pow(2, 16); //attack drone
+const float FPV_HEAVY = pow(2, 17); //heavy weapons attack drone
+const float FPV_ELITE = pow(2, 18); //player equal drone
+const float FPV_ULTRA = pow(2, 19); //flying tank drone
+const float MAN_PILOT = pow(2, 20);
+const float PAN_PILOT = pow(2, 21);
+const float DRA_PILOT = pow(2, 22);
+const float FRO_PILOT = pow(2, 23);
+const float ZOM_GRUNT = pow(2, 24);
+const float ZOM_HEAVY = pow(2, 25);
+const float ZOM_ELITE = pow(2, 26);
+const float ZOM_ULTRA = pow(2, 27);
+const float SEN_GRUNT = pow(2, 28);
+const float SEN_HEAVY = pow(2, 29);
+const float SEN_ELITE = pow(2, 30);
 //squad styles
 const float PAN_LIGHT = PAN_GRUNT + FRO_GRUNT + FRO_HEAVY;
 const float MAN_LIGHT = MAN_GRUNT;

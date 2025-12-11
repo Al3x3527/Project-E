@@ -7,16 +7,28 @@
     float newspawns = 0;
     entity monster;
     float tstyle = self.style;
+    dprint("spawner use\n");
+    if !(tstyle) {dprint(self.classname); dprint(" err no spawner style\n"); return(spawns);}
+    if !(self.enemy) {
+        test = startingpoint = self.enemy = find(world, targetname, self.target); }
     while (spawns > 0) {
+      dprint("spawner use do\n");
       monster = FALSE;
-      if !(test.enemy) break;
+      if !(test.enemy) { dprint("err link expected\n"); break;}
       test = test.enemy; //spawn point linking
       if (test == startingpoint) break;
       //we have our spawn point
       i = SEN_ELITE;
-      while (tstyle ^- i) i /= 2;
+      dprint(ftos(i)); dprint(" maximum flag\n");
+      while (tstyle < i) { //^-?
+        i /= 2;
+        if (i < 1) {
+          dprint(ftos(tstyle)); dprint(" err in tstyle bits\n");
+          break;
+        }
+      }
       if (i > 4) flag = i;
-      else if !(flag) break; //no style flags found
+      else if !(flag) { dprint(ftos(i)); dprint(" err no style flags\n"); break;} //no style flags found
       //we have our largest style flag
       switch (flag) { //choose a spawn class
       case MAN_GRUNT..MAN_HEAVY : monster = spawn(biped_man); break;
@@ -33,8 +45,9 @@
       case ZOM_ELITE : break;
       case ZOM_ULTRA : break;
       case SEN_GRUNT..SEN_ELITE : break;
-      default : break;
+      default : dprint("err default\n"); break;
       }
+      if !(monster) { dprint(ftos(flag)); dprint(" err no monster spawned\n"); return(spawns);}
       setorigin(monster, test.origin);
       monster.style = flag;
       monster.flags += FL_MONSTER;

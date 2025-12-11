@@ -735,7 +735,8 @@ class spawner_controller : entity {
   //float style
 
   void() spawner_controller = {
-    fgdprint("@fgd \n@PointClass base(Target) = spawner_controller : \"spawner controller\" [");
+    classname = "spawn controller";
+    fgdprint("@fgd \n@PointClass base(Target, Targetname) = spawner_controller : \"spawner controller\" [");
     FLOAT(style, 0, "squad class style");
   };
 };
@@ -887,14 +888,14 @@ biped_class (float f, squad_c squad) memberref = {
   void() spawn_request;
 class wave_c : entity {
   //float frags; kills to end wave
-  float endcond; //spawns + rt to end wave
-  float spawns; //number of spawns allotted to wave
-  float spawndelay; //time between waves/biped respawn time
+  //max_health float endcond; //spawns + rt to end wave
+  //health float spawns; //number of spawns allotted to wave
+  //respawntime float spawndelay; //time between waves/biped respawn time
   //float estate activation state
-  float runtime_max; //local runtime max
-  float runtime_min; //local runtime min
+  //float runtime_max; //local runtime max
+  //float runtime_min; //local runtime min
   //float runtime_now; no local runtime?
-  string spawncontrollers; //target spawn controllers
+  string spawncontrollers; //target spawn controllers (noise)
   //string target next wave
   //string targetname find this wave
   //global monster runtime instead (respawning only)
@@ -902,13 +903,33 @@ class wave_c : entity {
   entity lastcontroller;
   //float wait time to next use
 
+  nonvirtual void(entity controller) link_spawnpoints = {
+    entity start = findtarget(controller.target);
+    entity test = FALSE;
+    dprint("link spawnpoints\n");
+    if !(start) {dprint("err controller no spawnpoints\n"); return;}
+    while (test != start) {
+      if !(test) test = start;
+      test.enemy = findmoretargets(test, controller.target);
+      if !(test.enemy) break;
+      test = test.enemy;
+      dprint("spawnpoint linked\n");
+    }
+  };
+
   nonvirtual void() link_controllers = {
-    lastcontroller = findtarget("spawncontrollers");
-    if !(lastcontroller) return;
+    dprint("link controllers\n");
+    if !(style) dprint("err link controllers no style\n");
+    lastcontroller = findtarget(noise);
+    if !(lastcontroller) { dprint(spawncontrollers); dprint(" err no spawn controller\n"); return;}
+    else dprint(lastcontroller.classname); dprint(" spawn controller found\n");
     entity test = FALSE;
     while(test != lastcontroller) {
       if !(test) test = lastcontroller;
-      test.enemy = findmoretargets(test, "spawncontrollers");
+      test.enemy = findmoretargets(test, spawncontrollers);
+      test.style = style;
+      if !(test.style) dprint("err no style given\n");
+      link_spawnpoints(test);
       if (test.enemy) test = test.enemy;
       else break;
     }
@@ -916,34 +937,38 @@ class wave_c : entity {
 
   nonvirtual void() wave_suspend;
   nonvirtual void() wave_resume = {
+    dprint("wave resume\n");
     entity test = this;
     while (test.estate != TRUE) {
       test.estate = TRUE;
       test = test.enemy;
-      if !(test) return;
+      if !(test) {dprint("err expected enemy\n"); return;}
     }
     use = wave_suspend;
   };
 
   nonvirtual void() wave_suspend = {
+    dprint("wave suspend\n");
     estate = FALSE;
     nextthink = time + 1;
     use = wave_resume;
   };
 
   nonvirtual void() wave_end = {
+    dprint("wave end\n");
     if (this.enemy)
       this.enemy.nextthink = time + 0.3;
   };
 
   nonvirtual void() calc_endcond = {
-    endcond = spawns - frags;
+    max_health = health - frags;
   };
 
   nonvirtual void() wave_think = {
     if !(estate) return;
+    dprint("wave think do\n");
     //check end cond ()
-    if (endcond > (spawns + monsters_runtime.runtime_current)) wave_end; //keep thinking
+    if (max_health > (health + monsters_runtime.runtime_current)) wave_end(); //keep thinking
     //check spawns ???
     //check rt min
     if !(monsters_runtime.runtime_current > runtime_min) spawn_request();
@@ -951,13 +976,16 @@ class wave_c : entity {
     if (monsters_runtime.runtime_current < runtime_max)
       if (time > wait) {
         spawn_request();
-        wait = time + spawndelay;
+        wait = time + respawntime;
       }
-    if (spawns)
+    if (health)
       nextthink = time + 1;
   };
 
   nonvirtual void() wave_start = {
+    dprint("wave start\n");
+    setorigin(this, this.origin + '0 0 8');
+    if !(style) dprint("wave start no style\n");
     link_controllers();
     calc_endcond();
     estate = TRUE;
@@ -968,6 +996,7 @@ class wave_c : entity {
     void() wave_c {
       think = wave_start;
       use = wave_suspend;
+      spawncontrollers = noise;
       //nextthink = time + 0.3;
       //create controller links - spawn point links on controller spawn
   };
@@ -976,55 +1005,64 @@ class wave_class : wave_c {
   void() wave_class = {
     INFO(wave_class, "Target, Targetname, Spawnflags", "wave controller");
     FLOAT(frags, 0, "+kill count to end wave");
-    FLOAT(spawns, 0, "number of spawns allotted to wave");
-    FLOAT(spawndelay, 3, "time between waves/biped respawns");
+    FLOAT(health, 0, "number of spawns allotted to wave");
+    FLOAT(respawntime, 3, "time between waves/biped respawns");
     FLOAT(runtime_max, 20, "local runtime max spawns");
     FLOAT(runtime_min, 0, "local runtime min spawns");
-    STRING(spawncontrollers, target_destination, "Name");
-
+    STRING(noise, target_destination, "spawn controllers");
+    FLAGS(style, 8, "[\n"
+          "8 : \"MAN_GRUNT\" : 1\n"
+          "16 : \"MAN_HEAVY\" : 0\n"
+          "]");
   };
 };
 
 float(float remaining) spawner_use;
 
 void() spawn_request = {
+  dprint("spawn request\n");
   wave_c wave = self;
-  float remaining = wave.spawns; //or another number
+  float remaining = wave.health; //or another number
   entity last = wave.lastcontroller;
   //loop controllers --assume linking set up
   if !(last){
       wave.think = wave.wave_start;
+      dprint("err wave not started\n");
       return;
     }
   self = last;
+  dprint(self.classname); dprint(" spawner use\n");
   //one controller per think
   remaining = spawner_use(remaining);
   //wave.runtime_now += (wave.spawns - remaining); //update loc rt
-  wave.lastcontroller = last.enemy;
-  wave.spawns = remaining;
+  if (last.enemy)
+    wave.lastcontroller = last.enemy;
+  //else dprint("err expected controller chain\n");
+  wave.health = remaining;
   self = wave;
   //self.nextthink = time + wave.delay; in wave.think
 };
 
 class objective_c : entity {
-  string firinggroup; //to find zones
+  string firinggroup; //to find zones (noise)
   trigger_zone zone1;
   trigger_zone zone2;
   trigger_zone zone3;
   trigger_zone zone4;
-  float control; //block action flags
-  float style; //force action flags
-  float type;
-  float popcap; //max pop of all squads
-  float pop;
+  //float control; //block action flags
+  //float style; //force action flags
+  float type; //armortype
+  //max_health float popcap; //max pop of all squads
+  //health float pop;
   platoon_c platoon; //list of all squads
-  float minstrength; //self-imposed condition
+  //frags float minstrength; //self-imposed condition
   //cmdlist_c conditions; //targetname
   //float team
-  string wavetarget;
+  //target string wavetarget;
   //enemy wave ent
 
   nonvirtual void() objectiveDo = {
+    dprint("objectiveDo\n");
     platoon_c plat = this.platoon;
     this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
@@ -1091,16 +1129,18 @@ class objective_c : entity {
   };
 
   nonvirtual float() fillPlatoon = {
-  float popnow = this.pop;
-  float maxpop = this.popcap;
-  float minpop = this.minstrength;
+  float popnow = this.health;
+  float maxpop = this.max_health;
+  float minpop = this.frags;
   platoon_c plat = this.platoon;
+  dprint("fill platoon\n");
   //find squad not assigned type
   int i = 0;
   squad_c test;
   if !(plat.squad0){
       while (i < 20) {
         test = unassignedlist[i].squad0;
+        if !(test) break; //worldspawn no unassigned
         if !(test.population > (maxpop - popnow)) {
           if (test.style & FL_NOSQUAD){
             test.style -= FL_NOSQUAD;
@@ -1121,6 +1161,7 @@ class objective_c : entity {
   if !(plat.squad1){
       while (i < 20) {
         test = unassignedlist[i].squad0;
+        if !(test) break;
         if !(test.population > (maxpop - popnow)) {
           if (test.style & FL_NOSQUAD){
             test.style -= FL_NOSQUAD;
@@ -1141,6 +1182,7 @@ class objective_c : entity {
   if !(plat.squad2){
       while (i < 20) {
         test = unassignedlist[i].squad0;
+        if !(test) break;
         if !(test.population > (maxpop - popnow)) {
           if (test.style & FL_NOSQUAD){
             test.style -= FL_NOSQUAD;
@@ -1159,6 +1201,7 @@ class objective_c : entity {
   if !(plat.squad3){
       while (i < 20) {
         test = unassignedlist[i].squad0;
+        if !(test) break;
         if !(test.population > (maxpop - popnow)) {
           if (test.style & FL_NOSQUAD){
             test.style -= FL_NOSQUAD;
@@ -1184,14 +1227,15 @@ return (popnow > minpop);
   //check min and loop
   //if can't find check min
   //if < min return 0 else 1
+  dprint("min pop not met\n");
 return(0);
 };
 
   virtual void() use = {
     dprint("objective use\n");
     //first start waves
-    enemy = findtarget("wavetarget");
-    if !(enemy) return;
+    enemy = findtarget(target);
+    if !(enemy) {dprint("err no target wave\n"); return;}
     enemy.nextthink = time + 0.3;
     //make platoon
     platoon_c currentplatoon = this.platoon;
@@ -1213,6 +1257,8 @@ return(0);
 
   void() objective_c = {
    if !(this.style) this.style = ACT_GUARD; //default objective
+   type = armortype;
+   firinggroup = noise;
    //this.style = 16384;
    dprint(ftos(this.style), "objective style set\n");
   };
@@ -1223,7 +1269,7 @@ class objective_class : objective_c {
     fgdprint("@fgd\n@PointClass base(Spawnflags, Target, Targetname) color(0 0 255) = objective_class : \"objective placed on map"
              "\ncontrol(Flags) actions blocked when assigned to this objective"
              "\nstyle(Flags) action flags forced when assigned to this objective\" \n[");
-    STRING(firinggroup, target_dest, "Name");
+    STRING(noise, target_dest, "firinggroup");
     FLAGS(control, 0, "[\n"
           "1 : \"ACT_SLEEP\" : 0\n"
           "2 : \"ACT_FIGHT\" : 0\n"
@@ -1252,11 +1298,11 @@ class objective_class : objective_c {
           "1024 : \"ACT_CONVERSE\" : 0\n"
           "2048 : \"ACT_AVOID\" : 0\n"
           "]");
-    FLAGS(type, 0, "[\n"
+    FLAGS(armortype, 0, "[\n"
           "2 : \"defend this point\" : 1\n"
           "]");
-    FLOAT(popcap, 0, "max bipeds assigned to task if non-zero");
-    FLOAT(minstrength, 0, "min bipeds assigned for task to activate");
+    FLOAT(max_health, 0, "max bipeds assigned to task if non-zero");
+    FLOAT(frags, 0, "min bipeds assigned for task to activate");
     FLAGS(team, 0, "[\n"
           "2 : \"team NATO\" : 0\n"
           "4 : \"team NAZI\" : 0\n"

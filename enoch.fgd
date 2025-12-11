@@ -22,34 +22,68 @@
   target(target_destination) : "Name"
   ]
 @BaseClass = ModelLight [ ]
+@PointClass base(Spawnflags) color(0 255 0) = info_firingpoint : "firing point placed on map."
+  [
+  targetname(target_source) : "firing group"
+  ]
+@SolidClass base(trigger_multiple) = trigger_zone : "trigger zone brush" [ ]
+@BaseClass base(Spawnflags) color(0 255 221) = Path : "path point classes for biped navigation" [ ]
+@PointClass base(Path) = path_corner : "corner marker for biped navigation" [ ]
+@BaseClass base(Spawnflags, Targetname) color(206 18 18) = weapon_class : "base weapon class" [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/w_ad70.mdl" }) = weapon_battlerifle : "battle rifle"
+  [
+  currentammo(float) : "starting ammo" : "150"
+  respawntime(float) : "respawn time" : "40"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/w_plasma_rifle.mdl" }) = weapon_plasmarifle : "plasma rifle placed on map."
+  [
+  currentammo(float) : "starting ammo" : "140"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/browning.mdl" }) = weapon_browning : "machine gun placed on map."
+  [
+  currentammo(float) : "starting ammo" : "400"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_cannon.mdl" }) = weapon_cannon : "sentinel cannon placed on map."
+  [
+  currentammo(float) : "starting ammo" : "10"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_m40a5.mdl" }) = weapon_sniper : "sniper placed on map."
+  [
+  currentammo(float) : "starting ammo" : "40"
+  ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_rocket_launcher.mdl" }) = weapon_rocket : "rocket launcher placed on map." [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_sentinelsmg.mdl" }) = weapon_smg : "sentinel smg placed on map." [ ]
+@PointClass base(weapon_class) model({ "path": "mdls/qp_spear.mdl" }) = weapon_spear : "sentinel spear placed on map." [ ]
 @PointClass = cmdlist : "command list designed in editor."
   [
   step(int) : "command list step index"
   step0(string) : "target controller: up to step7"
   ]
-@PointClass base(Targetname, Target, Spawnflags) color(0 255 0) = info_firingpoint : "firing point placed on map."
-  [
-  firinggroup(target_source) : "Name"
-  ]
-@BaseClass base(Spawnflags) color(0 255 221) = Path : "path point classes for biped navigation" [ ]
-@PointClass base(Path) = path_corner : "corner marker for biped navigation" [ ]
 @BaseClass base(Spawnflags, Targetname) color(255 0 0) = biped_class : "base biped class" [ ]
 @PointClass base(Targetname, Spawnflags) color(0 255 0) = info_monster_spawnpoint : "monster respawn location" [ ]
-@PointClass base(Target) = spawner_controller : "spawner controller" [ ]
+@PointClass base(Target, Targetname) = spawner_controller : "spawner controller"
+  [
+  style(float) : "squad class style" : "0"
+  ]
 @PointClass base(Target, Targetname, Spawnflags) color(0 255 0) = wave_class : "wave controller"
   [
-  endcond(float) : "+kill count to end wave" : "0"
-  spawns(float) : "number of spawns allotted to wave" : "0"
-  spawndelay(float) : "time between waves/biped respawns" : "3"
+  frags(float) : "+kill count to end wave" : "0"
+  health(float) : "number of spawns allotted to wave" : "0"
+  respawntime(float) : "time between waves/biped respawns" : "3"
   runtime_max(float) : "local runtime max spawns" : "20"
   runtime_min(float) : "local runtime min spawns" : "0"
-   spawncontrollers(target_destination) : "Name"
+   noise(target_destination) : "spawn controllers"
+  style(Flags) =
+  [
+  8 : "MAN_GRUNT" : 1
+  16 : "MAN_HEAVY" : 0
+  ]
   ]
 @PointClass base(Spawnflags, Target, Targetname) color(0 0 255) = objective_class : "objective placed on map
 control(Flags) actions blocked when assigned to this objective
 style(Flags) action flags forced when assigned to this objective"
   [
-  firinggroup(target_dest) : "Name"
+  noise(target_dest) : "firinggroup"
   control(Flags) =
   [
   1 : "ACT_SLEEP" : 0
@@ -80,12 +114,12 @@ style(Flags) action flags forced when assigned to this objective"
   1024 : "ACT_CONVERSE" : 0
   2048 : "ACT_AVOID" : 0
   ]
-  type(Flags) =
+  armortype(Flags) =
   [
   2 : "defend this point" : 1
   ]
-  popcap(float) : "max bipeds assigned to task if non-zero" : "0"
-  minstrength(float) : "min bipeds assigned for task to activate" : "0"
+  max_health(float) : "max bipeds assigned to task if non-zero" : "0"
+  frags(float) : "min bipeds assigned for task to activate" : "0"
   team(Flags) =
   [
   2 : "team NATO" : 0
@@ -95,7 +129,7 @@ style(Flags) action flags forced when assigned to this objective"
   32 : "team HELL" : 0
   ]
   ]
-@PointClass base(biped_class) model({ "path": "mdls/cubeman.mdl" }) = biped_man : "human enemyplaced on map." [ ]
+@PointClass base(biped_class) model({ "path": "mdls/cubeman.mdl" }) model({ "path": "mdls/police.mdl" }) = biped_man : "human enemyplaced on map." [ ]
 @PointClass base(Spawnflags) color(0 255 0) = info_null : "info null" [ ]
 @SolidClass base(ModelLight) = func_illusionary : "non-solid brush" [ ]
 @SolidClass base(Target) = trigger_multiple : "trigger multiple brush" [ ]
@@ -106,28 +140,3 @@ style(Flags) action flags forced when assigned to this objective"
   health(float) : "starting health value" : "20"
   ]
 @PointClass base(Spawnflags) color(0 255 0) = info_player_start : "initial spawn point" [ ]
-@BaseClass base(Spawnflags, Targetname) color(206 18 18) = weapon_class : "base weapon class" [ ]
-@PointClass base(weapon_class) model({ "path": "mdls/w_ad70.mdl" }) = weapon_battlerifle : "battle rifle"
-  [
-  currentammo(float) : "starting ammo" : "150"
-  respawntime(float) : "respawn time" : "40"
-  ]
-@PointClass base(weapon_class) model({ "path": "mdls/w_plasma_rifle.mdl" }) = weapon_plasmarifle : "plasma rifle placed on map."
-  [
-  currentammo(float) : "starting ammo" : "140"
-  ]
-@PointClass base(weapon_class) model({ "path": "mdls/browning.mdl" }) = weapon_browning : "machine gun placed on map."
-  [
-  currentammo(float) : "starting ammo" : "400"
-  ]
-@PointClass base(weapon_class) model({ "path": "mdls/qp_cannon.mdl" }) = weapon_cannon : "sentinel cannon placed on map."
-  [
-  currentammo(float) : "starting ammo" : "10"
-  ]
-@PointClass base(weapon_class) model({ "path": "mdls/qp_m40a5.mdl" }) = weapon_sniper : "sniper placed on map."
-  [
-  currentammo(float) : "starting ammo" : "40"
-  ]
-@PointClass base(weapon_class) model({ "path": "mdls/qp_rocket_launcher.mdl" }) = weapon_rocket : "rocket launcher placed on map." [ ]
-@PointClass base(weapon_class) model({ "path": "mdls/qp_sentinelsmg.mdl" }) = weapon_smg : "sentinel smg placed on map." [ ]
-@PointClass base(weapon_class) model({ "path": "mdls/qp_spear.mdl" }) = weapon_spear : "sentinel spear placed on map." [ ]

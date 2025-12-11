@@ -99,6 +99,7 @@ void() man_flee1 = {};
 void() man_converse1 = {};
 
  nonvirtual void() style_grunt = {
+   dprint("style grunt\n");
    setmodel(this, gamemodels "police.mdl"); //for demo
    if (team == TEAM_NAZI) skin = 2;
    else if (team == TEAM_ARMY) skin = 4;
@@ -108,6 +109,7 @@ void() man_converse1 = {};
  };
 
  nonvirtual void() style_heavy = {
+   dprint("style heavy\n");
    setmodel(this, gamemodels "police.mdl");
    if (team == TEAM_NAZI) skin = 2;
    else if (team == TEAM_ARMY) skin = 4;
@@ -116,6 +118,7 @@ void() man_converse1 = {};
 
  void() biped_man = {
   //assign to nosquad
+   dprint("biped man\n");
       squad_nosquad squad = spawn(squad_nosquad);
       squad.member0 = this;
       squad.style += this.style;
