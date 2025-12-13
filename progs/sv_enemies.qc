@@ -135,14 +135,15 @@ cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search))
 
 //NOTE path_search moved to sv_combat.qc
 float (entity ent) CheckAlive = {
-  dprint("check alive\n");
+  //dprint("check alive\n");
   if (ent.flags & FL_COVER) return (0);
   if !(ent.health > 0) return(0);
   if (ent) return(1);
   return(0);
 };
 
-float (entity ent) CheckLine = {dprint("check line\n");
+float (entity ent) CheckLine = {
+  //dprint("check line\n");
   traceline(self.origin, ent.origin, MOVE_NOMONSTERS, self);
   if (trace_fraction == 1) {
     //if (self.status < STA_SIGHT) self.status = STA_SIGHT;
@@ -185,6 +186,7 @@ void(int i, tracked_c shift) shiftpropfields = {
 };
 
 entity(int i, tracked_c test) testpropcover = {
+  dprint("test prop cover\n");
   entity e = self.enemy;
   field_t checkfield = entityfieldref( findentityfield (strcat (
                                                                 "tracked_c::__mprop",
@@ -257,6 +259,7 @@ class biped_class : entity { //biped spawn point definition
   string firinggroup;
 
 nonvirtual float (entity ent) addprop = {
+  dprint("add prop\n");
   int i = 0;
   //check for open field
   while (i < 20) {
@@ -312,6 +315,7 @@ nonvirtual float (entity ent) addenemy = {
 };
 
 nonvirtual float () findfear = {
+  dprint("find fear\n");
   entity ent = this.enemy;
   vector sdanger = this.scary * '1 0 0' + this.movechain.scary * '0 1 0';
   vector odanger = ent.scary * '1 0 0' + ent.movechain.scary * '0 1 0';
@@ -321,6 +325,7 @@ nonvirtual float () findfear = {
 };
 
  nonvirtual float () findcover = {
+   dprint("find cover\n");
    // test FL_COVER props against enemy, create firingpoint_c
    entity coverpoint;
    tracked_c test = this.tracked;
@@ -358,6 +363,7 @@ nonvirtual float () findfear = {
      //NOTE: in weaponsound
 
  nonvirtual void() find_action = { //fallback
+dprint("find action\n");
    if (this.control & this.action) this.action = ACT_NONE;
    //NOTE: ACT_WAIT, ACT_UNCOVER, ACT_NONE never supressed
    if !(this.status) {
@@ -525,6 +531,7 @@ nonvirtual void() findstuff = {
   float dist = 500;
   //dprint("find stuff\n");
   ent = RequestSearch(dist);
+  dprint("find stuff\n");
   if !(ent) return;
   while (ent) {
     if (ent.flags & FL_SEARCHPOINT) { //else real
@@ -565,10 +572,19 @@ nonvirtual void() findstuff = {
 
 nonvirtual void() findgoal = {
   dprint("findgoal\n");
-  if (this.goalentity) return;
+  if (this.goalentity) { dprint("biped has goal\n"); return;}
+  if !(this.firinggroup) dprint("no firinggroup\n");
   this.goalentity = findtarget(this.firinggroup);
-  if (this.goalentity) this.firingpoint = this.goalentity;
-  else this.goalentity = findtarget(this.target);
+  if (this.goalentity) {
+    this.firingpoint = this.goalentity;
+    dprint("firing point found\n");
+    }
+  else {
+    dprint(firinggroup); dprint(" no firing point\n");
+    this.goalentity = findtarget(this.target);
+    if !(this.target) dprint("no target\n");
+    //else dprint(this.target);
+  }
   if (this.goalentity){
     this.action = ACT_GUARD;
     this.status = STA_ACTIVE;
@@ -634,6 +650,7 @@ nonvirtual void() ai_shoot = {
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
+  dprint("respawn biped do\n");
   setmodel(this, this.model); //TODO set model index instead
   setsize(this, '-16 -16 0', '16 16 80'); //TODO make universal
   this.solid = SOLID_SLIDEBOX;
@@ -650,7 +667,7 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   //dprint("respawn biped do\n");
   this.commandlist = findcmdlist(this.targetcmdlist);
   if(this.commandlist) this.commandlist.th_pain(this,0);
-  else {dprint(this.targetcmdlist);dprint("no command list\n");}
+  //else {dprint(this.targetcmdlist);dprint("no command list\n");}
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
 
@@ -746,7 +763,7 @@ void() usecmdlist = {
     other = self;
     self = self.commandlist;
     self.use();}
-  else dprint("no command list\n");
+ // else dprint("no command list\n");
 };
 
 float(float f) floatoffield = {
@@ -919,12 +936,15 @@ class wave_c : entity {
 
   nonvirtual void() link_controllers = {
     dprint("link controllers\n");
+    //float i = 0;
     if !(style) dprint("err link controllers no style\n");
     lastcontroller = findtarget(noise);
     if !(lastcontroller) { dprint(spawncontrollers); dprint(" err no spawn controller\n"); return;}
     else dprint(lastcontroller.classname); dprint(" spawn controller found\n");
     entity test = FALSE;
     while(test != lastcontroller) {
+      //i++;
+      dprint("link controllers new link\n");
       if !(test) test = lastcontroller;
       test.enemy = findmoretargets(test, spawncontrollers);
       test.style = style;
@@ -933,6 +953,7 @@ class wave_c : entity {
       if (test.enemy) test = test.enemy;
       else break;
     }
+    //dprint(ftos(i)); dprint(" controllers linked\n");
   };
 
   nonvirtual void() wave_suspend;
@@ -1022,6 +1043,7 @@ float(float remaining) spawner_use;
 void() spawn_request = {
   dprint("spawn request\n");
   wave_c wave = self;
+  //dprint(ftos(self.style)); dprint(" is style\n");
   float remaining = wave.health; //or another number
   entity last = wave.lastcontroller;
   //loop controllers --assume linking set up
@@ -1030,13 +1052,18 @@ void() spawn_request = {
       dprint("err wave not started\n");
       return;
     }
-  self = last;
-  dprint(self.classname); dprint(" spawner use\n");
+  self = last; //NOTE: self changes here!
+  //dprint(self.classname); dprint(" spawner use\n");
   //one controller per think
   remaining = spawner_use(remaining);
   //wave.runtime_now += (wave.spawns - remaining); //update loc rt
-  if (last.enemy)
+  if (last.enemy) {
+    //if (last == last.enemy) dprint("err link is self\n");
+    dprint(last.classname);
     wave.lastcontroller = last.enemy;
+    //dprint("linked controller found\n");
+    }
+  //else {dprint("no linked controllers\n");}
   //else dprint("err expected controller chain\n");
   wave.health = remaining;
   self = wave;
@@ -1066,8 +1093,8 @@ class objective_c : entity {
     platoon_c plat = this.platoon;
     this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
-    if !(squad) dprint("objDo with no squad!\n");
-    if !(squad.member0) dprint("no members in squad!/n");
+    if !(squad) { dprint("objDo with no squad!\n"); return; }
+    if !(squad.member0) { dprint("no members in squad!\n"); return; }
     float ref = 0;
     float maxref = ref + 8;
     float f = ref;
@@ -1128,105 +1155,74 @@ class objective_c : entity {
 
   };
 
+  nonvirtual float(float i) testunassigned = {
+    squad_c test;
+    float popnow = health;
+    float maxpop = max_health;
+    float minpop = frags;
+    platoon_c plat = platoon;
+    test = unassignedlist[i].squad0;
+    if !(test) { dprint("no unassigned remain\n"); return(-1); } //worldspawn no unassigned
+    if !(test.population > (maxpop - popnow)) {
+        if (test.style & FL_NOSQUAD){
+          test.style -= FL_NOSQUAD;
+        } else test.style -= FL_UNASSIGNED;
+        test.style += FL_ASSIGNED;
+        plat.squad0 = test;
+        unassignedlist[i].squad0 = FALSE;
+        popnow += test.population;
+        dprint(ftos(i)); dprint(" index "); dprint("squad added\n");
+        if (popnow == maxpop) {
+          dprint(ftos(popnow)); dprint(" platoon full\n");
+          return (1); }
+        return(0);
+      } else { dprint("no room in squad\n"); return(0); }
+  };
+
   nonvirtual float() fillPlatoon = {
   float popnow = this.health;
   float maxpop = this.max_health;
   float minpop = this.frags;
+  float result = 0;
   platoon_c plat = this.platoon;
   dprint("fill platoon\n");
   //find squad not assigned type
   int i = 0;
-  squad_c test;
+ // squad_c test;
   if !(plat.squad0){
+      dprint("new squad0\n");
       while (i < 20) {
-        test = unassignedlist[i].squad0;
-        if !(test) break; //worldspawn no unassigned
-        if !(test.population > (maxpop - popnow)) {
-          if (test.style & FL_NOSQUAD){
-            test.style -= FL_NOSQUAD;
-          }
-          else test.style -= FL_UNASSIGNED;
-          test.style += FL_ASSIGNED;
-          plat.squad0 = test;
-          unassignedlist[i].squad0 = FALSE;
-          popnow += test.population;
-          dprint("squad added\n");
-          if (popnow == maxpop) return (1);
-          break;
-        }
+        result = testunassigned(i);
+        if (result) return(result);
         i++;
       }
       i = 0;
     }
   if !(plat.squad1){
-      while (i < 20) {
-        test = unassignedlist[i].squad0;
-        if !(test) break;
-        if !(test.population > (maxpop - popnow)) {
-          if (test.style & FL_NOSQUAD){
-            test.style -= FL_NOSQUAD;
-          }
-          else test.style -= FL_UNASSIGNED;
-          test.style += FL_ASSIGNED;
-          plat.squad1 = test;
-          unassignedlist[i].squad0 = FALSE;
-          popnow += test.population;
-          dprint("squad added\n");
-          if (popnow == maxpop) return (1);
-          break;
-        }
+      dprint("new squad1\n");
+         while (i < 20) {
+        result = testunassigned(i);
+        if (result) return(result);
         i++;
       }
       i = 0;
     }
   if !(plat.squad2){
-      while (i < 20) {
-        test = unassignedlist[i].squad0;
-        if !(test) break;
-        if !(test.population > (maxpop - popnow)) {
-          if (test.style & FL_NOSQUAD){
-            test.style -= FL_NOSQUAD;
-          }
-          else test.style -= FL_UNASSIGNED;
-          test.style += FL_ASSIGNED;
-          plat.squad2 = test;
-          unassignedlist[i].squad0 = FALSE;
-          popnow += test.population;
-          dprint("squad added\n");
-          if (popnow == maxpop) return (1);
-          break;
-        } i++;
-      } i = 0;
+        while (i < 20) {
+        result = testunassigned(i);
+        if (result) return(result);
+        i++;
+      }
+      i = 0;
     }
   if !(plat.squad3){
-      while (i < 20) {
-        test = unassignedlist[i].squad0;
-        if !(test) break;
-        if !(test.population > (maxpop - popnow)) {
-          if (test.style & FL_NOSQUAD){
-            test.style -= FL_NOSQUAD;
-          }
-          else test.style -= FL_UNASSIGNED;
-          test.style += FL_ASSIGNED;
-          plat.squad3 = test;
-          unassignedlist[i].squad0 = FALSE;
-          popnow += test.population;
-          dprint("squad added\n");
-          if (popnow == maxpop) return (1);
-          break;
-        } i++;
-      } i = 0;
+       while (i < 20) {
+        result = testunassigned(i);
+        if (result) return(result);
+      }
+      i = 0;
     }
 return (popnow > minpop);
-//if (popnow > minpop) return (1);
-  //(from a global tracked_c?) unassigned manager function?
-  //if nosquad type reassign biped
-  //check max and
-  //assign type to squad
-  //assign squad to platoon
-  //check min and loop
-  //if can't find check min
-  //if < min return 0 else 1
   dprint("min pop not met\n");
 return(0);
 };
@@ -1239,13 +1235,18 @@ return(0);
     enemy.nextthink = time + 0.3;
     //make platoon
     platoon_c currentplatoon = this.platoon;
-    if !(currentplatoon) this.platoon = currentplatoon = spawn(platoon_c);
+    if !(currentplatoon) { this.platoon = currentplatoon = spawn(platoon_c);
     currentplatoon.style = this.style;
     dprint(ftos(this.style), " platoon style set\n");
+    //if (max_health) currentplatoon.max_health = this.max_health;
+    //else currentplatoon.max_health = 80;
+    //currentplatoon.frags = this.frags;
+    }
     //make squads
     //check population
     //assign style to platoon
-    if (fillPlatoon()) objectiveDo();
+    if !(max_health) max_health = 80;
+    if (fillPlatoon() == 1) objectiveDo();
     else {
       think = use;
       nextthink = time + 1.4;

@@ -125,6 +125,7 @@ class firingpoint_c : entity {
     other.goalentity = world;
   };
   virtual void() think = {
+    dprint("firing point removed\n");
     remove(this); //for cover points
   };
   void() firingpoint_c = {

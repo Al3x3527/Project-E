@@ -7,19 +7,19 @@
     float newspawns = 0;
     entity monster;
     float tstyle = self.style;
-    dprint("spawner use\n");
+    //dprint(ftos(self.style)); dprint(" spawner use do\n");
     if !(tstyle) {dprint(self.classname); dprint(" err no spawner style\n"); return(spawns);}
-    if !(self.enemy) {
-        test = startingpoint = self.enemy = find(world, targetname, self.target); }
+    if !(self.aiment) { //NOTE enemy link vertical
+        test = startingpoint = self.aiment = find(world, targetname, self.target); }
+    i = SEN_ELITE;
     while (spawns > 0) {
-      dprint("spawner use do\n");
+     // dprint("spawner use do\n");
       monster = FALSE;
-      if !(test.enemy) { dprint("err link expected\n"); break;}
+      if !(test.enemy) { dprint("err link expected\n"); break;} //horizontal
       test = test.enemy; //spawn point linking
       if (test == startingpoint) break;
       //we have our spawn point
-      i = SEN_ELITE;
-      dprint(ftos(i)); dprint(" maximum flag\n");
+      //dprint(ftos(i)); dprint(" maximum flag\n");
       while (tstyle < i) { //^-?
         i /= 2;
         if (i < 1) {
@@ -51,10 +51,11 @@
       setorigin(monster, test.origin);
       monster.style = flag;
       monster.flags += FL_MONSTER;
-      tstyle -= flag; //NOTE float precision jank in |= over 23 bits
+      if (tstyle > flag) tstyle -= flag; //NOTE float precision jank in |= over 23 bits
       newspawns ++;
       spawns --;
     }
     monsters_runtime.runtime_current += newspawns;
+    //dprint(ftos(self.style)); dprint(" is style\n");
     return(spawns);
   };
