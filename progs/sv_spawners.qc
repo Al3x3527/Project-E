@@ -9,8 +9,8 @@
     float tstyle = self.style;
     //dprint(ftos(self.style)); dprint(" spawner use do\n");
     if !(tstyle) {dprint(self.classname); dprint(" err no spawner style\n"); return(spawns);}
-    if !(self.aiment) { //NOTE enemy link vertical
-        test = startingpoint = self.aiment = find(world, targetname, self.target); }
+    if !(self.goalentity) { //NOTE enemy link vertical
+        test = startingpoint = self.goalentity = find(world, targetname, self.target); }
     i = SEN_ELITE;
     while (spawns > 0) {
      // dprint("spawner use do\n");

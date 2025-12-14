@@ -23,7 +23,8 @@ $frame crouch1 crouch2
 RTINIT(biped_man);
 class biped_man : biped_class {
 
-nonvirtual void() man_stand1 = [$key9, man_stand1] {ai_idle();};
+nonvirtual void() man_stand1 = [$key9, man_stand1] {ai_idle(); //dprint("man stand\n");
+};
 
 nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
 nonvirtual void() man_walk7 = [$walk7, man_walk8]{movetogoal(8);};

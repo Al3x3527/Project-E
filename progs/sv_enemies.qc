@@ -596,13 +596,15 @@ nonvirtual void() findgoal = {
 
 nonvirtual void() ai_idle = {
   //dprint("ai_idle\n");
-  if !(this.action) return; //actually return
+  if !(this.action) { //dprint("braindead idle\n");
+    return; } //actually return
   if (this.status & STA_IDLE) {
     findstuff();
     if (this.enemy) this.think = this.th_charge;
     return;
   } //look for enemies
   if !(this.firingpoint) findgoal();
+  else dprint("idle biped has firingpoint\n");
 };
 
 nonvirtual void(float dist) ai_walk = {
@@ -778,6 +780,7 @@ class squad_c : entity {
   float population;
   //platoon_c platoon;
   float squadtype; //what is it doing? 0 no squad, 1 no platoon, 2 forward...
+  //float action; //from obj to biped
   tracked_c tracked;
   //float refzero;
   biped_class member0;
@@ -789,14 +792,22 @@ class squad_c : entity {
   biped_class member6;
   biped_class member7;
   biped_class leader;
+
+  //nonvirtual void() squad_think = {
+  //  member0.action = member1.action = member2.action = member3.action = member3.action = member5.action = member6.action = member7.action = action;
+  //};
+
   void() squad_c = {
     squadtype = 0;
+    //think = squad_think; objective do
   };
 };
 
 class squad_nosquad : squad_c {
   void() squad_nosquad = {
     style = FL_NOSQUAD;
+    population = 1;
+    classname = "squad nosquad";
   };
 };
 
@@ -892,15 +903,63 @@ class platoon_c : entity {
   squad_c squad3;
 
   void() platoon_c = {
+    classname = "platoon class";
     //refzero = findentityfield("squad0");
   };
 };
 
 biped_class (float f, squad_c squad) memberref = {
+  if !(squad) {dprint("member ref err no squad\n"); return (FALSE);}
   field_t checkfield = entityfieldref (findentityfield (strcat (
                                                                 "squad_c::__mmember",
                                                                 ftos (f))));
-  return (squad.checkfield); }
+  biped_class member = squad.checkfield;
+  dprint((strcat("member ref squad classname ", squad.classname, " field squad_c::__mmember", ftos(f), " member classname ", member.classname)));
+  if !(squad) { dprint("memberref err no squad\n"); return(FALSE);}
+  if (squad.checkfield) { dprint(" member referenced\n"); return(squad.checkfield); }
+  else dprint(" member ref world\n");
+  return (FALSE); }
+
+squad_c (float f, platoon_c plat) squadref = {
+  if !(plat) {dprint("squadref err no plat"); return(FALSE);}
+  field_t checkfield = entityfieldref (findentityfield (strcat (
+                                                                "platoon_c::__msquad",
+                                                                ftos (f))));
+  squad_c test = FALSE;
+  if (plat.checkfield)
+    test = plat.checkfield;
+  if !(test.classname) {dprint(strcat("platoon squad", ftos(f),
+                                      " squadref err found squad no classname\n")); return(FALSE);}
+  if (test) {dprint(strcat("squadref plat classname ", plat.classname,
+                           ", squad classname ", test.classname,
+                           ", field platoon_c::__msquad", ftos(f), " squad found\n"));}
+  else {dprint("squadref no squad found\n"); return (FALSE);}
+  return(test); }
+
+float(float f, platoon_c plat, squad_c squad) squadwrite = {
+  if !(plat.classname) {dprint("squadwrite err plat no classname\n"); return(0);}
+  if !(squad.classname) {dprint("squadwrite err squad no classname\n"); return(0);}
+   field_t checkfield = entityfieldref (findentityfield (strcat (
+                                                                "platoon_c::__msquad",
+                                                                ftos (f))));
+   plat.checkfield = squad;
+   squad = plat.checkfield;
+   dprint(strcat("squad write platoon classname ", plat.classname,
+                 ", field platoon_c::__msquad", ftos(f),
+                 ", squad classname ", squad.classname));
+   if (plat.checkfield) { dprint(" squad written\n"); return(1);}
+   dprint("squad write fail\n"); return(0);
+};
+
+void(biped_class member, float f, squad_c squad) memberwrite = {
+  field_t checkfield = entityfieldref (findentityfield (strcat (
+                                                                "squad_c::__mmember",
+                                                                ftos (f))));
+  squad.checkfield = member;
+  dprint(strcat("member write squad classname ",squad.classname, "member classname ", member.classname, "field squadd_c::__mmember", ftos(f)));
+  if (squad.checkfield) dprint(" member written\n");
+  else dprint("member write failed\n");
+}
 
   void() spawn_request;
 class wave_c : entity {
@@ -1094,16 +1153,18 @@ class objective_c : entity {
     this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
     if !(squad) { dprint("objDo with no squad!\n"); return; }
+    if !(squad.classname) {dprint("objDo err squad no classname\n"); return;}
     if !(squad.member0) { dprint("no members in squad!\n"); return; }
-    float ref = 0;
-    float maxref = ref + 8;
-    float f = ref;
+    if !(squad.member1) { dprint("no member1\n");}
+    //float ref = 0;
+    float maxref = 8;
+    float f = 0;
     //TODO: clean up this squad-member stuff
     biped_class member;
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member) break;
+      if !(member) { dprint("no more members\n"); break; }
       dprint("a member was found\n");
       member.control = this.control;
       member.firinggroup = this.firinggroup;
@@ -1112,7 +1173,7 @@ class objective_c : entity {
       dprint(ftos(this.style), " action set\n");
       member = FALSE;
       f++;
-    } f = ref;
+    } f = 0;
     if !(plat.squad1) return;
     squad = plat.squad1;
     if !(squad.leader) squad.leader = squad.member0;
@@ -1125,7 +1186,7 @@ class objective_c : entity {
       member.action = this.style;
       member = FALSE;
       f++;
-    } f = ref;
+    } f = 0;
     if !(plat.squad2) return;
     squad = plat.squad2;
     if !(squad.leader) squad.leader = squad.member0;
@@ -1138,7 +1199,7 @@ class objective_c : entity {
       member.action = this.style;
       member = FALSE;
       f++;
-    } f = ref;
+    } f = 0;
     if !(plat.squad3) return;
     squad = plat.squad3;
     if !(squad.leader) squad.leader = squad.member0;
@@ -1155,77 +1216,97 @@ class objective_c : entity {
 
   };
 
-  nonvirtual float(float i) testunassigned = {
+  nonvirtual float() fillPlatoon = {
     squad_c test;
-    float popnow = health;
+    //float popnow = health;
     float maxpop = max_health;
     float minpop = frags;
-    platoon_c plat = platoon;
-    test = unassignedlist[i].squad0;
-    if !(test) { dprint("no unassigned remain\n"); return(-1); } //worldspawn no unassigned
-    if !(test.population > (maxpop - popnow)) {
-        if (test.style & FL_NOSQUAD){
-          test.style -= FL_NOSQUAD;
-        } else test.style -= FL_UNASSIGNED;
-        test.style += FL_ASSIGNED;
-        plat.squad0 = test;
-        unassignedlist[i].squad0 = FALSE;
-        popnow += test.population;
-        dprint(ftos(i)); dprint(" index "); dprint("squad added\n");
-        if (popnow == maxpop) {
-          dprint(ftos(popnow)); dprint(" platoon full\n");
-          return (1); }
-        return(0);
-      } else { dprint("no room in squad\n"); return(0); }
-  };
-
-  nonvirtual float() fillPlatoon = {
-  float popnow = this.health;
-  float maxpop = this.max_health;
-  float minpop = this.frags;
-  float result = 0;
-  platoon_c plat = this.platoon;
-  dprint("fill platoon\n");
-  //find squad not assigned type
-  int i = 0;
- // squad_c test;
-  if !(plat.squad0){
-      dprint("new squad0\n");
+    platoon_c plat = this.platoon;
+    squad_c asquad;
+    int ref = 0;
+    float f = 0;
+    biped_class testbiped = FALSE;
+    int i = 0;
+             //new squad or append?
+    while (ref < 4) { //squad slot
       while (i < 20) {
-        result = testunassigned(i);
-        if (result) return(result);
+        test = FALSE;
+        test = unassignedlist[i].squad0;
+        if !(test) { dprint("no unassigned remain\n"); return(-1); } //worldspawn no unassigned
+        if !(test.population > (maxpop - health)) {
+
+            asquad = FALSE;
+            if !(plat.classname) {dprint("fillplatoon err no plat classname\n"); return(0);}
+            dprint("calling squadref from fillplatoon\n");
+            asquad = squadref(ref, plat);
+            if !(asquad) { //new squad
+                dprint(ftos(ref)); dprint(" new squad\n");
+                if (test.style & FL_NOSQUAD){
+                  test.style -= FL_NOSQUAD;
+                } else test.style -= FL_UNASSIGNED;
+                test.style += FL_ASSIGNED;
+                test.classname = "assigned squad";
+                if !(squadwrite(ref, plat, test)) {
+                    dprint(strcat("squad", ftos(ref), " ", plat.classname,
+                                  test.classname, "write fail\n"));
+                    dprint("!!!!!!!!!!!!!!!!!!\n");
+                    return(0);
+                  } //plat.squad0 = test;
+                asquad = squadref(ref, plat);
+                if !(asquad == test) {dprint("err test not written to field\n");}
+                else {
+                  dprint(asquad.classname);
+                  dprint(" is asquad, field really was set to test squad\n");
+                  }
+              }
+            else { //append squad
+              f = 0; //was 0
+              while (f < 8) { //platoon squads FIXME keep appending
+                dprint(ftos(ref)); dprint(" append squad\n");
+                testbiped = FALSE;
+                //dprint("test biped\n");
+                dprint(strcat("calling memberref with asquad classname ",
+                              asquad.classname,
+                              ", squad", ftos(ref),
+                              ", field member", ftos(f)));
+                dprint(strcat("unassigned index ", ftos(i),"\n"));
+                if !(asquad.classname) {dprint("asquad no classname aborting memberref\n"); return (0);}
+                testbiped = memberref(f, asquad); //plat sq member
+                if !(testbiped) {
+                    dprint(ftos(f)); dprint(" open member slot\n");
+                    memberwrite(test.member0, f, asquad); //member to slot.memberf
+                    if !(memberref(f, asquad)) {
+                        dprint(strcat(asquad.classname, ftos(f), "err write failed\n")); return 0;}
+                    break; //get new unassigned
+                  }
+                else { dprint(ftos(f)); dprint(" asquad member slot used\n"); }
+                dprint("moving on to next member slot "); dprint(ftos(f + 1)); dprint("\n");
+               f++;
+              }
+              dprint(ftos(f)); dprint("members filled");
+              if (f > 7) {
+                dprint(", all members filled in squad"); dprint(ftos(ref));
+                ref ++; //squad full
+                dprint(" moving on to squad"); dprint(ftos(ref)); dprint("\n");
+              } //both cases
+            }
+            unassignedlist[i].squad0 = FALSE;
+            health += test.population;
+            dprint(ftos(i)); dprint(" index "); dprint("squad added\n");
+            if (health == maxpop) {
+              dprint(ftos(health)); dprint(" platoon full\n");
+              return (1); }
+          } else { dprint("no room in platoon\n"); return(0); }
+          //all squads used
+          //return(0);
+          //test.action = this.style; //NOTE: force squad behavior in obj do
         i++;
       }
-      i = 0;
     }
-  if !(plat.squad1){
-      dprint("new squad1\n");
-         while (i < 20) {
-        result = testunassigned(i);
-        if (result) return(result);
-        i++;
-      }
-      i = 0;
-    }
-  if !(plat.squad2){
-        while (i < 20) {
-        result = testunassigned(i);
-        if (result) return(result);
-        i++;
-      }
-      i = 0;
-    }
-  if !(plat.squad3){
-       while (i < 20) {
-        result = testunassigned(i);
-        if (result) return(result);
-      }
-      i = 0;
-    }
-return (popnow > minpop);
-  dprint("min pop not met\n");
-return(0);
-};
+    dprint("fill platoon we shouldn't be here\n");
+    return (health > minpop);
+
+  };
 
   virtual void() use = {
     dprint("objective use\n");
@@ -1246,8 +1327,14 @@ return(0);
     //check population
     //assign style to platoon
     if !(max_health) max_health = 80;
-    if (fillPlatoon() == 1) objectiveDo();
+    fillPlatoon();
+    if (this.health) {
+      dprint(ftos(health)); dprint(" objective health\n");
+      if !(frags > health) objectiveDo();
+      else dprint("objective does not meet min pop\n");
+        }
     else {
+      dprint("objective no pop\n");
       think = use;
       nextthink = time + 1.4;
     }
