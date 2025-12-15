@@ -640,10 +640,10 @@ nonvirtual void() ai_idle = {
     if (this.enemy) this.think = this.th_charge;
     return;
   } //look for enemies
-  if !(this.firingpoint) findgoal();
-    else {
-    dprint("idle biped has firingpoint\n");
-    }
+  //if !(this.firingpoint) findgoal();  FIXME let squad assign goal
+   // else {
+    //dprint("idle biped has firingpoint\n");
+    //}
   if !(this.goalentity) this.goalentity = this.firingpoint;
   //if (flags & FL_CORNER) flags -= FL_CORNER;
   think = th_walk;
@@ -842,11 +842,14 @@ float(float f) floatoffield = {
   return(self.testfield);
 };
 
+void() squad_think;
+
 class squad_c : entity {
   //objective_c objective;
   float traitor;
   float strength;
   float population;
+  string firinggroup;
   //platoon_c platoon;
   float squadtype; //what is it doing? 0 no squad, 1 no platoon, 2 forward...
   //float action; //from obj to biped
@@ -862,13 +865,9 @@ class squad_c : entity {
   biped_class member7;
   biped_class leader;
 
-  //nonvirtual void() squad_think = {
-  //  member0.action = member1.action = member2.action = member3.action = member3.action = member5.action = member6.action = member7.action = action;
-  //};
-
   void() squad_c = {
     squadtype = 0;
-    //think = squad_think; objective do
+    think = squad_think;
   };
 };
 
@@ -1032,6 +1031,26 @@ void(biped_class member, float f, squad_c squad) memberwrite = {
   if (squad.checkfield) dprint(" member written\n");
   else dprint("member write failed\n");
 }
+
+  void() squad_think = {
+  squad_c asquad = self;
+  int i = 0;
+  biped_class testmember;
+  entity point;
+  dprint("squad think !!!!!!\n");
+  if !(asquad.firinggroup) { dprint("squad think no firinggroup\n"); return; }
+  point = findtarget(asquad.firinggroup);
+  while (i < 8) {
+    testmember = memberref(i, asquad);
+    if !(testmember) return;
+    if !(testmember.style) return;
+    if !(point) { dprint("err no point squad think\n"); return; }
+    testmember.firingpoint = testmember.goalentity = point;
+    point = point.enemy;
+    dprint("firing point set by squad\n");
+    i++;
+  }
+  };
 
   void() spawn_request;
 class wave_c : entity {
@@ -1319,6 +1338,10 @@ class objective_c : entity {
                 } else test.style -= FL_UNASSIGNED;
                 test.style += FL_ASSIGNED;
                 test.classname = "assigned squad";
+
+                test.firinggroup = firinggroup;
+                test.nextthink = time + .1;
+
                 if !(squadwrite(ref, plat, test)) {
                     dprint(strcat("squad", ftos(ref), " ", plat.classname,
                                   test.classname, "write fail\n"));
@@ -1336,7 +1359,7 @@ class objective_c : entity {
               }
             else { //append squad
               //f = 0; //was 0
-              while (f < 8) { //platoon squads FIXME keep appending
+              while (f < 8) { //platoon squads
                 //dprint(ftos(ref)); dprint(" append squad\n");
                 testbiped = FALSE;
                 dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
@@ -1390,12 +1413,27 @@ class objective_c : entity {
 
   };
 
+  nonvirtual void() link_firingpoints = {
+    dprint("link firingpoints\n");
+    entity point = world;
+    int cnt = 0;
+    point = findtarget(firinggroup);
+    if !(point) { dprint("err no firingpoints link firingpoints\n"); return; }
+    while (point != world) {
+      cnt++;
+      point.enemy = findmoretargets(point, firinggroup);
+      point = point.enemy;
+    }
+    dprint(strcat(ftos(cnt), "firingpoints linked\n"));
+  };
+
   virtual void() use = {
     dprint("objective use\n");
     //first start waves
     enemy = findtarget(target);
     if !(enemy) {dprint("err no target wave\n"); return;}
     enemy.nextthink = time + 0.3;
+    link_firingpoints();
     //make platoon
     platoon_c currentplatoon = this.platoon;
     if !(currentplatoon) { this.platoon = currentplatoon = spawn(platoon_c);
