@@ -227,21 +227,50 @@ class path_cover : entity {
   };
 };
 
+void() hint_touch = {
+  if (other.flags & FL_CORNER) return;
+  other.goalentity = self.enemy;
+  dprint("hint touched\n");
+};
+
+void() hint_think = {
+  self.enemy = findtarget(self.target);
+  if !(self.enemy) self.touch = sub_noop;
+}
+
+void() trigger_hint = {
+  setmodel(self, self.model);
+  self.modelindex = 0;
+  self.solid = SOLID_TRIGGER;
+
+  self.touch = hint_touch;
+  self.think = hint_think;
+  self.nextthink = time + 0.3;
+  FUNC(trigger_hint, "Target", "navigation hint.");
+};
+
 class path_corner : entity {
   //NOTE view_ofs = fwd, r, tp firing point org
   virtual void() touch = {
     if (other.goalentity != this) return;
+    if !(other.flags & FL_CORNER) other.flags += FL_CORNER;
+    dprint("corner touch\n");
+    other.goalentity = FALSE;
     if (this.target != FALSE) {
       entity targ = findtarget(this.target);
       if (targ) other.goalentity = targ;
       return;
     }
-    other.think = other.th_wait;
+
+    //other.think = other.th_wait;
     other.wait = this.wait;
   };
   void() path_corner = {
+    //wait = 1;
     flags = FL_COVER;
-    FGDbase("Spawnflags", Path, "path point classes for biped navigation");
+    setsize(self, '-8 -8 -8', '8 8 16');
+    solid = SOLID_TRIGGER;
+    FGDbase("Spawnflags, Target, Targetname", Path, "path point classes for biped navigation");
     COLOR(0 255 221);
     PATH(path_corner, "Path", "corner marker for biped navigation");
   };

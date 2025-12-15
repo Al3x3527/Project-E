@@ -37,7 +37,7 @@ void() usebyname = {
 //void() tactical = {other.think = tacthink; other.nextthink = time + 0.1;}
 
 class tracked_c : entity {
-  float refzero;
+  //float refzero;
   entity prop0;
   entity prop1;
   entity prop2;
@@ -59,7 +59,7 @@ class tracked_c : entity {
   entity prop18;
   entity prop19;
   void() tracked_c = {
-    refzero = findentityfield("prop0");
+    //refzero = findentityfield("prop0");
   };
 };
 
@@ -94,8 +94,8 @@ virtual void() cmduse = {
    this.enemy = inflictor;
    dprint(this.enemy.classname); dprint(" cmd ememy\n");
    tracked_c tracked = this.cmdtracked;
-   float ref = tracked.refzero;
-   float zero = ref;
+ //  float ref = tracked.refzero;
+   //float zero = ref;
  };
  //prop list?
 
@@ -183,6 +183,27 @@ void(int i, tracked_c shift) shiftpropfields = {
                                                               "tracked_c::__mprop",
                                                               itos (i))));
   shift.newfield = shift.oldfield;
+};
+
+entity (int i, tracked_c test) getprop = {
+  field_t checkfield = entityfieldref( findentityfield (strcat (
+                                                              "tracked_c::__mprop",
+                                                              itos (i))) );
+entity p = test.checkfield;
+if !(p) return(FALSE);
+return(p);
+}
+float (entity p) testnavcorners = {
+  dprint("test nav corners");
+vector vec1;
+vector vec2;
+//if !(p) return (-1); //no prop
+if !(p.flags & FL_CORNER) return(0);
+if (p == self.goalentity) return(0);
+vec1 = self.goalentity.origin - self.origin;
+vec2 = p.origin - self.origin;
+if ((vec2 * vec1) > 0) return(1);
+return(0);
 };
 
 entity(int i, tracked_c test) testpropcover = {
@@ -594,8 +615,24 @@ nonvirtual void() findgoal = {
   else dprint("no goal found\n");
 };
 
+nonvirtual void() find_corners = {
+  int i = 0;
+  entity p = FALSE;
+  //tracked_c test = tracked;
+  while (i < 20) {
+    p = FALSE;
+    p = getprop(i, tracked);
+    if (p) {
+      if(testnavcorners(p))
+        goalentity = p;
+    }
+    else return;
+    i++;
+  }
+};
+
 nonvirtual void() ai_idle = {
-  //dprint("ai_idle\n");
+ // dprint("ai_idle\n");
   if !(this.action) { //dprint("braindead idle\n");
     return; } //actually return
   if (this.status & STA_IDLE) {
@@ -604,16 +641,48 @@ nonvirtual void() ai_idle = {
     return;
   } //look for enemies
   if !(this.firingpoint) findgoal();
-  else dprint("idle biped has firingpoint\n");
+    else {
+    dprint("idle biped has firingpoint\n");
+    }
+  if !(this.goalentity) this.goalentity = this.firingpoint;
+  //if (flags & FL_CORNER) flags -= FL_CORNER;
+  think = th_walk;
 };
 
 nonvirtual void(float dist) ai_walk = {
+  vector goal = goalentity.origin;
+  goal.z = 0;
+  vector falseorg = origin;
+  falseorg.z = 0;
   findstuff();
   if (this.enemy) this.think = this.th_charge;
-  if !(this.goalentity) this.think = this.th_stand;
+  if !(this.goalentity) {
+      if !(this.firingpoint)
+        this.think = this.th_stand;
+      else {
+        goalentity = firingpoint;
+      }
+  }
+  else dprint("bp has a goal\n");
+  //find corners between this and goal
   this.ideal_yaw = vectoyaw(this.goalentity.origin - this.origin);
   sub_changeyaw();
-  movetogoal(dist);
+  if !(movetogoal(dist)) {
+      dprint("movetogoal failed in ai_walk\n");
+      //if (oldorigin == origin) {
+       // if (wait < time) {//just jams a door longer
+          //if ( vlen(goal-falseorg) < 16) {
+       //  goalentity = firingpoint = world;
+    //        dprint("bp has reached corner\n");
+            //}
+          //wait = time + 0.1;
+          //oldorigin = '0 0 0';
+        //}
+      findgoal();
+      //oldorigin = origin;
+     // }
+    }
+  //else wait = time + 0.1;
 };
 
 nonvirtual void(float dist) ai_charge = {
@@ -1167,7 +1236,7 @@ class objective_c : entity {
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member.style) { dprint("no more members\n"); break; }
+      if !(member.style) { dprint("no more members\n"); return; }
       dprint(strcat("squad0 ", ftos(f), " a member was found\n"));
       member.control = this.control;
       member.firinggroup = this.firinggroup;
@@ -1182,7 +1251,7 @@ class objective_c : entity {
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member) break;
+      if !(member) return;
       member.control = this.control;
       member.firinggroup = this.firinggroup;
       member.leader = squad.leader;
@@ -1195,7 +1264,7 @@ class objective_c : entity {
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member) break;
+      if !(member) return;
       member.control = this.control;
       member.firinggroup = this.firinggroup;
       member.leader = squad.leader;
@@ -1208,7 +1277,7 @@ class objective_c : entity {
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member) break;
+      if !(member) return;
       member.control = this.control;
       member.firinggroup = this.firinggroup;
       member.leader = squad.leader;
