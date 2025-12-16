@@ -678,7 +678,7 @@ nonvirtual void(float dist) ai_walk = {
           //wait = time + 0.1;
           //oldorigin = '0 0 0';
         //}
-      findgoal();
+      //findgoal();
       //oldorigin = origin;
      // }
     }
