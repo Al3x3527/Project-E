@@ -7,6 +7,7 @@ sv_items.qc
 sv_combat.qc
 sv_weapons.qc
 sv_enemies.qc
+sv_objectives.qc
 sv_man.qc
 sv_triggers.qc
 sv_player.qc
