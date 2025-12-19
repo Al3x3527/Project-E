@@ -23,7 +23,7 @@ $frame crouch1 crouch2
 RTINIT(biped_man);
 class biped_man : biped_class {
 
-nonvirtual void() man_stand1 = [$key9, man_stand1] {ai_idle(); //dprint("man stand\n");
+nonvirtual void() man_stand1 = [$basis, man_stand1] {ai_idle(); //dprint("man stand\n");
 };
 
 nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
@@ -146,5 +146,6 @@ void() man_converse1 = {};
    weapon_use = sub_noop;
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
+   th_guard = man_stand1;
  };
 };

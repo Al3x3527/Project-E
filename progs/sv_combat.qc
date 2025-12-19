@@ -120,9 +120,10 @@ class firingpoint_c : entity {
   string firinggroup;
 
   nonvirtual void() point_touch = {
-    dprint("point touch\n");
+    dprint("firing point touch\n");
     if (other.goalentity != this) return;
     other.goalentity = world;
+    other.think = other.th_stand;
   };
   virtual void() think = {
     dprint("firing point removed\n");

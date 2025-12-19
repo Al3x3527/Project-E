@@ -638,15 +638,24 @@ nonvirtual void() ai_idle = {
   if (this.status & STA_IDLE) {
     findstuff();
     if (this.enemy) this.think = this.th_charge;
+    dprint("charge from idle\n");
     return;
   } //look for enemies
+  if (this.status > 7) {
+    if(this.enemy) {
+      this.think = this.th_charge;
+      dprint("charge from idle 1\n");
+      return;
+    }
+  }
   //if !(this.firingpoint) findgoal();  FIXME let squad assign goal
    // else {
     //dprint("idle biped has firingpoint\n");
     //}
+  //dprint("ai idle looking for goal\n");
   if !(this.goalentity) this.goalentity = this.firingpoint;
-  //if (flags & FL_CORNER) flags -= FL_CORNER;
-  think = th_walk;
+  if (flags & FL_CORNER) flags -= FL_CORNER;
+  //think = th_walk;
 };
 
 nonvirtual void(float dist) ai_walk = {
@@ -658,7 +667,7 @@ nonvirtual void(float dist) ai_walk = {
   if (this.enemy) this.think = this.th_charge;
   if !(this.goalentity) {
       if !(this.firingpoint)
-        this.think = this.th_stand;
+        think = this.th_guard;
       else {
         goalentity = firingpoint;
       }
@@ -842,7 +851,7 @@ float(float f) floatoffield = {
   return(self.testfield);
 };
 
-void() squad_think;
+void() squad_guard_think;
 
 class squad_c : entity {
   //objective_c objective;
@@ -867,7 +876,7 @@ class squad_c : entity {
 
   void() squad_c = {
     squadtype = 0;
-    think = squad_think;
+    think = squad_guard_think;
   };
 };
 
@@ -1031,8 +1040,7 @@ void(biped_class member, float f, squad_c squad) memberwrite = {
   if (squad.checkfield) dprint(" member written\n");
   else dprint("member write failed\n");
 }
-
-  void() squad_think = {
+  void() squad_guard_think = {
   squad_c asquad = self;
   int i = 0;
   biped_class testmember;
@@ -1046,9 +1054,9 @@ void(biped_class member, float f, squad_c squad) memberwrite = {
     if !(testmember.style) return;
     if !(point) { dprint("err no point squad think\n"); return; }
     testmember.firingpoint = testmember.goalentity = point;
+    testmember.think = testmember.th_walk;
     point = point.enemy;
     dprint("firing point set by squad\n");
     i++;
   }
   };
-
