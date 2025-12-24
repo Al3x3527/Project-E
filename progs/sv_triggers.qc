@@ -38,16 +38,6 @@ void() trigger_multiple = {
 
 //trigger zone in combat.qc
 
-void() func_door = {
-	setmodel(self, self.model);
-	self.solid = SOLID_BSP;
-	FUNC(func_door, "Targetname", "door brush");
-};
-
-void() item_key = {
-	fgdprint("@fgd\n@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : \"key item placed on map\" [");
-};
-
 class func_decoration : entity {
 	void() func_decoration = {
 		setmodel(this, this.model);

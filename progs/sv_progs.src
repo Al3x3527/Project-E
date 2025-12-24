@@ -12,4 +12,5 @@ sv_man.qc
 sv_triggers.qc
 sv_player.qc
 sv_spawners.qc
+sv_doors.qc
 sv_main.qc
