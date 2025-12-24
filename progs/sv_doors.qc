@@ -29,6 +29,7 @@ void() SUB_CalcMoveDone = {
   self.nextthink = -1;
   self.equip();
 }
+
 void(vector tdest, float tspeed, void() func) SUB_CalcMove = {
   vector vdestdelta;
   float len, traveltime, localtime;
