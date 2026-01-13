@@ -72,7 +72,7 @@ void() PlayerSpawn =
 {
 	self.classname = "player";
 	self.solid = SOLID_SLIDEBOX;
-	setmodel(self, "models/testplayer.iqm");
+	setmodel(self, gamemodels "police.mdl");
 	self.movetype = MOVETYPE_WALK;
 	self.health = 100;
 	setorigin(self, get_spawn_point());
@@ -82,6 +82,7 @@ void() PlayerSpawn =
 
 	self.team = TEAM_NATO;//placeholder
 	self.flags = FL_CLIENT;
+	self.scary = 2; //idk
 };
 
 void() PutClientInServer =

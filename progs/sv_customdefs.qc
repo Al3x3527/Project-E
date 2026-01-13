@@ -1,7 +1,4 @@
 // put custom server-only globals and fields here
-
-const float FL_JUMPRELEASED = 4096;
-
 void() sub_remove =
 {
 	remove(self);
@@ -205,8 +202,9 @@ void() sub_changeyaw = {
 };
 
 const float FL_CORNER = 2048; //FL_WATERJUMP not meaningful
-const float FL_SEARCHPOINT = 4096;
-const float FL_COVER = 8192;
+const float FL_JUMPRELEASED = 4096;
+const float FL_SEARCHPOINT = 8192;
+const float FL_COVER = FL_CORNER;
 const float FL_VEHICLE = 32768;
 
 //make enumflags class squadstyle or macros

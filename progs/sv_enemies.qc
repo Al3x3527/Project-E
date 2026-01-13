@@ -151,6 +151,7 @@ cmdlist_c (string search) findcmdlist = {return(find(world, targetname, search))
 //NOTE path_search moved to sv_combat.qc
 float (entity ent) CheckAlive = {
   //dprint("check alive\n");
+  if (ent.flags & FL_CLIENT) dprint("check alive client\n");
   if (ent.flags & FL_COVER) return (0);
   if !(ent.health > 0) return(0);
   if (ent) return(1);
@@ -171,14 +172,15 @@ float (entity ent) CheckLine = {
 entity (float dist) RequestSearch = {
   //dprint("search requested\n");
 if (self == searchent) {
-  if (time < searchtime + 0.5) return (world);
+  if (time < searchtime + 0.25) return (FALSE);
  }
  else if (CheckDist(searchent) < DIST_FAR)
-   if (time < searchtime + 0.25) return (world);
-//dprint("request granted\n");
+   if (time < searchtime + 0.5) return (FALSE);
+dprint("request granted\n");
 searchent = self;
 searchtime = time;
 return(findradius(self.origin, dist, searchchain));
+//check all ent.searchchain
 }
 
 void() VirtualWeapon;
@@ -327,6 +329,7 @@ nonvirtual float (entity ent) addprop = {
 nonvirtual float (entity ent) addenemy = {
   entity least = ent;
   if !(this.enemies) this.enemies = spawn(enemylist_c);
+  if !(ent.scary) dprint("err addenemy no scary\n");
 
   if !(this.enemies.foe0) this.enemies.foe0 = ent;
   else {
@@ -347,10 +350,12 @@ nonvirtual float (entity ent) addenemy = {
         }
       }
     }
-  }
+
   if (least == ent) {
     addprop(ent);
+    dprint("add enemy was least\n");
     return(0);
+  }
   }
   if !(this.enemy) this.enemy = ent;
   if (this.enemies.foe0 == least) this.enemies.foe0 = ent;
@@ -358,13 +363,14 @@ nonvirtual float (entity ent) addenemy = {
   else if (this.enemies.foe2 == least) this.enemies.foe2 = ent;
   else if (this.enemies.foe3 == least) this.enemies.foe3 = ent;
   else dprint("problem in addenemy!\n");
-  dprint("enemy found\n");
+  dprint(strcat(enemy.classname, " is enemy found\n"));
   return (1);
 };
 
 nonvirtual float () findfear = {
   dprint("find fear\n");
   entity ent = this.enemy;
+  if !(scary) dprint("err findfear no scary\n");
   vector sdanger = this.scary * '1 0 0' + this.movechain.scary * '0 1 0';
   vector odanger = ent.scary * '1 0 0' + ent.movechain.scary * '0 1 0';
   float fear = vlen(odanger - sdanger);
@@ -579,13 +585,22 @@ nonvirtual void() findstuff = {
   float dist = 500;
   //dprint("find stuff\n");
   ent = RequestSearch(dist);
+  if (ent == FALSE) {
+    //dprint("Request Declined\n");
+    return;
+    }
   //dprint("find stuff\n");
   if !(ent) return;
   while (ent) {
+    dprint(strcat(ent.classname, " is ent findstuff\n"));
+    if (ent.flags & FL_CLIENT) dprint("client searched\n");
+    if (ent.flags | FL_CORNER) {
     if (ent.flags & FL_SEARCHPOINT) { //else real
+      if (ent.flags & FL_CLIENT) dprint("client searchpoint found\n");
       if !(CheckLine(ent.enemy)) { //visible ignore
           if (CheckAlive(ent)) {//prop ignore
             if (ent.team != this.team) { //ignore
+              dprint("add virtual enemy\n");
               addenemy(ent);
               if (this.status < STA_CERTAIN) this.status = STA_CERTAIN;
               } //team ignore
@@ -593,28 +608,35 @@ nonvirtual void() findstuff = {
         }
     } else{ //real
       //dprint("real found\n");
+      if (ent.flags & FL_CLIENT) dprint("client found\n");
       if (CheckLine(ent)) { //else check path
-        if (CheckAlive(ent)) { //see prop
-          if (ent.team != this.team) { //ignore
-            //dprint("potential enemy found\n");
-            entyaw = vectoyaw (ent.origin - this.origin);
-            deltayaw = fabs(thisyaw - entyaw);
-            if (deltayaw > 180) deltayaw -= 180;
-            if (deltayaw < maxyaw) { //ignore
-              addenemy(ent);
-              if (this.status < STA_SIGHT) this.status = STA_SIGHT;
+        if (ent.solid & SOLID_SLIDEBOX){ //see prop
+          if (CheckAlive(ent) && (ent.team != this.team)){  //ignore
+              dprint("potential enemy found\n");
+              entyaw = vectoyaw (ent.origin - this.origin);
+              deltayaw = fabs(thisyaw - entyaw);
+              if (deltayaw > 180) deltayaw -= 180;
+              if (deltayaw < maxyaw) { //ignore
+                dprint(strcat(ent.classname, " add enemy\n"));
+                addenemy(ent);
+                if (this.status < STA_SIGHT) this.status = STA_SIGHT;
+              }
             }
-          }
-      } else {
-         addprop(ent);
+        } else {
+          dprint("add prop\n");
+          addprop(ent);
         }
       } else { //always see path entities
         if (ent.flags & FL_COVER) {
+          dprint("add cover prop\n");
           addprop(ent);
         }
       }
     }
-    ent = ent.searchchain;
+    }
+    if (ent.searchchain)
+      ent = ent.searchchain;
+    else ent = FALSE;
   }
 };
 
@@ -691,7 +713,9 @@ nonvirtual void(float dist) ai_walk = {
   vector falseorg = origin;
   falseorg.z = 0;
   findstuff();
-  if (this.enemy) this.think = this.th_charge;
+  if (this.enemy) {this.think = this.th_charge;
+    dprint("ai walk charge\n");
+    }
   if !(this.goalentity) {
       if !(this.firingpoint)
         think = this.th_guard;
@@ -722,6 +746,7 @@ nonvirtual void(float dist) ai_walk = {
 };
 
 nonvirtual void(float dist) ai_charge = {
+  dprint("ai charge\n");
   if !(this.enemy) {
     this.think = this.th_stand;
     //check tracked
@@ -749,6 +774,7 @@ nonvirtual void(float dist) ai_charge = {
   movetogoal(dist);
   if (this.status > STA_CERTAIN) //TODO: other attacks
     if (random() > 0.8)
+      dprint("ai charge attack\n");
       this.think = this.th_shoot;
 };
 
@@ -847,6 +873,7 @@ nonvirtual void() RespawnBipedTry = {
  void() biped_class = {
     FGDbase("Spawnflags, Targetname", biped_class, "base biped class");
     COLOR(255 0 0);
+    scary = 1; //idk
     think = RespawnBipedDo;
     dprint("biped spawn function\n");
     nextthink = time + 0.1;

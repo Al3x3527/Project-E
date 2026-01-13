@@ -99,10 +99,10 @@ void() stop_it = {
 }
 
 void(entity old) drop_weapon = {
-  dprint("drop weapon\n");
+  //dprint("drop weapon\n");
   entity oself = self;
   self = old;
-  dprint(strcat("drop_weapon ", vtos(other.origin), " origin\n"));
+  //dprint(strcat("drop_weapon ", vtos(other.origin), " origin\n"));
   setorigin(self, other.origin);
   self.oldorigin = self.origin;
   //self.velocity = '0 0 0';
@@ -147,6 +147,7 @@ class firingpoint_c : entity {
     solid = SOLID_TRIGGER;
     setsize(this, '-8 -8 0', '8 8 16');
     firinggroup = targetname;
+    flags += FL_CORNER;
   };
 };
 

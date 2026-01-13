@@ -115,7 +115,7 @@ void() IsAutoPickup = {
 void(entity old) drop_weapon; //sv_combat.qc
 void(entity item) drop_an_item = {
   other = item.owner;
-  dprint(strcat(vtos(other.origin), " weapon drop origin\n"));
+  //dprint(strcat(vtos(other.origin), " weapon drop origin\n"));
  // item.owner = world;
  // item.solid = SOLID_TRIGGER;
   item.movetype = MOVETYPE_NONE; //why do you fly away? one landed close and acted normal
