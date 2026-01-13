@@ -300,4 +300,6 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
   setorigin(held, self.origin + self.view_ofs - held.view_ofs);
   held.angles = self.angles;
   held.modelindex = getmodelindex(held.weaponmodel);
+
+  self.primary = held;
 }

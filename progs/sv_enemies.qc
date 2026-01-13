@@ -1,13 +1,28 @@
 float BIPED_DONTRESPAWN = INHIBIT_RESPAWN;
 float BIPED_SPAWNED = SPAWNED_ACTIVE;
 
+void() remove_self = {
+  remove(self);
+}
+
 void() spawn_corpse = {
   entity corpse = spawn();
   setmodel(corpse, self.model);
   setorigin(corpse, self.origin);
   corpse.angles = self.angles;
   corpse.frame = self.frame;
+  corpse.angles = self.angles + '90 90 90';
+  corpse.think = remove_self;
+  corpse.nextthink = time + 10;
 };
+
+void() kill_object = {
+  dprint("kill object\n");
+  spawn_corpse();
+  self.movechain = world;
+  drop_items();
+  remove(self);
+}
 
 void(float behavior) dothink = {
   field_t thinkField = entityfieldref(behavior);
@@ -169,13 +184,18 @@ return(findradius(self.origin, dist, searchchain));
 void() VirtualWeapon;
 
 float (int i, tracked_c test, entity ent) testpropref = {
+  entity content;
+  if !(test) { dprint("err testpropref bad test tracked_c\n"); return 0;}
  field_t checkfield = entityfieldref( findentityfield (strcat (
                                                                "tracked_c::__mprop",
                                                                itos (i))));
+ content = test.checkfield;
+ if !(content) test.checkfield = ent;
+
  return(ent == test.checkfield);
 };
 
-void(int i, tracked_c shift) shiftpropfields = {
+float(int i, tracked_c shift) shiftpropfields = {
   field_t oldfield = entityfieldref( findentityfield (strcat (
                                                               "tracked_c::__mprop",
                                                               itos (i+1))));
@@ -183,6 +203,9 @@ void(int i, tracked_c shift) shiftpropfields = {
                                                               "tracked_c::__mprop",
                                                               itos (i))));
   shift.newfield = shift.oldfield;
+  if (shift.newfield) return 1;
+  dprint(strcat("err shift prop fields hit invalid entity at index ", itos(i), "\n"));
+  return 0;
 };
 
 entity (int i, tracked_c test) getprop = {
@@ -280,8 +303,12 @@ class biped_class : entity { //biped spawn point definition
   string firinggroup;
 
 nonvirtual float (entity ent) addprop = {
-  dprint("add prop\n");
+  //dprint("add prop\n");
   int i = 0;
+  if !(this.tracked) {
+      dprint("err addprop invalid this.tracked\n");
+      return 0;
+    }
   //check for open field
   while (i < 20) {
     if (testpropref(i, this.tracked, ent)) return(1);
@@ -290,7 +317,7 @@ nonvirtual float (entity ent) addprop = {
   //shift prop fields
   i = 0;
   while (i < 19) {
-    shiftpropfields(i, this.tracked);
+    if !(shiftpropfields(i, this.tracked)) break;
     i++;
   }
   this.tracked.prop19 = ent;
@@ -552,7 +579,7 @@ nonvirtual void() findstuff = {
   float dist = 500;
   //dprint("find stuff\n");
   ent = RequestSearch(dist);
-  dprint("find stuff\n");
+  //dprint("find stuff\n");
   if !(ent) return;
   while (ent) {
     if (ent.flags & FL_SEARCHPOINT) { //else real
@@ -648,7 +675,7 @@ nonvirtual void() ai_idle = {
       return;
     }
   }
-  //if !(this.firingpoint) findgoal();  FIXME let squad assign goal
+  //if !(this.firingpoint) findgoal(); let squad assign goal
    // else {
     //dprint("idle biped has firingpoint\n");
     //}
@@ -672,12 +699,12 @@ nonvirtual void(float dist) ai_walk = {
         goalentity = firingpoint;
       }
   }
-  else dprint("bp has a goal\n");
+  else// dprint("bp has a goal\n");
   //find corners between this and goal
   this.ideal_yaw = vectoyaw(this.goalentity.origin - this.origin);
   sub_changeyaw();
   if !(movetogoal(dist)) {
-      dprint("movetogoal failed in ai_walk\n");
+      //dprint("movetogoal failed in ai_walk\n");
       //if (oldorigin == origin) {
        // if (wait < time) {//just jams a door longer
           //if ( vlen(goal-falseorg) < 16) {
@@ -751,12 +778,17 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);
 
-  if(this.weapon) VirtualWeapon();
+  if(this.weapon){ VirtualWeapon();
+    dprint("virtual weapon should spawn\n");
+    if !(this.primary) dprint("err no primary weapon\n");
+    }
+  else { dprint("respawnbipeddo not assigning a weapon\n");}
   //if !(this.squad) this.squad = spawn(squad_c);
   //this.squad.style = this.style + FL_NOSQUAD; in spawn function
 };
 
 nonvirtual void() RespawnBipedTry = {
+  dprint("respawnbipedtry\n");
   switch (this.spawnflags) {
     case BIPED_DONTRESPAWN : {
       this.think = sub_noop;
@@ -816,8 +848,8 @@ nonvirtual void() RespawnBipedTry = {
     FGDbase("Spawnflags, Targetname", biped_class, "base biped class");
     COLOR(255 0 0);
     think = RespawnBipedDo;
-    //dprint("biped spawn function\n");
-    nextthink = time + 0.3;
+    dprint("biped spawn function\n");
+    nextthink = time + 0.1;
   };
 };
 

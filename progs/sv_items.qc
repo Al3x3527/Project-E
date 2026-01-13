@@ -66,6 +66,13 @@ void() PickupItem ={
   self.equip(); //because we don't know the class
 }
 
+void() AutoPickup ={
+  self.use();
+  sprint(other, 1, strcat("You got the ", self.netname, "\n"));
+  DespawnItem();
+  if (self.spawnflags | ITEM_HELD) self.spawnflags += ITEM_HELD;
+}
+
 void() UseItemDo = {
   //sprint(other, 1, "UseItemDo\n");
   self.use();
@@ -98,3 +105,28 @@ void() IsConsumable = {
   self.use = PickupItem;
   IsUsable();
 };
+void() IsAutoPickup = {
+  //have their own touch functions
+  if (self.spawnflags & ITEM_HELD) return;
+  self.touch = AutoPickup;
+  IsItem();
+};
+
+void(entity old) drop_weapon; //sv_combat.qc
+void(entity item) drop_an_item = {
+  other = item.owner;
+  dprint(strcat(vtos(other.origin), " weapon drop origin\n"));
+ // item.owner = world;
+ // item.solid = SOLID_TRIGGER;
+  item.movetype = MOVETYPE_NONE; //why do you fly away? one landed close and acted normal
+  //setorigin(item, self.origin);
+//  if (item.spawnflags & ITEM_HELD) item.spawnflags -= ITEM_HELD;
+
+  drop_weapon(item);
+}
+void() drop_items = {
+  self.movechain = FALSE;
+  entity item;
+  if (self.primary) drop_an_item(self.primary);
+  if (self.secondary) drop_an_item(self.secondary);
+}

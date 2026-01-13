@@ -8,6 +8,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) TakeDamage = 
 //inflictor can = projectile
 if !(targ) return;
 targ.health -= damage;
+//dprint(strcat(ftos(targ.health), "health left \n"));
 entity oself = self;
 self = targ;
 if (targ.th_pain) targ.th_pain(inflictor, damage);
@@ -91,13 +92,25 @@ void() use_active = {
   return;
 }
 
+void() stop_it = {
+  setorigin(self, self.oldorigin);
+  //self.velocity = '0 0 0';
+  //self.movetype = MOVETYPE_TOSS;
+}
+
 void(entity old) drop_weapon = {
+  dprint("drop weapon\n");
   entity oself = self;
   self = old;
+  dprint(strcat("drop_weapon ", vtos(other.origin), " origin\n"));
   setorigin(self, other.origin);
+  self.oldorigin = self.origin;
+  //self.velocity = '0 0 0';
   self.spawnflags -= ITEM_HELD;
   self.use = PickupItem;
   self.touch = UseItemTry;
+  self.think = stop_it;
+  self.nextthink = time + 0.01;
   RespawnItemDo();
   self = oself;
 };
@@ -120,7 +133,7 @@ class firingpoint_c : entity {
   string firinggroup;
 
   nonvirtual void() point_touch = {
-    dprint("firing point touch\n");
+    //dprint("firing point touch\n");
     if (other.goalentity != this) return;
     other.goalentity = world;
     other.think = other.th_stand;
@@ -231,7 +244,7 @@ class path_cover : entity {
 void() hint_touch = {
   if (other.flags & FL_CORNER) return;
   other.goalentity = self.enemy;
-  dprint("hint touched\n");
+  //dprint("hint touched\n");
 };
 
 void() hint_think = {

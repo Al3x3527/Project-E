@@ -34,7 +34,7 @@ nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8);};
 nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);};
 nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);};
 nonvirtual void() man_walk1 = [$walk1, man_walk2] {
-  dprint("man_walk1\n");
+  //dprint("man_walk1\n");
   ai_walk(6);
 };
 
@@ -46,10 +46,11 @@ void() man_pain3 = [$pain3, man_stand1]{};
 void() man_pain2 = [$pain2, man_pain3]{};
 void(entity inflictor, float damage) man_pain1 = [$pain1, man_pain2] {
   dprint("man_pain1\n");
-  usecmdlist();
+  //usecmdlist();
+  if !(health > 0) think = th_die;
 };
 
-void() man_die2 = [$die2, man_die2] {spawn_corpse(); remove(this);};
+void() man_die2 = [$die2, man_die2] {kill_object();};
 void() man_die1 = [$die1, man_die2]{dprint("man_die1\n");};
 
 void() man_charge1 = {

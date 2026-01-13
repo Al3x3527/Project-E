@@ -18,8 +18,8 @@ enum float
     STATE_UP
 };
 
-float STATE_ACTIVE = 1;
-float STATE_INACTIVE = 0;
+float STATE_ACTIVE = 0; //convention
+float STATE_INACTIVE = 1;
 float FINAL_CUSTOM_KEY = 4194304;
 float highest_custom_key;
 
@@ -31,6 +31,7 @@ void() SUB_CalcMoveDone = {
 }
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove = {
+  dprint("SUB_CalcMove\n");
   vector vdestdelta;
   float len, traveltime, localtime;
   if !(tspeed) objerror("No speed is defined!");
@@ -59,26 +60,26 @@ void(vector tdest, float tspeed, void() func) SUB_CalcMove = {
 
 class item_key : entity {
   //float customkeys; items
-  virtual void() touch = {
+  virtual void() use = { //changed from touch
     if (other.items & items) return; //has keys
-
-    sprint(other, 1, strcat("You got the ", netname, "\n"));
     other.items += items; //give keys
     //activator = other;
-
+    use();
   };
   void() item_key = {
+    setmodel(this, gamemodels "qp_bomb.mdl");
     if (target == "") {
       objerror("key no target");
       return;
     }
     netname = target;
     setsize(this, '-16 -16 -24', '16 16 32');
-    if !(items) { //just set it ourselves
+    if !(items) { //just set it ourselves TODO
         objerror("key no item");
         return;
       }
-    IsItem();
+    //IsItem();
+    IsAutoPickup();
     fgdprint("@fgd\n@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : \"key item placed on map\" [");
   };
 };
@@ -94,9 +95,11 @@ void(string key_name) keylock_set_custom_key = {
   self.netname = key_name;
 }
 float() keylock_has_key_set = {
-  return self.items != 0;
+  if (self.items) dprint(strcat("keylock has key ", ftos(self.items), "\n"));
+  return (self.items != 0);
 };
 void(entity client, string custom_message, void() success_func) keylock_try_to_unlock ={
+  dprint("keylock_try_to_unlock\n");
   string s;
   if !(client.items & self.items) {
     if (custom_message != "") centerprint (client, custom_message);
@@ -109,6 +112,27 @@ void(entity client, string custom_message, void() success_func) keylock_try_to_u
   sprint(client, 1, self.netname);
   sprint(client, 1, "\n");
   success_func ();
+};
+
+void() trigger_door_use = {
+  if !(self.owner) return;
+  self = self.owner;
+  self.use();
+};
+
+class func_door_trigger : entity {
+  virtual void() touch = {
+    if (other.health <= 0) return;
+    if (other.movetype == MOVETYPE_NOCLIP) return;
+    if (time < impulse) return;
+    impulse = time + 1;
+    use();
+  };
+  void() func_door_trigger = {
+    movetype = MOVETYPE_NONE;
+    solid = SOLID_TRIGGER;
+    use = trigger_door_use;
+  };
 };
 
 class func_door : entity {
@@ -150,8 +174,11 @@ class func_door : entity {
   };
 
   nonvirtual void() door_fire = {
+    dprint("door fire\n");
     if (owner != this) objerror("door_fire: owner != this");
-    if (estate != STATE_ACTIVE) return;
+    if (estate != STATE_ACTIVE) {
+      dprint("estate != STATE_ACIVE\n");
+      return; }
     message = "";
     if (spawnflags & DOOR_TOGGLE) {
       if (state == STATE_UP || state == STATE_TOP) {
@@ -163,9 +190,12 @@ class func_door : entity {
   };
 
   virtual void() use = {
+    dprint("door: use\n");
     message = "";
-    owner.message = "";
-    enemy.message = "";
+    if (owner)
+      owner.message = "";
+    if (enemy)
+      enemy.message = "";
     //self = self.owner for group
     door_fire();
   };
@@ -179,12 +209,16 @@ class func_door : entity {
   };
 
   virtual void() touch = {
+    //doors without keys are opened with door_trigger_touch
     if (impulse > time) return;
+    dprint("door: touch\n");
     impulse = time + 2;
     if (message != "") {
       centerprint (other, message);
     }
-    if (!keylock_has_key_set ()) return;
+    if (!keylock_has_key_set ()){
+      dprint("door: touch no key\n");
+      return; }
     keylock_try_to_unlock (other, "", door_unlock);
   };
 
@@ -193,6 +227,33 @@ class func_door : entity {
     solid = SOLID_BSP;
     movetype = MOVETYPE_PUSH;
     FUNC(func_door, "Targetname", "door brush");
+    //TODO
+    owner = this;
+    if !(movedir) movedir = '1 0 0';
+
+    //TODO: fgdgen
+    if !(speed) speed = 100;
+    if !(wait) wait = 3;
+    //if !(lip) lip = 8;
+    //if !(dmg) dmg = 2;
+    pos1 = origin;
+    pos2 = pos1 + movedir*(fabs(movedir*size) - 8); //- lip
+
+    if (spawnflags & DOOR_START_OPEN) {
+        setorigin(this, pos2);
+        pos2 = pos1;
+        pos1 = origin;
+      }
+    state = STATE_BOTTOM;
+/*    if (health) {
+      takedamage = DAMAGE_YES;
+      th_die = door_killed;
+    }
+*/
+
+    func_door_trigger trigger = spawn(func_door_trigger);
+    trigger.owner = this;
+    setsize(trigger, mins - '60 60 8', maxs + '60 60 8');
   };
 };
 
