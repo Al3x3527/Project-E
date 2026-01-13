@@ -66,7 +66,7 @@ void() man_shoot1 = {
   if (this.frame < $shoot1) this.frame = $shoot1;
   else if (this.frame > $shoot2) this.frame = $shoot1;
   if (this.frame == $shoot1) {
-    ai_shoot();
+    ai_shoot(); //this.weapon_use();
     //this.think = this.th_charge;
   }
   else if (this.frame == $shoot2) this.think = this.th_charge;

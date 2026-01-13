@@ -301,5 +301,6 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
   held.angles = self.angles;
   held.modelindex = getmodelindex(held.weaponmodel);
 
-  self.primary = held;
+  self.active_weapon = self.primary = held;
+  self.weapon_use = use_active;
 }
