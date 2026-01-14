@@ -160,11 +160,13 @@ float (entity ent) CheckAlive = {
 
 float (entity ent) CheckLine = {
   //dprint("check line\n");
-  traceline(self.origin, ent.origin, MOVE_NOMONSTERS, self);
+  traceline(self.origin + self.view_ofs, ent.origin + ent.view_ofs, MOVE_MISSILE, self);
   if (trace_fraction == 1) {
     //if (self.status < STA_SIGHT) self.status = STA_SIGHT;
     return(1);
   }
+  else if (trace_ent == ent)
+    return(1);
   //if (self.status > STA_UNCERTAIN) self.status = STA_UNCERTAIN;
   return(0);
 };// NOTE: not oo function
@@ -582,7 +584,7 @@ nonvirtual void() findstuff = {
   float thisyaw = vectoyaw(this.angles) + 90;
   float maxyaw = 70;
   float deltayaw;
-  float dist = 500;
+  float dist = 700;
   //dprint("find stuff\n");
   ent = RequestSearch(dist);
   if (ent == FALSE) {
@@ -592,7 +594,7 @@ nonvirtual void() findstuff = {
   //dprint("find stuff\n");
   if !(ent) return;
   while (ent) {
-    dprint(strcat(ent.classname, " is ent findstuff\n"));
+    //dprint(strcat(ent.classname, " is ent findstuff\n"));
     if (ent.flags & FL_CLIENT) dprint("client searched\n");
     if (ent.flags | FL_CORNER) {
     if (ent.flags & FL_SEARCHPOINT) { //else real
@@ -779,6 +781,7 @@ nonvirtual void(float dist) ai_charge = {
 };
 
 nonvirtual void() ai_shoot = {
+  v_angle = angles;
   this.weapon_use();
 };
 
@@ -1104,18 +1107,29 @@ void(biped_class member, float f, squad_c squad) memberwrite = {
   int i = 0;
   biped_class testmember;
   entity point;
+  entity priority = self.enemy;
   dprint("squad think !!!!!!\n");
-  if !(asquad.firinggroup) { dprint("squad think no firinggroup\n"); return; }
+  if !(asquad.firinggroup) { dprint("squad think no firinggroup\n"); }
   point = findtarget(asquad.firinggroup);
   while (i < 8) {
     testmember = memberref(i, asquad);
-    if !(testmember) return;
-    if !(testmember.style) return;
-    if !(point) { dprint("err no point squad think\n"); return; }
-    testmember.firingpoint = testmember.goalentity = point;
-    testmember.think = testmember.th_walk;
-    point = point.enemy;
-    dprint("firing point set by squad\n");
+    if !(testmember) break;
+    if !(testmember.style) break;
+    if (testmember.firingpoint) {
+      if (testmember.enemy.scary > priority.scary) {
+        dprint("squad guard enemy sharing\n");
+        asquad.enemy = priority = testmember.enemy;
+        }
+      else if (priority) testmember.enemy = priority;
+    } else {
+      if !(point) { dprint("err no point squad think\n"); break; }
+      testmember.firingpoint = testmember.goalentity = point;
+      testmember.think = testmember.th_walk;
+      point = point.enemy;
+      //dprint("firing point set by squad\n");
+    }
     i++;
   }
-  };
+  asquad.think = squad_guard_think;
+  asquad.nextthink = time + 1;
+};
