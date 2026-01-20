@@ -51,6 +51,7 @@ void() PlayerPreThink =
 	{
 		self.flags = self.flags | FL_JUMPRELEASED;
 	}
+	//dprint(strcat("player health ", ftos(self.health), "\n"));
 };
 
 void() PlayerPostThink =
