@@ -176,6 +176,8 @@ float searchtime;
 .float estate;
 //.float style;
 .float control;
+//ammo_rockets as jump energy
+//ammo_nails as blood points
 
 void() sub_chainmoved = {
 	entity parent = self.owner;

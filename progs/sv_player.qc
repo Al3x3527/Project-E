@@ -5,12 +5,34 @@
 
 void() PlayerJump =
 {
+	/* jump energy
 	if (!(self.flags & FL_ONGROUND))
+		return; */
+	if (!(self.ammo_rockets > 0))
 		return;
-
 	if ( !(self.flags & FL_JUMPRELEASED) )
 		return;
-	
+	float boost = self.ammo_rockets;
+	self.ammo_rockets -= 170;
+	dprint(strcat("jump energy", ftos(self.ammo_rockets), "\n"));
+	dprint(strcat("velocity", vtos(self.velocity), "\n"));
+	if (!(self.flags & FL_ONGROUND)) {
+		//air control
+		vector vyaw = self.v_angle;
+		vyaw.x = vyaw.z = 0;
+		makevectors(vyaw);
+		vector vel = self.velocity;
+		vector vxy = vel;
+		vxy.z = 0;
+		vxy = vlen(vxy) * v_forward;
+		self.velocity.x = vxy.x;
+		self.velocity.y = vxy.y;
+		//loose nothing
+		if (vel.z > 0) self.velocity.z += boost;
+		else self.velocity.z = boost * 1.3; //spoof on ground instead?
+	}
+	//boost for jumping into wall (feel good)?
+
 	self.weaponframe = 0;
 	self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
 	self.button2 = 0;
@@ -57,6 +79,8 @@ void() PlayerPreThink =
 void() PlayerPostThink =
 {
 	self.impulse = 0;
+	//jump energy
+	if (self.flags & FL_ONGROUND) self.ammo_rockets = 340;
 };
 
 void() ClientKill =
