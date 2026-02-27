@@ -79,20 +79,40 @@ class item_key : entity {
         return;
       }
     //IsItem();
-    IsAutoPickup();
+    //IsAutoPickup();
+    //FIXME IsKey to find doors?
+    //keylock_set_custom_key(target);
+    think = IsKey;
+    nextthink = time + 0.3;
     fgdprint("@fgd\n@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : \"key item placed on map\" [");
   };
 };
 
 float (string key_name) CustomKeyFlag = {
   item_key key_def = find(world, target, key_name);
+  //TODO: check for unused .items bitflag
   if !(key_def.items) {objerror("custom key flags no items");  return(0);}
+  dprint(strcat("CustomKeyFlag ", ftos(key_def.items), "\n"));
   return(key_def.items);
 }
 
 void(string key_name) keylock_set_custom_key = {
+  dprint("keylock_set_custom_key\n");
   self.items = CustomKeyFlag (key_name);
   self.netname = key_name;
+  //FIXME: assign items to all targets
+  entity door0 = find(world, targetname, key_name);
+  if (door0) {
+    entity door = door0;
+    } else objerror("custom key no doors");
+  while (door){
+    dprint(strcat("door found for ", key_name, "\n"));
+    door.items = self.items;
+    door.netname = self.netname;
+    door = find(door, targetname, key_name);
+    if !(door) break;
+    if (door == door0) break;
+  }
 }
 float() keylock_has_key_set = {
   if (self.items) dprint(strcat("keylock has key ", ftos(self.items), "\n"));
@@ -117,6 +137,7 @@ void(entity client, string custom_message, void() success_func) keylock_try_to_u
 void() trigger_door_use = {
   if !(self.owner) return;
   self = self.owner;
+  //NOTE: field should not spawn if key door
   self.use();
 };
 
@@ -175,6 +196,7 @@ class func_door : entity {
 
   nonvirtual void() door_fire = {
     dprint("door fire\n");
+    dprint(strcat("movedir ", vtos(movedir), "\n"));
     if (owner != this) objerror("door_fire: owner != this");
     if (estate != STATE_ACTIVE) {
       dprint("estate != STATE_ACIVE\n");
@@ -216,9 +238,10 @@ class func_door : entity {
     if (message != "") {
       centerprint (other, message);
     }
-    if (!keylock_has_key_set ()){
+    if (!keylock_has_key_set ()){ //if no key set
       dprint("door: touch no key\n");
       return; }
+    //NOTE: door otherwise opens with trigger volume
     keylock_try_to_unlock (other, "", door_unlock);
   };
 
@@ -229,7 +252,7 @@ class func_door : entity {
     FUNC(func_door, "Targetname", "door brush");
     //TODO
     owner = this;
-    if !(movedir) movedir = '1 0 0';
+    if !(movedir) movedir = '1 0 0'; //no quotes in editor
 
     //TODO: fgdgen
     if !(speed) speed = 100;
@@ -250,6 +273,10 @@ class func_door : entity {
       th_die = door_killed;
     }
 */
+    //dont spawn field if key door
+    if (health) return;
+    if (targetname != "") return;
+    if (keylock_has_key_set ()) return; //possibly redundant
 
     func_door_trigger trigger = spawn(func_door_trigger);
     trigger.owner = this;

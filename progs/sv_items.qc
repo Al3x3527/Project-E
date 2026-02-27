@@ -112,6 +112,12 @@ void() IsAutoPickup = {
   IsItem();
 };
 
+void(string keyname) keylock_set_custom_key;
+void() IsKey = {
+  keylock_set_custom_key(self.target);
+  IsAutoPickup();
+};
+
 void(entity old) drop_weapon; //sv_combat.qc
 void(entity item) drop_an_item = {
   other = item.owner;
