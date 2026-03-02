@@ -12,6 +12,24 @@ targ.health -= damage;
 entity oself = self;
 self = targ;
 if (targ.th_pain) targ.th_pain(inflictor, damage);
+
+//TODO: reward doing damage
+if (self.ammo_nails > 0) {
+  //dprint("enemy has nails\n");
+  if (attacker.flags & FL_CLIENT)
+    sprint(attacker, 1, "+10\n");
+  attacker.ammo_nails += 10;
+  self.ammo_nails -= 10;
+ }
+//TODO: reward kills
+if !(self.health > 0) {
+    if (self.ammo_nails > 0){
+      if (attacker.flags & FL_CLIENT)
+        sprint(attacker, 1, strcat("+", ftos(self.ammo_nails), "\n"));
+      attacker.ammo_nails += self.ammo_nails;
+      self.ammo_nails = 0;
+    }
+  }
 self = oself;
 };
 
@@ -69,7 +87,7 @@ void(float damage, vector dir) BulletHit = {
 
 class func_target: entity {
   nonvirtual void(entity inflictor, float damage) targ_pain = {
-    dprint("target hit "); dprint(ftos(this.health)); dprint(" health\n");
+    //dprint("target hit "); dprint(ftos(this.health)); dprint(" health\n");
   };
   nonvirtual void() targ_touch = {dprint(ftos(this.health)); dprint("debug\n");};
   void() func_target = {

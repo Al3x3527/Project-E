@@ -265,13 +265,15 @@ class objective_c : entity {
     float f = 0;
     biped_class testbiped = FALSE;
     int i = 0;
-    dprint("fill platoon\n");
+    //dprint("fill platoon\n");
              //new squad or append?
     while (ref < 4) { //squad slot
-      while (i < 20) {
+      while (i < 20) { //NOTE not the problem loop.
         test = FALSE;
         test = unassignedlist[i].squad0;
-        if !(test) { dprint("no unassigned remain\n"); return(-1); } //worldspawn no unassigned
+        if !(test) { //NOTE more robust check no effect
+            //dprint("no unassigned remain\n");
+            return(-1); } //worldspawn no unassigned
         if !(test.population > (maxpop - health)) {
             asquad = FALSE;
             if !(plat.classname) {dprint("fillplatoon err no plat classname\n"); return(0);}
@@ -284,62 +286,63 @@ class objective_c : entity {
                   test.style -= FL_NOSQUAD;
                 } else test.style -= FL_UNASSIGNED;
                 test.style += FL_ASSIGNED;
-                test.classname = "assigned squad";
-
+                //test.classname = "assigned squad"; //NOTE was squad nosquad
                 test.firinggroup = firinggroup;
                 test.nextthink = time + .1;
-
-                if !(squadwrite(ref, plat, test)) {
+                if !(squadwrite(ref, plat, test)) { //NOTE SQUADWRITE
                     dprint(strcat("squad", ftos(ref), " ", plat.classname,
-                                  test.classname, "write fail\n"));
-                    dprint("!!!!!!!!!!!!!!!!!!\n");
+                                  test.classname, " write fail\n"));
                     return(0);
                   } //plat.squad0 = test;
+
                 asquad = squadref(ref, plat);
                 if !(asquad == test) {dprint("err test not written to field\n");
                   dprint(strcat(asquad.classname, " is asquad ", test.classname, " is test\n"));}
-                else {
-                  dprint(asquad.classname);
-                  dprint(" is asquad, field really was set to test squad\n");
-                  }
+                //else {
+                 // dprint(asquad.classname);
+                  //dprint(" is asquad, field really was set to test squad\n");
+                  //}
                 f ++;
               }
             else { //append squad
-              //f = 0; //was 0
               while (f < 8) { //platoon squads
-                //dprint(ftos(ref)); dprint(" append squad\n");
+                //NOTE: appending squad
                 testbiped = FALSE;
+                // unnassigned[i], squad[ref], member[f]
                 dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
-                //dprint("test biped\n");
-                //dprint(strcat("calling memberref with asquad classname ",
-                              //asquad.classname,
-                              //", squad", ftos(ref),
-                              //", field member", ftos(f)));
-                //dprint(strcat("unassigned index ", ftos(i),"\n"));
-                if !(asquad.classname) {dprint("asquad no classname aborting memberref\n"); return (0);}
+                if !(asquad.classname) {dprint("err asquad no classname aborting memberref\n"); return (0);}
+                dprint("memberref expecting nothing\n");
                 testbiped = memberref(f, asquad); //plat sq member
-                if !(testbiped.style) {
-                    //dprint(ftos(f)); dprint(" open member slot\n");
+                if (testbiped){
+                  dprint("nonerr unexpected member\n");
+                  //eprint(testbiped);
+                  if (testbiped.style) {
+                    f++;
+                    dprint(strcat("member slot is ", testbiped.classname, "\n"));
+                    eprint(testbiped);
+                  }
+                  else f++;
+                }
+                else {
+                //if !(testbiped.style) {//NOTE: open member slot
+                    if !(test.member0) dprint("err no member0\n");
+                    //FIXME
                     memberwrite(test.member0, f, asquad); //member to slot.memberf
+                    dprint("memberref expecting entity\n");
                     if !(memberref(f, asquad)) {
-                        dprint(strcat(asquad.classname, ftos(f), "err write failed\n")); return 0;}
+                        dprint("err write failed\n");
+                        //eprint(test.member0);
+                        //return 0;
+                      }
+                    else {dprint("memberwrite confirmed\n");}
                     f++;
                     break; //get new unassigned
                   }
-                else {
-                  f++;
-                  dprint(strcat("member slot is ", testbiped.classname, "\n"));
-                  eprint(testbiped);
-                  }
-                //dprint("moving on to next member slot "); dprint(ftos(f + 1)); dprint("\n");
-               //f++;
+                //}
               }
-              //dprint(ftos(f)); dprint("members filled");
               if (f > 7) {
-               // dprint(", all members filled in squad"); dprint(ftos(ref));
                 ref ++; //squad full
                 f = 0;
-                //dprint(" moving on to squad"); dprint(ftos(ref)); dprint("\n");
               } //both cases
             }
             unassignedlist[i].squad0 = FALSE;
@@ -361,26 +364,27 @@ class objective_c : entity {
   };
 
   nonvirtual void() link_firingpoints = {
-    dprint("link firingpoints\n");
+    //dprint("link firingpoints\n");
     entity point = world;
     int cnt = 0;
     point = findtarget(firinggroup);
+    if (point.enemy) return;
     if !(point) { dprint("err no firingpoints link firingpoints\n"); return; }
     while (point != world) {
       cnt++;
       point.enemy = findmoretargets(point, firinggroup);
       point = point.enemy;
     }
-    dprint(strcat(ftos(cnt), "firingpoints linked\n"));
+    //dprint(strcat(ftos(cnt), "firingpoints linked\n"));
   };
 
   virtual void() use = {
-    dprint("objective use\n");
+    //dprint("objective use\n");
     //first start waves
     enemy = findtarget(target);
     if !(enemy) {dprint("err no target wave\n"); return;}
     enemy.nextthink = time + 0.3;
-    link_firingpoints();
+    link_firingpoints(); //TODO don't run every time?
     //make platoon
     platoon_c currentplatoon = this.platoon;
     if !(currentplatoon) { this.platoon = currentplatoon = spawn(platoon_c);
@@ -394,14 +398,14 @@ class objective_c : entity {
     //check population
     //assign style to platoon
     if !(max_health) max_health = 80;
-    fillPlatoon();
+    fillPlatoon(); //TODO fix spam before spawns
     if (this.health) {
       dprint(ftos(health)); dprint(" objective health\n");
       if !(frags > health) objectiveDo();
       else dprint("objective does not meet min pop\n");
         }
     else {
-      dprint("objective no pop\n");
+      //dprint("objective no pop\n");
       think = use;
       nextthink = time + 1.4;
     }

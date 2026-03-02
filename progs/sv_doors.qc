@@ -100,7 +100,6 @@ void(string key_name) keylock_set_custom_key = {
   dprint("keylock_set_custom_key\n");
   self.items = CustomKeyFlag (key_name);
   self.netname = key_name;
-  //FIXME: assign items to all targets
   entity door0 = find(world, targetname, key_name);
   if (door0) {
     entity door = door0;
@@ -195,11 +194,11 @@ class func_door : entity {
   };
 
   nonvirtual void() door_fire = {
-    dprint("door fire\n");
-    dprint(strcat("movedir ", vtos(movedir), "\n"));
+    //dprint("door fire\n");
+    //dprint(strcat("movedir ", vtos(movedir), "\n"));
     if (owner != this) objerror("door_fire: owner != this");
     if (estate != STATE_ACTIVE) {
-      dprint("estate != STATE_ACIVE\n");
+      //dprint("estate != STATE_ACIVE\n");
       return; }
     message = "";
     if (spawnflags & DOOR_TOGGLE) {
@@ -212,7 +211,7 @@ class func_door : entity {
   };
 
   virtual void() use = {
-    dprint("door: use\n");
+    //dprint("door: use\n");
     message = "";
     if (owner)
       owner.message = "";

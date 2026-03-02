@@ -14,8 +14,8 @@ void() PlayerJump =
 		return;
 	float boost = self.ammo_rockets;
 	self.ammo_rockets -= 170;
-	dprint(strcat("jump energy", ftos(self.ammo_rockets), "\n"));
-	dprint(strcat("velocity", vtos(self.velocity), "\n"));
+	//dprint(strcat("jump energy", ftos(self.ammo_rockets), "\n"));
+	//dprint(strcat("velocity", vtos(self.velocity), "\n"));
 	if (!(self.flags & FL_ONGROUND)) {
 		//air control
 		vector vyaw = self.v_angle;

@@ -178,7 +178,7 @@ if (self == searchent) {
  }
  else if (CheckDist(searchent) < DIST_FAR)
    if (time < searchtime + 0.5) return (FALSE);
-dprint("request granted\n");
+//dprint("request granted\n");
 searchent = self;
 searchtime = time;
 return(findradius(self.origin, dist, searchchain));
@@ -221,7 +221,7 @@ if !(p) return(FALSE);
 return(p);
 }
 float (entity p) testnavcorners = {
-  dprint("test nav corners");
+ // dprint("test nav corners");
 vector vec1;
 vector vec2;
 //if !(p) return (-1); //no prop
@@ -234,7 +234,7 @@ return(0);
 };
 
 entity(int i, tracked_c test) testpropcover = {
-  dprint("test prop cover\n");
+  //dprint("test prop cover\n");
   entity e = self.enemy;
   field_t checkfield = entityfieldref( findentityfield (strcat (
                                                                 "tracked_c::__mprop",
@@ -355,7 +355,7 @@ nonvirtual float (entity ent) addenemy = {
 
   if (least == ent) {
     addprop(ent);
-    dprint("add enemy was least\n");
+    //dprint("add enemy was least\n");
     return(0);
   }
   }
@@ -365,12 +365,12 @@ nonvirtual float (entity ent) addenemy = {
   else if (this.enemies.foe2 == least) this.enemies.foe2 = ent;
   else if (this.enemies.foe3 == least) this.enemies.foe3 = ent;
   else dprint("problem in addenemy!\n");
-  dprint(strcat(enemy.classname, " is enemy found\n"));
+  //dprint(strcat(enemy.classname, " is enemy found\n"));
   return (1);
 };
 
 nonvirtual float () findfear = {
-  dprint("find fear\n");
+  //dprint("find fear\n");
   entity ent = this.enemy;
   if !(scary) dprint("err findfear no scary\n");
   vector sdanger = this.scary * '1 0 0' + this.movechain.scary * '0 1 0';
@@ -381,7 +381,7 @@ nonvirtual float () findfear = {
 };
 
  nonvirtual float () findcover = {
-   dprint("find cover\n");
+   //dprint("find cover\n");
    // test FL_COVER props against enemy, create firingpoint_c
    entity coverpoint;
    tracked_c test = this.tracked;
@@ -419,7 +419,7 @@ nonvirtual float () findfear = {
      //NOTE: in weaponsound
 
  nonvirtual void() find_action = { //fallback
-dprint("find action\n");
+//dprint("find action\n");
    if (this.control & this.action) this.action = ACT_NONE;
    //NOTE: ACT_WAIT, ACT_UNCOVER, ACT_NONE never supressed
    if !(this.status) {
@@ -595,14 +595,14 @@ nonvirtual void() findstuff = {
   if !(ent) return;
   while (ent) {
     //dprint(strcat(ent.classname, " is ent findstuff\n"));
-    if (ent.flags & FL_CLIENT) dprint("client searched\n");
+    //if (ent.flags & FL_CLIENT) dprint("client searched\n");
     if (ent.flags | FL_CORNER) {
     if (ent.flags & FL_SEARCHPOINT) { //else real
-      if (ent.flags & FL_CLIENT) dprint("client searchpoint found\n");
+      //if (ent.flags & FL_CLIENT) dprint("client searchpoint found\n");
       if !(CheckLine(ent.enemy)) { //visible ignore
           if (CheckAlive(ent)) {//prop ignore
             if (ent.team != this.team) { //ignore
-              dprint("add virtual enemy\n");
+              //dprint("add virtual enemy\n");
               addenemy(ent);
               if (this.status < STA_CERTAIN) this.status = STA_CERTAIN;
               } //team ignore
@@ -610,27 +610,27 @@ nonvirtual void() findstuff = {
         }
     } else{ //real
       //dprint("real found\n");
-      if (ent.flags & FL_CLIENT) dprint("client found\n");
+      //if (ent.flags & FL_CLIENT) dprint("client found\n");
       if (CheckLine(ent)) { //else check path
         if (ent.solid & SOLID_SLIDEBOX){ //see prop
           if (CheckAlive(ent) && (ent.team != this.team)){  //ignore
-              dprint("potential enemy found\n");
+              //dprint("potential enemy found\n");
               entyaw = vectoyaw (ent.origin - this.origin);
               deltayaw = fabs(thisyaw - entyaw);
               if (deltayaw > 180) deltayaw -= 180;
               if (deltayaw < maxyaw) { //ignore
-                dprint(strcat(ent.classname, " add enemy\n"));
+                //dprint(strcat(ent.classname, " add enemy\n"));
                 addenemy(ent);
                 if (this.status < STA_SIGHT) this.status = STA_SIGHT;
               }
             }
         } else {
-          dprint("add prop\n");
+          //dprint("add prop\n");
           addprop(ent);
         }
       } else { //always see path entities
         if (ent.flags & FL_COVER) {
-          dprint("add cover prop\n");
+          //dprint("add cover prop\n");
           addprop(ent);
         }
       }
@@ -643,27 +643,29 @@ nonvirtual void() findstuff = {
 };
 
 nonvirtual void() findgoal = {
-  dprint("findgoal\n");
-  if (this.goalentity) { dprint("biped has goal\n"); return;}
-  if !(this.firinggroup) dprint("no firinggroup\n");
+  //dprint("findgoal\n");
+  if (this.goalentity) {
+    //dprint("biped has goal\n");
+    return;}
+  //if !(this.firinggroup) dprint("no firinggroup\n");
   this.goalentity = findtarget(this.firinggroup);
   if (this.goalentity) {
     this.firingpoint = this.goalentity;
-    dprint("firing point found\n");
+    //dprint("firing point found\n");
     }
   else {
-    dprint(firinggroup); dprint(" no firing point\n");
+    //dprint(firinggroup); dprint(" no firing point\n");
     this.goalentity = findtarget(this.target);
-    if !(this.target) dprint("no target\n");
+    //if !(this.target) dprint("no target\n");
     //else dprint(this.target);
   }
   if (this.goalentity){
     this.action = ACT_GUARD;
     this.status = STA_ACTIVE;
     this.think = th_walk;
-    dprint("found goal\n");
+    //dprint("found goal\n");
   }
-  else dprint("no goal found\n");
+  //else dprint("no goal found\n");
 };
 
 nonvirtual void() find_corners = {
@@ -689,13 +691,13 @@ nonvirtual void() ai_idle = {
   if (this.status & STA_IDLE) {
     findstuff();
     if (this.enemy) this.think = this.th_charge;
-    dprint("charge from idle\n");
+    //dprint("charge from idle\n");
     return;
   } //look for enemies
   if (this.status > 7) {
     if(this.enemy) {
       this.think = this.th_charge;
-      dprint("charge from idle 1\n");
+      //dprint("charge from idle 1\n");
       return;
     }
   }
@@ -716,7 +718,7 @@ nonvirtual void(float dist) ai_walk = {
   falseorg.z = 0;
   findstuff();
   if (this.enemy) {this.think = this.th_charge;
-    dprint("ai walk charge\n");
+    //dprint("ai walk charge\n");
     }
   if !(this.goalentity) {
       if !(this.firingpoint)
@@ -748,7 +750,7 @@ nonvirtual void(float dist) ai_walk = {
 };
 
 nonvirtual void(float dist) ai_charge = {
-  dprint("ai charge\n");
+  //dprint("ai charge\n");
   if !(this.enemy) {
     this.think = this.th_stand;
     //check tracked
@@ -776,7 +778,7 @@ nonvirtual void(float dist) ai_charge = {
   movetogoal(dist);
   if (this.status > STA_CERTAIN) //TODO: other attacks
     if (random() > 0.8)
-      dprint("ai charge attack\n");
+      //dprint("ai charge attack\n");
       this.think = this.th_shoot;
 };
 
@@ -808,7 +810,7 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   this.tracked = spawn(tracked_c);
 
   if(this.weapon){ VirtualWeapon();
-    dprint("virtual weapon should spawn\n");
+    //dprint("virtual weapon should spawn\n");
     if !(this.primary) dprint("err no primary weapon\n");
     }
   else { dprint("respawnbipeddo not assigning a weapon\n");}
@@ -817,7 +819,7 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
 };
 
 nonvirtual void() RespawnBipedTry = {
-  dprint("respawnbipedtry\n");
+  //dprint("respawnbipedtry\n");
   switch (this.spawnflags) {
     case BIPED_DONTRESPAWN : {
       this.think = sub_noop;
@@ -878,7 +880,7 @@ nonvirtual void() RespawnBipedTry = {
     COLOR(255 0 0);
     scary = 1; //idk
     think = RespawnBipedDo;
-    dprint("biped spawn function\n");
+    //dprint("biped spawn function\n");
     nextthink = time + 0.1;
   };
 };
@@ -938,6 +940,7 @@ class squad_c : entity {
 
   void() squad_c = {
     squadtype = 0;
+    classname = "squad_c";
     think = squad_guard_think;
   };
 };
@@ -946,7 +949,7 @@ class squad_nosquad : squad_c {
   void() squad_nosquad = {
     style = FL_NOSQUAD;
     population = 1;
-    classname = "squad nosquad";
+    //classname = "squad nosquad";
   };
 };
 
@@ -1049,15 +1052,37 @@ class platoon_c : entity {
 
 biped_class (float f, squad_c squad) memberref = {
   if !(squad) {dprint("member ref err no squad\n"); return (FALSE);}
-  field_t checkfield = entityfieldref (findentityfield (strcat (
-                                                                "squad_c::__mmember",
-                                                                ftos (f))));
-  biped_class member = squad.checkfield;
-  //dprint((strcat("member ref squad classname ", squad.classname, " field squad_c::__mmember", ftos(f), " member classname ", member.classname)));
-  if !(squad) { dprint("memberref err no squad\n"); return(FALSE);}
-  if (squad.checkfield) { dprint(" member referenced\n"); return(squad.checkfield); }
-  else dprint(" member ref world\n");
-  return (FALSE); }
+  float fieldnum  = findentityfield (strcat (
+                                             "squad_c::__mmember",
+                                             ftos (f)));
+  field_t checkfield = entityfieldref (fieldnum);
+  biped_class member = FALSE;
+  if (squad.checkfield) member = squad.checkfield;
+  else {
+    //dprint("memberref no member simple\n");
+    return(FALSE);
+  }
+  if (member) {
+    if !(getentityfieldstring(fieldnum, squad)) {
+        dprint(" err fake field memberref\n");
+        return(FALSE);
+      }
+    //NOTE wasfreed() can not be used for this
+    //nuclear option:
+    entity test = world;
+    while (test != member) {
+      test = nextent(test);
+      if !(test) {
+          //dprint("member is not any ent\n");
+          return(FALSE);
+        }
+    }
+    //dprint(" success member referenced\n");
+    return(member);
+  }
+    dprint(" nonerr member ref world\n");
+    return (FALSE);
+};
 
 squad_c (float f, platoon_c plat) squadref = {
   if !(plat) {dprint("squadref err no plat"); return(FALSE);}
@@ -1073,59 +1098,81 @@ squad_c (float f, platoon_c plat) squadref = {
     //                       ", squad classname ", test.classname,
       //                     ", field platoon_c::__msquad", ftos(f), " squad found\n"));}
   else {dprint("squadref no squad found\n"); return (FALSE);}
-  return(test); }
+  return(test);
+}
 
 float(float f, platoon_c plat, squad_c squad) squadwrite = {
   if !(plat.classname) {dprint("squadwrite err plat no classname\n"); return(0);}
   if !(squad.classname) {dprint("squadwrite err squad no classname\n"); return(0);}
-   field_t checkfield = entityfieldref (findentityfield (strcat (
-                                                                "platoon_c::__msquad",
-                                                                ftos (f))));
+  float fieldref = findentityfield (strcat (
+                                            "platoon_c::__msquad",
+                                            ftos (f)));
+   field_t checkfield = entityfieldref (fieldref);
    plat.checkfield = squad;
    squad = FALSE;
    squad = plat.checkfield;
    if !(squad) {dprint("err squadwrite failed\n"); return(0);}
-   //if !(squad.classname) {dprint("we somehow lost the classname in squadwrite\n");}
-   //dprint(strcat("squad write platoon classname ", plat.classname,
-     //            ", field platoon_c::__msquad", ftos(f),
-      //           ", squad classname ", squad.classname));
-   if (plat.checkfield) { dprint("squad written\n"); return(1);}
+if !(getentityfieldstring(fieldref, plat)) {
+    dprint("err fake field squadwrite\n");
+    return(0);
+  }
+   if (plat.checkfield) {
+     //dprint("squad written\n");
+     return(1);}
    dprint("squad write fail\n"); return(0);
 };
 
 void(biped_class member, float f, squad_c squad) memberwrite = {
-  field_t checkfield = entityfieldref (findentityfield (strcat (
-                                                                "squad_c::__mmember",
-                                                                ftos (f))));
+  if !(squad.classname) {
+    dprint("err squad no classname memberwrite\n");
+    return(0);
+  }
+  if !(member){
+      dprint("err memberwrite no member\n");
+      return(FALSE);
+    }
+  float fieldnum = findentityfield (strcat (
+                                            "squad_c::__mmember",
+                                            ftos (f)));
+  field_t checkfield = entityfieldref (fieldnum);
   squad.checkfield = member;
-  //dprint(strcat("member write squad classname ",squad.classname, "member classname ", member.classname, "field squadd_c::__mmember", ftos(f)));
-  if (squad.checkfield) dprint(" member written\n");
-  else dprint("member write failed\n");
+    if !(getentityfieldstring(fieldnum, squad)) {
+        dprint(" err fake field memberwrite\n");
+        dprint(strcat("squad_c::__member", ftos(f), "\n"));
+        dprint(strcat("in ", squad.classname, "\n"));
+        eprint(squad);
+        return(FALSE); }
 }
-  void() squad_guard_think = {
+
+void() squad_guard_think = {
   squad_c asquad = self;
   int i = 0;
   biped_class testmember;
   entity point;
   entity priority = self.enemy;
-  dprint("squad think !!!!!!\n");
+  //dprint("squad think !!!!!!\n");
   if !(asquad.firinggroup) { dprint("squad think no firinggroup\n"); }
   point = findtarget(asquad.firinggroup);
   while (i < 8) {
-    testmember = memberref(i, asquad);
-    if !(testmember) break;
-    if !(testmember.style) break;
+    testmember = FALSE;
+    testmember = memberref(i, asquad); //this creates the err spam I think
+    if !(testmember) break; //NOTE not catching error?
+    if !(testmember.style) break; //FIXME: quits function
     if (testmember.firingpoint) {
       if (testmember.enemy.scary > priority.scary) {
-        dprint("squad guard enemy sharing\n");
+        //dprint("squad guard enemy sharing\n");
         asquad.enemy = priority = testmember.enemy;
         }
-      else if (priority) testmember.enemy = priority;
+      else if (priority) { testmember.enemy = priority;
+        //dprint("enemy set\n");
+        }
     } else {
       if !(point) { dprint("err no point squad think\n"); break; }
       testmember.firingpoint = testmember.goalentity = point;
       testmember.think = testmember.th_walk;
+      if !(point.enemy) dprint("no point.enemy\n");
       point = point.enemy;
+      //NOTE no err here
       //dprint("firing point set by squad\n");
     }
     i++;

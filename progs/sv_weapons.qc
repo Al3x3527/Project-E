@@ -129,6 +129,7 @@ virtual void() projectile = {
 
   local float i = 0;
   if (trace_fraction != 1.0) {
+    other = ent;
     BulletHit(this.attackdamage, dir);
     vector delta = end - org;
     delta *= trace_fraction;
