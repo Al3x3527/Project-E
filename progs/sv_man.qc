@@ -45,13 +45,15 @@ void() man_run1 = {
 void() man_pain3 = [$pain3, man_stand1]{};
 void() man_pain2 = [$pain2, man_pain3]{};
 void(entity inflictor, float damage) man_pain1 = [$pain1, man_pain2] {
-  dprint("man_pain1\n");
+  //dprint("man_pain1\n");
   //usecmdlist();
   if !(health > 0) think = th_die;
 };
 
 void() man_die2 = [$die2, man_die2] {kill_object();};
-void() man_die1 = [$die1, man_die2]{dprint("man_die1\n");};
+void() man_die1 = [$die1, man_die2]{
+  //dprint("man_die1\n");
+};
 
 void() man_charge1 = {
   ai_charge(8);

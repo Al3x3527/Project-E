@@ -13,7 +13,6 @@ entity oself = self;
 self = targ;
 if (targ.th_pain) targ.th_pain(inflictor, damage);
 
-//TODO: reward doing damage
 if (self.ammo_nails > 0) {
   //dprint("enemy has nails\n");
   if (attacker.flags & FL_CLIENT)
@@ -21,7 +20,6 @@ if (self.ammo_nails > 0) {
   attacker.ammo_nails += 10;
   self.ammo_nails -= 10;
  }
-//TODO: reward kills
 if !(self.health > 0) {
     if (self.ammo_nails > 0){
       if (attacker.flags & FL_CLIENT)
@@ -228,8 +226,13 @@ class path_search : entity {
   //team
   //origin
   //enemy lookingfor
-  virtual void() think = {
+  nonvirtual void() search_think = {
+    //dprint("path search think\n");
     if (this.style == SEARCH_SCRIPTED) return;
+    /*if (nextthink){
+     nextthink = 0;
+     dprint("path search nextthink set to 0\n");
+    }*/
     this.enemy = world;
     remove(this);
   };
@@ -242,8 +245,10 @@ class path_search : entity {
   };
   void() path_search = {
     nextthink = time + 15;
+    think = search_think;
     classname = "path_search";
     flags = FL_SEARCHPOINT;
+    //dprint("path search created\n");
   };
 };
 

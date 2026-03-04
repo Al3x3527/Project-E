@@ -31,7 +31,7 @@ void() SUB_CalcMoveDone = {
 }
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove = {
-  dprint("SUB_CalcMove\n");
+  //dprint("SUB_CalcMove\n");
   vector vdestdelta;
   float len, traveltime, localtime;
   if !(tspeed) objerror("No speed is defined!");
@@ -232,13 +232,27 @@ class func_door : entity {
   virtual void() touch = {
     //doors without keys are opened with door_trigger_touch
     if (impulse > time) return;
-    dprint("door: touch\n");
+    //dprint("door: touch\n");
     impulse = time + 2;
     if (message != "") {
       centerprint (other, message);
     }
+    if (ammo_nails) {
+      centerprint (other, strcat("open for ", ftos(ammo_nails)));
+      if (other.impulse = 1) {
+        if !(other.ammo_nails < ammo_nails) {
+            other.ammo_nails -= ammo_nails;
+            centerprint (other, strcat("-", ftos(ammo_nails), " blood"));
+            ammo_nails = 0;
+            func_door_trigger trigger = spawn(func_door_trigger);
+            trigger.owner = this;
+            setsize(trigger, mins - '60 60 8', maxs + '60 60 8');
+            use();
+          }
+      }
+    }
     if (!keylock_has_key_set ()){ //if no key set
-      dprint("door: touch no key\n");
+      //dprint("door: touch no key\n");
       return; }
     //NOTE: door otherwise opens with trigger volume
     keylock_try_to_unlock (other, "", door_unlock);
@@ -274,6 +288,7 @@ class func_door : entity {
 */
     //dont spawn field if key door
     if (health) return;
+    if (ammo_nails) return;
     if (targetname != "") return;
     if (keylock_has_key_set ()) return; //possibly redundant
 

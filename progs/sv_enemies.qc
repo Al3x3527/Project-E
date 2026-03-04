@@ -17,7 +17,7 @@ void() spawn_corpse = {
 };
 
 void() kill_object = {
-  dprint("kill object\n");
+  //dprint("kill object\n");
   spawn_corpse();
   self.movechain = world;
   drop_items();
@@ -758,21 +758,34 @@ nonvirtual void(float dist) ai_charge = {
     return;
   }
   this.goalentity = this.enemy;
-  if (this.enemy.flags != FL_SEARCHPOINT)
+  if (this.enemy.flags != FL_SEARCHPOINT) {
     if (CheckLine(this.enemy)) {
       this.status = STA_SIGHT;
       this.enemy.lastseen = this.enemy.origin; //new update lastseen
       }
     else {
+      //dprint("path search uncertain charge\n");
       this.status = STA_UNCERTAIN;
       //searchpoint at enemy.lastseen
       entity old = this.enemy;
-      path_search new = spawn(path_search);
+      entity new = spawn(path_search);
       this.enemy = new;
       new.lastseen = old.lastseen;
       setorigin(new, old.lastseen);
       new.enemy = old;
       }
+    }
+  else {
+    if (CheckLine(enemy.enemy)) {
+      entity old = enemy;
+      entity new = old.enemy;
+      //remove(old);
+      old.nextthink = time + 0.1;
+      enemy = new;
+      status = STA_SIGHT;
+      enemy.lastseen = enemy.origin;
+    }
+  }
   this.ideal_yaw = vectoyaw(this.enemy.origin - this.origin);
   sub_changeyaw();
   movetogoal(dist);
@@ -788,7 +801,7 @@ nonvirtual void() ai_shoot = {
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
-  dprint("respawn biped do\n");
+  //dprint("respawn biped do\n");
   setmodel(this, this.model); //TODO set model index instead
   setsize(this, '-16 -16 0', '16 16 80'); //TODO make universal
   this.solid = SOLID_SLIDEBOX;
@@ -966,7 +979,7 @@ void(squad_c squad) unassigned = {
     test = unassignedlist[i].squad0;
     if !(test) {
         unassignedlist[i].squad0 = squad;
-        dprint("unassigned list "); dprint(ftos(i + 1)); dprint(" squads\n");
+        //dprint("unassigned list "); dprint(ftos(i + 1)); dprint(" squads\n");
         break;
       }
     i++;
@@ -1097,7 +1110,9 @@ squad_c (float f, platoon_c plat) squadref = {
   if (test) {}//dprint(strcat("squadref plat classname ", plat.classname,
     //                       ", squad classname ", test.classname,
       //                     ", field platoon_c::__msquad", ftos(f), " squad found\n"));}
-  else {dprint("squadref no squad found\n"); return (FALSE);}
+  else {
+    //dprint("squadref no squad found\n");
+    return (FALSE);}
   return(test);
 }
 

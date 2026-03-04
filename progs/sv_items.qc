@@ -42,7 +42,7 @@ void() RespawnItemTry = {
 }
 
 void() DespawnItem = {
-  dprint(self.classname); dprint(" despawned\n");
+  //dprint(self.classname); dprint(" despawned\n");
   self.solid = SOLID_NOT;
   self.modelindex = 0;
 }
@@ -51,7 +51,6 @@ void() DespawnItem = {
   if(this.spawnflags | ITEM_HELD) return;\
   this.spawnflags = this.enemy.spawnflags -= ITEM_HELD;\
   this.enemy.nextthink = time + this.enemy.respawntime;\
-  dprint("item consumed\n");\
   return;}
 /*
 void() ConsumeItem = {

@@ -26,16 +26,12 @@ fgdprint("@fgd \n@PointClass base("CLASSbase") = "#CLASSname" : \""CLASSdesc"pla
   new.solid = SOLID_NOT;\
   new.owner = other;\
   new.modelindex = 0;\
-  if !(other.primary) {other.primary = new;\
-    dprint("new primary "); dprint(other.primary.classname); dprint("\n");}\
-  else if !(other.secondary) {other.secondary = new;\
-    dprint("new secondary "); dprint(other.secondary.classname); dprint("\n");}\
+  if !(other.primary) {other.primary = new;}\
+  else if !(other.secondary) {other.secondary = new;}\
   else if (other.weapon == other.primary.weapon){ drop_weapon(other.primary);\
-    other.primary = new;\
-    dprint("swap primary\n");}\
+    other.primary = new;}\
   else {drop_weapon(other.secondary);\
-    other.secondary = new;\
-    dprint("swap secondary\n");}\
+    other.secondary = new;}\
   this = other;\
   switch_weapon(new);\
 }

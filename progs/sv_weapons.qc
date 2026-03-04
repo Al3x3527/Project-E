@@ -33,12 +33,16 @@ void() rocket_touch = {
 void(entity ent, string path) weapon_sound = {
 sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
 //alert !DIST_FAR >> create  searchpoint (memory waypoint) can find without line
+//dprint("path search weapon sound\n");
 path_search point = spawn(path_search);
 setorigin(point, ent.origin);
 point.weapon = ent.weapon;
 point.enemy = ent;
 point.team = ent.team;
 point.style = SEARCH_SOUND;
+//NOTE: fix path think
+//point.think = search_think;
+point.nextthink = 1;
 //TODO: in findstuff
 //if entity.enemies >> ent STA_CERTAIN
 //else if STA_IDLE/ACTIVE && possible enemy >> STA_SEARCHING -dont force action
@@ -175,7 +179,7 @@ virtual void() projectile = {
       this.nextthink = time + 0.05;
       }
     if (!this.currentammo) CONSUMEITEM
-  };
+};
 
 void() weapon_class = {
 FGDbase("Spawnflags, Targetname", weapon_class, "base weapon class");
@@ -186,8 +190,8 @@ nextthink = time + 0.3;
 setsize (this, '-16 -24 0', '16 24 16');
 void() attack = attackdo;
 precache_model(gamemodels "qp_bomb.mdl");
-};
-};
+};};
+
 
 runtime_t weapon_battlerifle_runtime;
 class weapon_battlerifle : weapon_class {
@@ -206,7 +210,7 @@ attackdelay = 0.8;
 rateoffire = 0.1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
-dprint("weapon_battlerifle spawn function\n");
+//dprint("weapon_battlerifle spawn function\n");
 };
 };
 

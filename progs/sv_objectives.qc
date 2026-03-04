@@ -20,28 +20,28 @@ class wave_c : entity {
   nonvirtual void(entity controller) link_spawnpoints = {
     entity start = findtarget(controller.target);
     entity test = FALSE;
-    dprint("link spawnpoints\n");
+    //dprint("link spawnpoints\n");
     if !(start) {dprint("err controller no spawnpoints\n"); return;}
     while (test != start) {
       if !(test) test = start;
       test.enemy = findmoretargets(test, controller.target);
       if !(test.enemy) break;
       test = test.enemy;
-      dprint("spawnpoint linked\n");
+      //dprint("spawnpoint linked\n");
     }
   };
 
   nonvirtual void() link_controllers = {
-    dprint("link controllers\n");
+    //dprint("link controllers\n");
     //float i = 0;
     if !(style) dprint("err link controllers no style\n");
     lastcontroller = findtarget(noise);
     if !(lastcontroller) { dprint(spawncontrollers); dprint(" err no spawn controller\n"); return;}
-    else dprint(lastcontroller.classname); dprint(" spawn controller found\n");
+    //else dprint(lastcontroller.classname); dprint(" spawn controller found\n");
     entity test = FALSE;
     while(test != lastcontroller) {
       //i++;
-      dprint("link controllers new link\n");
+      //dprint("link controllers new link\n");
       if !(test) test = lastcontroller;
       test.enemy = findmoretargets(test, spawncontrollers);
       test.style = style;
@@ -84,7 +84,7 @@ class wave_c : entity {
 
   nonvirtual void() wave_think = {
     if !(estate) return;
-    dprint("wave think do\n");
+    //dprint("wave think do\n");
     //check end cond ()
     if (max_health > (health + monsters_runtime.runtime_current)) wave_end(); //keep thinking
     //check spawns ???
@@ -101,7 +101,7 @@ class wave_c : entity {
   };
 
   nonvirtual void() wave_start = {
-    dprint("wave start\n");
+    //dprint("wave start\n");
     setorigin(this, this.origin + '0 0 8');
     if !(style) dprint("wave start no style\n");
     link_controllers();
@@ -138,7 +138,7 @@ class wave_class : wave_c {
 float(float remaining) spawner_use;
 
 void() spawn_request = {
-  dprint("spawn request\n");
+  //dprint("spawn request\n");
   wave_c wave = self;
   //dprint(ftos(self.style)); dprint(" is style\n");
   float remaining = wave.health; //or another number
@@ -186,7 +186,7 @@ class objective_c : entity {
   //enemy wave ent
 
   nonvirtual void() objectiveDo = {
-    dprint("objectiveDo\n");
+    //dprint("objectiveDo\n");
     platoon_c plat = this.platoon;
     this.style = ACT_GUARD; //force TODO
     squad_c squad = plat.squad0;
@@ -202,8 +202,10 @@ class objective_c : entity {
     if !(squad.leader) squad.leader = squad.member0;
     while (f < maxref) {
       member = memberref(f, squad);
-      if !(member.style) { dprint("no more members\n"); return; }
-      dprint(strcat("squad0 ", ftos(f), " a member was found\n"));
+      if !(member.style) {
+          //dprint("no more members\n");
+          return; }
+      //dprint(strcat("squad0 ", ftos(f), " a member was found\n"));
       member.control = this.control;
       member.firinggroup = this.firinggroup;
       member.leader = squad.leader;
@@ -280,8 +282,8 @@ class objective_c : entity {
             //dprint("calling squadref from fillplatoon\n");
             asquad = squadref(ref, plat);
             if !(asquad) { //new squad
-                dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
-                dprint(ftos(ref)); dprint(" new squad\n");
+                //dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
+                //dprint(ftos(ref)); dprint(" new squad\n");
                 if (test.style & FL_NOSQUAD){
                   test.style -= FL_NOSQUAD;
                 } else test.style -= FL_UNASSIGNED;
@@ -309,17 +311,17 @@ class objective_c : entity {
                 //NOTE: appending squad
                 testbiped = FALSE;
                 // unnassigned[i], squad[ref], member[f]
-                dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
+                //dprint(strcat(ftos(i), ftos(ref), ftos(f), "\n"));
                 if !(asquad.classname) {dprint("err asquad no classname aborting memberref\n"); return (0);}
-                dprint("memberref expecting nothing\n");
+                //dprint("memberref expecting nothing\n");
                 testbiped = memberref(f, asquad); //plat sq member
                 if (testbiped){
-                  dprint("nonerr unexpected member\n");
+                  //dprint("nonerr unexpected member\n");
                   //eprint(testbiped);
                   if (testbiped.style) {
                     f++;
-                    dprint(strcat("member slot is ", testbiped.classname, "\n"));
-                    eprint(testbiped);
+                    //dprint(strcat("member slot is ", testbiped.classname, "\n"));
+                    //eprint(testbiped);
                   }
                   else f++;
                 }
@@ -328,13 +330,13 @@ class objective_c : entity {
                     if !(test.member0) dprint("err no member0\n");
                     //FIXME
                     memberwrite(test.member0, f, asquad); //member to slot.memberf
-                    dprint("memberref expecting entity\n");
+                    //dprint("memberref expecting entity\n");
                     if !(memberref(f, asquad)) {
                         dprint("err write failed\n");
                         //eprint(test.member0);
                         //return 0;
                       }
-                    else {dprint("memberwrite confirmed\n");}
+                    //else {dprint("memberwrite confirmed\n");}
                     f++;
                     break; //get new unassigned
                   }
@@ -349,9 +351,9 @@ class objective_c : entity {
             health += test.population;
             //dprint(ftos(i)); dprint(" index "); dprint("squad added\n");
             if (health == maxpop) {
-              dprint(ftos(health)); dprint(" platoon full\n");
+              //dprint(ftos(health)); dprint(" platoon full\n");
               return (1); }
-          } else { dprint("no room in platoon\n"); return(0); }
+          } //else { dprint("no room in platoon\n"); return(0); }
           //all squads used
           //return(0);
           //test.action = this.style; //NOTE: force squad behavior in obj do
@@ -400,9 +402,9 @@ class objective_c : entity {
     if !(max_health) max_health = 80;
     fillPlatoon(); //TODO fix spam before spawns
     if (this.health) {
-      dprint(ftos(health)); dprint(" objective health\n");
+      //dprint(ftos(health)); dprint(" objective health\n");
       if !(frags > health) objectiveDo();
-      else dprint("objective does not meet min pop\n");
+      //else dprint("objective does not meet min pop\n");
         }
     else {
       //dprint("objective no pop\n");
