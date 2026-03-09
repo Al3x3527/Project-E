@@ -94,6 +94,7 @@ void() IsItem = {
   self.nextthink = time + 0.3;
   self.think = RespawnItemTry;
   self.modelindex = 0;
+  self.flags += FL_ITEM;
 };
 void() IsUsable = {
   self.touch = UseItemTry;

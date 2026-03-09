@@ -26,16 +26,24 @@ class biped_man : biped_class {
 nonvirtual void() man_stand1 = [$basis, man_stand1] {ai_idle(); //dprint("man stand\n");
 };
 
-nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
-nonvirtual void() man_walk7 = [$walk7, man_walk8]{movetogoal(8);};
-nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8);};
-nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8);};
-nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8);};
-nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);};
-nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);};
+//nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
+nonvirtual void() man_walk7 = [$walk7, this.th_walk]{movetogoal(8);
+};
+nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8);
+};
+nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8);
+};
+nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8);
+};
+nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);
+};
+nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);
+};
 nonvirtual void() man_walk1 = [$walk1, man_walk2] {
   //dprint("man_walk1\n");
   ai_walk(6);
+  weapon_class held = movechain;
+  held.weapon_walk1();
 };
 
 void() man_run1 = {
@@ -58,8 +66,14 @@ void() man_die1 = [$die1, man_die2]{
 void() man_charge1 = {
   ai_charge(8);
   this.frame++;
-  if (this.frame < $run1) this.frame = $run1;
+  if (this.frame < $run1) {
+    this.frame = $run1;
+  }
   else if (this.frame > $run6) this.frame = $run1;
+  if (frame == $run1) {
+    weapon_class held = movechain;
+    held.weapon_walk1();
+  }
   this.nextthink = time + 0.1;
 };
 

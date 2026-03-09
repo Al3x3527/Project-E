@@ -181,6 +181,7 @@ float searchtime;
 //ammo_nails as blood points
 
 void() sub_chainmoved = {
+	//dprint("sub_chainmoved\n");
 	entity parent = self.owner;
 	self.angles = parent.angles + self.v_angle;
 	self.avelocity = parent.avelocity;

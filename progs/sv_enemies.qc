@@ -25,15 +25,22 @@ void() kill_object = {
 }
 
 void(float behavior) dothink = {
+  entity targ = findtarget(other.target);
+  dprint(strcat("fieldnum ", ftos(behavior), " dothink\n"));
   field_t thinkField = entityfieldref(behavior);
-  other.think = other.thinkField;
-  if !(other.think) return;
+  targ.think = targ.thinkField;
+  if !(targ.think) {
+      string str = getentityfieldstring(behavior, targ);
+      dprint(strcat("err dothink no think", str," ", targ.classname, "\n"));
+      return; }
   other.impulse = TRUE;
-  other.nextthink = time + 0.1;
+  targ.nextthink = time + 0.1;
 }
 void() stand = {dothink(findentityfield("th_stand"));};
 void() die = {dothink(findentityfield("th_die"));};
-void() walk = {dothink(findentityfield("th_walk"));};
+void() walk = {
+  dprint("th_walk\n");
+  dothink(findentityfield("th_walk"));};
 void() run = {dothink(findentityfield("th_run"));};
 void() pain = {dothink(findentityfield("th_pain"));};
 void() charge = {dothink(findentityfield("th_charge"));};
@@ -47,7 +54,11 @@ void() usebyname = {
   other.impulse = TRUE; //other = trigger
 };
 
-
+void() nextframe = {
+  if !(self.enemy) self.enemy = find(world, targetname, self.target);
+  self.enemy.frame++;
+  dprint(strcat("frame ", ftos(self.enemy.frame), "\n"));
+}
 
 //void() tactical = {other.think = tacthink; other.nextthink = time + 0.1;}
 
@@ -96,7 +107,7 @@ virtual void() cmduse = {
   //this = cmdlist, other = biped
   other.impulse = 0; // to test
   if (this.step > (this.refzero + 7)) return; //no more steps
-  //dprint(other.classname); dprint(" cmduse\n");
+  dprint(other.classname); dprint(" cmduse\n");
   field_t stepField = entityfieldref(this.step);
   string stepn = stepField;
   if (isfunction(stepn)) callfunction(stepn);

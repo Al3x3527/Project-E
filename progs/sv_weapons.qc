@@ -1,3 +1,21 @@
+
+$frame basis
+$frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
+$frame key9
+$frame pain1 pain2 pain3 //pain4
+$frame key14
+$frame die1 die2
+$frame shoot1 shoot2
+$frame melee1 melee2
+$frame bark1 bark2
+$frame reload1 reload2
+$frame aggro1 aggro2
+$frame evade1 evade2 evade3 evade4 evade5 evade6
+$frame grenade1 grenade2 grenade3 grenade4 grenade5 grenade6 grenade7
+$frame key39
+$frame run1 run2 run3 run4 run5 run6
+$frame board1 drive1
+$frame crouch1 crouch2
 const float WEAPON_BATTLERIFLE = 2;
 const float WEAPON_PLASMARIFLE = 4;
 const float WEAPON_BROWNING = 8;
@@ -75,7 +93,22 @@ float attackdelay;
 float rateoffire; //burst
 float ammo_clip; //burst
 
-virtual void() attackdo = {dprint("placeholder attack\n");};
+ virtual void() weapon_walk2 = {
+   frame++;
+   if (frame > 8) frame = 2;
+   dprint(strcat("weapon walk frame "), ftos(frame),"\n");
+   dprint(strcat("owner frame ", ftos(owner.frame), "\n"));
+   nextthink = time + 0.1;
+ };
+ virtual void() weapon_walk1 = {
+   dprint(strcat(classname, " ", model, " "));
+   dprint(strcat(ftos(frame)," weapon walk1\n"));
+   frame = 2;
+   think = weapon_walk2;
+   nextthink = time + 0.1;
+ };
+
+ virtual void() attackdo = {dprint("placeholder attack\n");};
 
 virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn = {
   projectile_class proj = spawn(projectile_class);
@@ -190,6 +223,7 @@ nextthink = time + 0.3;
 setsize (this, '-16 -24 0', '16 24 16');
 void() attack = attackdo;
 precache_model(gamemodels "qp_bomb.mdl");
+th_walk = weapon_walk1;
 };};
 
 
@@ -208,6 +242,7 @@ attacktimes = 3;
 attackdamage = 20;
 attackdelay = 0.8;
 rateoffire = 0.1;
+this.th_walk = weapon_walk1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
 //dprint("weapon_battlerifle spawn function\n");
@@ -304,8 +339,12 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
   self.view_ofs = '0 0 60';//TODO
   setorigin(held, self.origin + self.view_ofs - held.view_ofs);
   held.angles = self.angles;
-  held.modelindex = getmodelindex(held.weaponmodel);
-
+  //NOTE: setting the model here breaks animations some how!
+  //held.modelindex = getmodelindex(held.weaponmodel);
+  //setmodel(held, held.weaponmodel);
+  held.flags = FL_ITEM;
   self.active_weapon = self.primary = held;
   self.weapon_use = use_active;
+  held.frame = 2;
+  self.frame = 2;
 }

@@ -41,7 +41,9 @@ fgdprint("@fgd\n model({ \"path\": \""gamemodels wmdl"\" })");\
 precache_model(gamemodels wmdl);\
 precache_model(gamemodels vmdl);\
 setmodel(this, gamemodels wmdl);\
-this.weaponmodel = gamemodels vmdl
+this.weaponmodel = gamemodels vmdl;\
+this.frame = 0
+//NOTE basis
 
 #define WPCLASS(WPname, WPdesc)\
   runtime_t WPname ## _runtime;\
