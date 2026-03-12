@@ -336,7 +336,7 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
   held.owner = self;
   //held.chainmoved = sub_chainmoved;
   held.spawnflags = ITEM_HELD;
-  self.view_ofs = '0 0 60';//TODO
+  self.view_ofs = '-20 0 60';//TODO
   setorigin(held, self.origin + self.view_ofs - held.view_ofs);
   held.angles = self.angles;
   //NOTE: setting the model here breaks animations some how!

@@ -185,7 +185,13 @@ void() sub_chainmoved = {
 	entity parent = self.owner;
 	self.angles = parent.angles + self.v_angle;
 	self.avelocity = parent.avelocity;
-	setorigin(self, self.origin + parent.view_ofs - self.view_ofs);
+
+	vector new_ofs, par_ofs;
+	makevectors(parent.angles);
+	new_ofs = self.view_ofs_x * v_forward + self.view_ofs_y * v_right + self.view_ofs_z;
+	par_ofs = parent.view_ofs_x * v_forward + parent.view_ofs_y * v_right + parent.view_ofs_z;
+
+	setorigin(self, self.origin + par_ofs - new_ofs);
 };
 
 void() sub_changeyaw = {
@@ -199,10 +205,75 @@ void() sub_changeyaw = {
 	self.yaw_speed = avel * 2;
 	self.ideal_yaw = ang;
 	ChangeYaw();
+
 	v_forward = parent.view_ofs - self.view_ofs;
 	rotatevectorsbyangle(angle);
 	setorigin(self, parent.origin + v_forward);
+
+	sub_chainmoved();
 	self = parent;
+};
+
+void() orbit = {
+	entity sun = self;
+	entity planet = self.enemy;
+	float radius = self.health;
+	float ang = self.ideal_yaw;
+	vector org = self.origin;
+	vector avel = self.avelocity;
+	float adel;
+	vector delta;
+	vector start = planet.oldorigin;
+	vector end;
+	float pyaw;
+	float drift;
+	pyaw = planet.angles_y; // degrees
+	if (pyaw > 360) pyaw -= 360;
+	else if (pyaw < 0) pyaw += 360;
+	planet.angles_y = pyaw;
+	pyaw *= 0.01744;
+	//dprint(strcat("pyaw ", ftos(pyaw), "\n"));
+	drift = pyaw - ang;
+	if (drift > 3.14) drift -= 6.28;
+	else if (drift < -3.14) drift += 6.28;
+
+	adel = avel_y * 0.001744; //0.01744 rad/deg * 0.1 s
+	ang += adel;
+	delta_x = radius * cos(ang);
+	delta_y = radius * sin(ang);
+	end = org + delta;
+	setorigin(planet, start);
+	planet.oldorigin = end;
+	planet.velocity = (end - start) * 10;
+	planet.avelocity_y = avel_y - (drift * 10);
+	if (ang > 6.28) ang -= 6.28;
+	if (ang < 0) ang += 6.28;
+	sun.ideal_yaw = ang;
+	//dprint(strcat("orbit angle ", ftos(ang), "\n"));
+	//dprint(strcat("delta ", vtos(delta), "\n"));
+	dprint(strcat("drift ", ftos(drift), "\n"));
+	self.nextthink = time + 0.1;
+};
+void() orbit_go = {
+	entity planet;
+	planet = find(world, targetname, self.target);
+	if !(planet) {
+		return;
+		}
+	//planet.yaw_speed = self.yaw_speed = 100;
+	planet.avelocity = self.avelocity = '0 50 0';
+	planet.movetype = MOVETYPE_FLY;
+	planet.solid = SOLID_TRIGGER;
+	planet.angles = self.angles;
+	self.enemy = self.movechain = planet;
+	self.think = orbit;
+	self.nextthink = time + 0.1;
+};
+void() info_orbit = {
+	self.health = 48;
+	self.solid = SOLID_NOT;
+	self.think = orbit_go;
+	self.nextthink = time + 1;
 };
 
 const float FL_CORNER = 2048; //FL_WATERJUMP not meaningful
