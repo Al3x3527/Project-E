@@ -181,35 +181,35 @@ float searchtime;
 //ammo_nails as blood points
 
 void() sub_chainmoved = {
-	//dprint("sub_chainmoved\n");
+	dprint("sub_chainmoved\n");
+
 	entity parent = self.owner;
-	self.angles = parent.angles + self.v_angle;
-	self.avelocity = parent.avelocity;
-
-	vector new_ofs, par_ofs;
-	makevectors(parent.angles);
-	new_ofs = self.view_ofs_x * v_forward + self.view_ofs_y * v_right + self.view_ofs_z;
-	par_ofs = parent.view_ofs_x * v_forward + parent.view_ofs_y * v_right + parent.view_ofs_z;
-
-	setorigin(self, self.origin + par_ofs - new_ofs);
-};
-
-void() sub_changeyaw = {
-	float ang = self.ideal_yaw;
-	vector angle = '0 0 0';
-	angle_z = ang;
-	float avel = self.yaw_speed;
-	entity parent = self;
-	ChangeYaw();
-	self = self.movechain;
+	float ang = parent.angles_y;
+	float avel = parent.yaw_speed;
+	vector dofs, delta;
+	vector pofs = parent.view_ofs;
+	vector sofs = self.view_ofs;
+	if !(parent){ dprint("chainmoved no owner\n");
+		return;}
 	self.yaw_speed = avel * 2;
 	self.ideal_yaw = ang;
 	ChangeYaw();
+	ang *= 0.01744;
+	dofs = pofs - sofs;
+	dprint(strcat("parent view_ofs ", vtos(pofs), "\n"));
+	dprint(strcat("chain view_ofs ", vtos(sofs), "\n"));
+	dprint(strcat("net offset ", vtos(dofs), "\n"));
+	delta_x = dofs_x * cos(ang) + dofs_y * sin(ang);
+	delta_y = dofs_x * sin(ang) + dofs_y * cos(ang);
+	delta_z = dofs_z;
+	setorigin(self, (parent.origin + delta));
+	dprint(strcat("movechain delta ", vtos(delta), "\n"));
+};
 
-	v_forward = parent.view_ofs - self.view_ofs;
-	rotatevectorsbyangle(angle);
-	setorigin(self, parent.origin + v_forward);
-
+void() sub_changeyaw = {
+	entity parent = self;
+	ChangeYaw();
+	self = self.movechain;
 	sub_chainmoved();
 	self = parent;
 };
@@ -251,7 +251,7 @@ void() orbit = {
 	sun.ideal_yaw = ang;
 	//dprint(strcat("orbit angle ", ftos(ang), "\n"));
 	//dprint(strcat("delta ", vtos(delta), "\n"));
-	dprint(strcat("drift ", ftos(drift), "\n"));
+	//dprint(strcat("drift ", ftos(drift), "\n"));
 	self.nextthink = time + 0.1;
 };
 void() orbit_go = {

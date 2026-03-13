@@ -165,5 +165,6 @@ void() man_converse1 = {};
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
    th_guard = man_stand1;
+   view_ofs = '4 5 55'; //FIXME
  };
 };

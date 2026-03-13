@@ -95,14 +95,14 @@ float ammo_clip; //burst
 
  virtual void() weapon_walk2 = {
    frame++;
-   if (frame > 8) frame = 2;
-   dprint(strcat("weapon walk frame "), ftos(frame),"\n");
-   dprint(strcat("owner frame ", ftos(owner.frame), "\n"));
+   if (frame > 7) frame = 2;
+   //dprint(strcat("weapon walk frame "), ftos(frame),"\n");
+   //dprint(strcat("owner frame ", ftos(owner.frame), "\n"));
    nextthink = time + 0.1;
  };
  virtual void() weapon_walk1 = {
-   dprint(strcat(classname, " ", model, " "));
-   dprint(strcat(ftos(frame)," weapon walk1\n"));
+   //dprint(strcat(classname, " ", model, " "));
+   //dprint(strcat(ftos(frame)," weapon walk1\n"));
    frame = 2;
    think = weapon_walk2;
    nextthink = time + 0.1;
@@ -245,6 +245,7 @@ rateoffire = 0.1;
 this.th_walk = weapon_walk1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
+view_ofs = '-16 -6 0';// FIXME
 //dprint("weapon_battlerifle spawn function\n");
 };
 };
@@ -336,7 +337,7 @@ void() VirtualWeapon = { //TODO pull pointers from struct instead?
   held.owner = self;
   //held.chainmoved = sub_chainmoved;
   held.spawnflags = ITEM_HELD;
-  self.view_ofs = '-20 0 60';//TODO
+  //self.view_ofs = '-20 0 60';//TODO
   setorigin(held, self.origin + self.view_ofs - held.view_ofs);
   held.angles = self.angles;
   //NOTE: setting the model here breaks animations some how!
