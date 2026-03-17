@@ -181,7 +181,7 @@ float searchtime;
 //ammo_nails as blood points
 
 void() sub_chainmoved = {
-	dprint("sub_chainmoved\n");
+	//dprint("sub_chainmoved\n");
 
 	entity parent = self.owner;
 	float ang = parent.angles_y;
@@ -189,6 +189,11 @@ void() sub_chainmoved = {
 	vector dofs, delta;
 	vector pofs = parent.view_ofs;
 	vector sofs = self.view_ofs;
+	if ((pofs_x - sofs_x) == 0) {
+		//fast and accurate
+		self.angles = parent.angles;
+		return;
+	}
 	if !(parent){ dprint("chainmoved no owner\n");
 		return;}
 	self.yaw_speed = avel * 2;
@@ -196,14 +201,14 @@ void() sub_chainmoved = {
 	ChangeYaw();
 	ang *= 0.01744;
 	dofs = pofs - sofs;
-	dprint(strcat("parent view_ofs ", vtos(pofs), "\n"));
-	dprint(strcat("chain view_ofs ", vtos(sofs), "\n"));
-	dprint(strcat("net offset ", vtos(dofs), "\n"));
+	//dprint(strcat("parent view_ofs ", vtos(pofs), "\n"));
+	//dprint(strcat("chain view_ofs ", vtos(sofs), "\n"));
+	//dprint(strcat("net offset ", vtos(dofs), "\n"));
 	delta_x = dofs_x * cos(ang) + dofs_y * sin(ang);
 	delta_y = dofs_x * sin(ang) + dofs_y * cos(ang);
 	delta_z = dofs_z;
 	setorigin(self, (parent.origin + delta));
-	dprint(strcat("movechain delta ", vtos(delta), "\n"));
+	//dprint(strcat("movechain delta ", vtos(delta), "\n"));
 };
 
 void() sub_changeyaw = {

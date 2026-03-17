@@ -245,7 +245,7 @@ rateoffire = 0.1;
 this.th_walk = weapon_walk1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
-view_ofs = '-16 -6 0';// FIXME
+view_ofs = '0 0 0';// FIXME
 //dprint("weapon_battlerifle spawn function\n");
 };
 };
@@ -324,6 +324,11 @@ attackvelocity = 100;
 attacktimes = 1;
 attackdelay = 0.6;
 ENDCLASS;
+
+void() wan = {
+  if !(self.active_weapon) return;
+  self.active_weapon.frame = self.frame;
+}
 
 void() VirtualWeapon = { //TODO pull pointers from struct instead?
   weapon_class held = FALSE;

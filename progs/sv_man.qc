@@ -27,23 +27,22 @@ nonvirtual void() man_stand1 = [$basis, man_stand1] {ai_idle(); //dprint("man st
 };
 
 //nonvirtual void() man_walk8 = [$walk8, this.th_walk]{movetogoal(8);};
-nonvirtual void() man_walk7 = [$walk7, this.th_walk]{movetogoal(8);
+nonvirtual void() man_walk7 = [$walk7, this.th_walk]{movetogoal(8); wan();
 };
-nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8);
+nonvirtual void() man_walk6 = [$walk6, man_walk7]{movetogoal(8); wan();
 };
-nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8);
+nonvirtual void() man_walk5 = [$walk5, man_walk6]{movetogoal(8); wan();
 };
-nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8);
+nonvirtual void() man_walk4 = [$walk4, man_walk5]{ai_walk(8); wan();
 };
-nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8);
+nonvirtual void() man_walk3 = [$walk3, man_walk4]{movetogoal(8); wan();
 };
-nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8);
+nonvirtual void() man_walk2 = [$walk2, man_walk3]{movetogoal(8); wan();
 };
 nonvirtual void() man_walk1 = [$walk1, man_walk2] {
   //dprint("man_walk1\n");
   ai_walk(6);
-  weapon_class held = movechain;
-  held.weapon_walk1();
+  wan();
 };
 
 void() man_run1 = {
@@ -71,9 +70,8 @@ void() man_charge1 = {
   }
   else if (this.frame > $run6) this.frame = $run1;
   if (frame == $run1) {
-    weapon_class held = movechain;
-    held.weapon_walk1();
   }
+  wan();
   this.nextthink = time + 0.1;
 };
 
@@ -86,6 +84,7 @@ void() man_shoot1 = {
     //this.think = this.th_charge;
   }
   else if (this.frame == $shoot2) this.think = this.th_charge;
+  wan();
   this.nextthink = time + 0.1;
 };
 
@@ -165,6 +164,6 @@ void() man_converse1 = {};
    //ANIMATE(man, crouch, 2) + 1; END //dont need a macro to do this.
    //dprint("man spawn function\n");
    th_guard = man_stand1;
-   view_ofs = '4 5 55'; //FIXME
+   view_ofs = '0 0 50'; //FIXME
  };
 };

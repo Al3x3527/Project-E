@@ -808,7 +808,7 @@ nonvirtual void(float dist) ai_charge = {
 
 nonvirtual void() ai_shoot = {
   v_angle = angles;
-  this.weapon_use();
+  //this.weapon_use();
 };
 
 nonvirtual void() RespawnBipedDo = { //walkmonster start, do
