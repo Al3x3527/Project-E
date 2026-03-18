@@ -49,12 +49,16 @@ void() man_run1 = {
 
 };
 
-void() man_pain3 = [$pain3, man_stand1]{};
-void() man_pain2 = [$pain2, man_pain3]{};
-void(entity inflictor, float damage) man_pain1 = [$pain1, man_pain2] {
+void() man_pain3 = [$pain3, man_stand1]{wan();};
+void() man_pain2 = [$pain2, man_pain3]{wan();};
+void(entity inflictor, float damage) man_pain1 = {
+  if (self.frame == $pain1) self.frame = $pain2;
+  else self.frame = $pain1;
   //dprint("man_pain1\n");
   //usecmdlist();
+  wan();
   if !(health > 0) think = th_die;
+  else self.think = man_pain2;
 };
 
 void() man_die2 = [$die2, man_die2] {kill_object();};

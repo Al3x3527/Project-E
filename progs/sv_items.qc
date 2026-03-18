@@ -1,6 +1,7 @@
 void() RespawnItemDo = {
   setmodel(self, self.model);
   self.solid = SOLID_TRIGGER;
+  self.frame = 0;
 }
 float ITEM_DONTRESPAWN = 4;
 float ITEM_HELD = 8;
