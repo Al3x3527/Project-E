@@ -230,6 +230,7 @@ class func_door : entity {
   };
 
   virtual void() touch = {
+    if !(other.flags & FL_CLIENT) return;
     //doors without keys are opened with door_trigger_touch
     if (impulse > time) return;
     //dprint("door: touch\n");

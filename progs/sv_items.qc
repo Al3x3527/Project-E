@@ -67,6 +67,7 @@ void() PickupItem ={
 }
 
 void() AutoPickup ={
+  if !(other.flags & FL_CLIENT) return;
   self.use();
   sprint(other, 1, strcat("You got the ", self.netname, "\n"));
   DespawnItem();
@@ -81,6 +82,7 @@ void() UseItemDo = {
 void() UseItemTry = {
   //prompt flag
   //dprint("UseItemTry\n");
+  if !(other.flags & FL_CLIENT) return;
   if (other.impulse == 1) {
     other.impulse = 0;
     UseItemDo();
