@@ -3,8 +3,8 @@ $frame basis
 $frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
 $frame key9
 $frame pain1 pain2 pain3 //pain4
-$frame key14
-$frame die1 die2
+$frame die1
+$frame die2 die3
 $frame shoot1 shoot2
 $frame melee1 melee2
 $frame bark1 bark2

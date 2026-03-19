@@ -1,3 +1,20 @@
+$frame basis
+$frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
+$frame key9
+$frame pain1 pain2 pain3 //pain4
+$frame die1 die2 die3
+$frame shoot1 shoot2
+$frame melee1 melee2
+$frame bark1 bark2
+$frame reload1 reload2
+$frame aggro1 aggro2
+$frame evade1 evade2 evade3 evade4 evade5 evade6
+$frame grenade1 grenade2 grenade3 grenade4 grenade5 grenade6 grenade7
+$frame key39
+$frame run1 run2 run3 run4 run5 run6
+$frame board1 drive1
+$frame crouch1 crouch2
+
 float BIPED_DONTRESPAWN = INHIBIT_RESPAWN;
 float BIPED_SPAWNED = SPAWNED_ACTIVE;
 
@@ -11,7 +28,7 @@ void() spawn_corpse = {
   setorigin(corpse, self.origin);
   corpse.angles = self.angles;
   corpse.frame = self.frame;
-  corpse.angles = self.angles + '90 90 90';
+  corpse.angles = self.angles;// + '90 90 90';
   corpse.think = remove_self;
   corpse.nextthink = time + 10;
 };

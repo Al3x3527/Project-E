@@ -4,8 +4,7 @@ $frame basis
 $frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
 $frame key9
 $frame pain1 pain2 pain3 //pain4
-$frame key14
-$frame die1 die2
+$frame die1 die2 die3
 $frame shoot1 shoot2
 $frame melee1 melee2
 $frame bark1 bark2
@@ -56,13 +55,17 @@ void(entity inflictor, float damage) man_pain1 = {
   else self.frame = $pain1;
   //dprint("man_pain1\n");
   //usecmdlist();
-  wan();
   if !(health > 0) think = th_die;
   else self.think = man_pain2;
+  wan();
 };
 
-void() man_die2 = [$die2, man_die2] {kill_object();};
+nonvirtual void() man_die3 = [$die3, man_die3] {wan();
+  kill_object();
+ };
+void() man_die2 = [$die2, man_die3] {wan();};
 void() man_die1 = [$die1, man_die2]{
+  wan();
   //dprint("man_die1\n");
 };
 
