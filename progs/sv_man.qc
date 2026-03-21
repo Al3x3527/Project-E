@@ -5,7 +5,7 @@ $frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
 $frame key9
 $frame pain1 pain2 pain3 //pain4
 $frame die1 die2 die3
-$frame shoot1 shoot2
+$frame shoot1 shoot2 shoot3 shoot4
 $frame melee1 melee2
 $frame bark1 bark2
 $frame reload1 reload2
@@ -85,12 +85,16 @@ void() man_charge1 = {
 void() man_shoot1 = {
   this.frame++;
   if (this.frame < $shoot1) this.frame = $shoot1;
-  else if (this.frame > $shoot2) this.frame = $shoot1;
-  if (this.frame == $shoot1) {
+  else if (this.frame == ($shoot4 + 1)) this.frame = $shoot2;
+  else if (this.frame > $shoot4) this.frame = $shoot1;
+  if (this.frame == $shoot3) {
     ai_shoot(); //this.weapon_use();
     //this.think = this.th_charge;
   }
-  else if (this.frame == $shoot2) this.think = this.th_charge;
+  else if (this.frame == $shoot4)
+    if (random() > 0.6) {
+    this.think = this.th_charge;
+    }
   wan();
   this.nextthink = time + 0.1;
 };
