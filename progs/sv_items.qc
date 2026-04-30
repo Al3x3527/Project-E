@@ -1,6 +1,7 @@
 void() RespawnItemDo = {
   setmodel(self, self.model);
   self.solid = SOLID_TRIGGER;
+  self.frame = 0;
 }
 float ITEM_DONTRESPAWN = 4;
 float ITEM_HELD = 8;
@@ -42,7 +43,7 @@ void() RespawnItemTry = {
 }
 
 void() DespawnItem = {
-  dprint(self.classname); dprint(" despawned\n");
+  //dprint(self.classname); dprint(" despawned\n");
   self.solid = SOLID_NOT;
   self.modelindex = 0;
 }
@@ -51,7 +52,6 @@ void() DespawnItem = {
   if(this.spawnflags | ITEM_HELD) return;\
   this.spawnflags = this.enemy.spawnflags -= ITEM_HELD;\
   this.enemy.nextthink = time + this.enemy.respawntime;\
-  dprint("item consumed\n");\
   return;}
 /*
 void() ConsumeItem = {
@@ -66,6 +66,14 @@ void() PickupItem ={
   self.equip(); //because we don't know the class
 }
 
+void() AutoPickup ={
+  if !(other.flags & FL_CLIENT) return;
+  self.use();
+  sprint(other, 1, strcat("You got the ", self.netname, "\n"));
+  DespawnItem();
+  if (self.spawnflags | ITEM_HELD) self.spawnflags += ITEM_HELD;
+}
+
 void() UseItemDo = {
   //sprint(other, 1, "UseItemDo\n");
   self.use();
@@ -74,6 +82,7 @@ void() UseItemDo = {
 void() UseItemTry = {
   //prompt flag
   //dprint("UseItemTry\n");
+  if !(other.flags & FL_CLIENT) return;
   if (other.impulse == 1) {
     other.impulse = 0;
     UseItemDo();
@@ -88,6 +97,7 @@ void() IsItem = {
   self.nextthink = time + 0.3;
   self.think = RespawnItemTry;
   self.modelindex = 0;
+  self.flags += FL_ITEM;
 };
 void() IsUsable = {
   self.touch = UseItemTry;
@@ -98,3 +108,34 @@ void() IsConsumable = {
   self.use = PickupItem;
   IsUsable();
 };
+void() IsAutoPickup = {
+  //have their own touch functions
+  if (self.spawnflags & ITEM_HELD) return;
+  self.touch = AutoPickup;
+  IsItem();
+};
+
+void(string keyname) keylock_set_custom_key;
+void() IsKey = {
+  keylock_set_custom_key(self.target);
+  IsAutoPickup();
+};
+
+void(entity old) drop_weapon; //sv_combat.qc
+void(entity item) drop_an_item = {
+  other = item.owner;
+  //dprint(strcat(vtos(other.origin), " weapon drop origin\n"));
+ // item.owner = world;
+ // item.solid = SOLID_TRIGGER;
+  item.movetype = MOVETYPE_NONE; //why do you fly away? one landed close and acted normal
+  //setorigin(item, self.origin);
+//  if (item.spawnflags & ITEM_HELD) item.spawnflags -= ITEM_HELD;
+
+  drop_weapon(item);
+}
+void() drop_items = {
+  self.movechain = FALSE;
+  entity item;
+  if (self.primary) drop_an_item(self.primary);
+  if (self.secondary) drop_an_item(self.secondary);
+}

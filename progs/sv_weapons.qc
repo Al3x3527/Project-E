@@ -1,3 +1,21 @@
+
+$frame basis
+$frame walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8
+$frame key9
+$frame pain1 pain2 pain3 //pain4
+$frame die1
+$frame die2 die3
+$frame shoot1 shoot2 shoot3 shoot4
+$frame melee1 melee2
+$frame bark1 bark2
+$frame reload1 reload2
+$frame aggro1 aggro2
+$frame evade1 evade2 evade3 evade4 evade5 evade6
+$frame grenade1 grenade2 grenade3 grenade4 grenade5 grenade6 grenade7
+$frame key39
+$frame run1 run2 run3 run4 run5 run6
+$frame board1 drive1
+$frame crouch1 crouch2
 const float WEAPON_BATTLERIFLE = 2;
 const float WEAPON_PLASMARIFLE = 4;
 const float WEAPON_BROWNING = 8;
@@ -32,6 +50,20 @@ void() rocket_touch = {
 
 void(entity ent, string path) weapon_sound = {
 sound (ent, CHAN_WEAPON, path, 1, ATTN_NORM);
+//alert !DIST_FAR >> create  searchpoint (memory waypoint) can find without line
+//dprint("path search weapon sound\n");
+path_search point = spawn(path_search);
+setorigin(point, ent.origin);
+point.weapon = ent.weapon;
+point.enemy = ent;
+point.team = ent.team;
+point.style = SEARCH_SOUND;
+//NOTE: fix path think
+//point.think = search_think;
+point.nextthink = 1;
+//TODO: in findstuff
+//if entity.enemies >> ent STA_CERTAIN
+//else if STA_IDLE/ACTIVE && possible enemy >> STA_SEARCHING -dont force action
 //dprint(path); dprint(" weapon_sound\n");
 };
 
@@ -61,7 +93,22 @@ float attackdelay;
 float rateoffire; //burst
 float ammo_clip; //burst
 
-virtual void() attackdo = {dprint("placeholder attack\n");};
+ virtual void() weapon_walk2 = {
+   frame++;
+   if (frame > 7) frame = 2;
+   //dprint(strcat("weapon walk frame "), ftos(frame),"\n");
+   //dprint(strcat("owner frame ", ftos(owner.frame), "\n"));
+   nextthink = time + 0.1;
+ };
+ virtual void() weapon_walk1 = {
+   //dprint(strcat(classname, " ", model, " "));
+   //dprint(strcat(ftos(frame)," weapon walk1\n"));
+   frame = 2;
+   think = weapon_walk2;
+   nextthink = time + 0.1;
+ };
+
+ virtual void() attackdo = {dprint("placeholder attack\n");};
 
 virtual void(vector dir, vector org, float damage, entity ent) projectile_spawn = {
   projectile_class proj = spawn(projectile_class);
@@ -119,12 +166,13 @@ virtual void() projectile = {
 
   local float i = 0;
   if (trace_fraction != 1.0) {
+    other = ent;
     BulletHit(this.attackdamage, dir);
     vector delta = end - org;
     delta *= trace_fraction;
     delta += org;
     te_gunshot(delta);
-    dprint(trace_ent.classname); dprint("\n");
+   // dprint(trace_ent.classname); dprint("\n");
   }
   else dprint("hit nothing\n");
   ApplyMultiDamage();
@@ -164,25 +212,27 @@ virtual void() projectile = {
       this.nextthink = time + 0.05;
       }
     if (!this.currentammo) CONSUMEITEM
-  };
+};
 
 void() weapon_class = {
-FGDbase(Spawnflags Targetname)
-COLOR(206 18 18)
+FGDbase("Spawnflags, Targetname", weapon_class, "base weapon class");
+COLOR(206 18 18);
 //if (SUB_Inhibit()) return;
 think = IsConsumable;
 nextthink = time + 0.3;
 setsize (this, '-16 -24 0', '16 24 16');
 void() attack = attackdo;
 precache_model(gamemodels "qp_bomb.mdl");
-};
-};
+th_walk = weapon_walk1;
+};};
+
 
 runtime_t weapon_battlerifle_runtime;
 class weapon_battlerifle : weapon_class {
 virtual void() attack = {hitscan();};
 virtual void() equip = WEAPONEQUIP(weapon_battlerifle);
 void () weapon_battlerifle = {
+  fgdprint("@fgd\n@PointClass base(weapon_class) = weapon_battlerifle : \"battle rifle\" [");
   classname = "weapon_battlerifle";
 WEAPONMODELS("w_ad70.mdl", "v_ad70.mdl");
 FLOAT(currentammo, 150, "starting ammo");
@@ -192,9 +242,11 @@ attacktimes = 3;
 attackdamage = 20;
 attackdelay = 0.8;
 rateoffire = 0.1;
+this.th_walk = weapon_walk1;
 RUNTIME(weapon_battlerifle_runtime);
 RESPAWNTIME(40);
-dprint("weapon_battlerifle spawn function\n");
+view_ofs = '0 0 0';// FIXME
+//dprint("weapon_battlerifle spawn function\n");
 };
 };
 
@@ -272,3 +324,33 @@ attackvelocity = 100;
 attacktimes = 1;
 attackdelay = 0.6;
 ENDCLASS;
+
+void() wan = {
+  if !(self.active_weapon) return;
+  self.active_weapon.frame = self.frame;
+}
+
+void() VirtualWeapon = { //TODO pull pointers from struct instead?
+  weapon_class held = FALSE;
+  switch (self.weapon) {
+    case WEAPON_BATTLERIFLE : held = spawn(weapon_battlerifle); break;
+    case WEAPON_PLASMARIFLE : held = spawn(weapon_plasmarifle); break;
+    default : return;
+  }
+  if !(held) return;
+  self.movechain = held; //TODO: add rotational corrections myself
+  held.owner = self;
+  //held.chainmoved = sub_chainmoved;
+  held.spawnflags = ITEM_HELD;
+  //self.view_ofs = '-20 0 60';//TODO
+  setorigin(held, self.origin + self.view_ofs - held.view_ofs);
+  held.angles = self.angles;
+  //NOTE: setting the model here breaks animations some how!
+  //held.modelindex = getmodelindex(held.weaponmodel);
+  //setmodel(held, held.weaponmodel);
+  held.flags = FL_ITEM;
+  self.active_weapon = self.primary = held;
+  self.weapon_use = use_active;
+  held.frame = 2;
+  self.frame = 2;
+}

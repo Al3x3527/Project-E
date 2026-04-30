@@ -4,6 +4,7 @@
 
 void() main =
 {
+
 };
 
 //called for each frame that QC runs
@@ -11,12 +12,12 @@ void() StartFrame =
 {
 };
 
+
 void() worldspawn =
-{	
-	precache_everything();
+{
+  precache_everything();
 };
 
 void() SpectatorConnect =
 {	
 };
-
