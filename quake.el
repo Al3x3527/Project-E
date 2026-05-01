@@ -20,8 +20,8 @@
 ;;; Code:
 
 ; For export and run:
-
-(defvar quake-gamedirpath "~/Programs/project_enoch/FTEQW/"
+; FIXME: I dont like updating
+(defvar quake-gamedirpath "/home/alex/Programs/project_enoch/FTEQW/"
   "Path to Quake game engine.")
 (defvar quake-moddirpath "enoch/"
   "Relative path to Quake mod.")
@@ -30,10 +30,13 @@
 (defvar quake-engine "fteqw64"
   "Name of Quake engine executable.")
 
+; NOTE project root should just be the location of this config.
+(defvar quake-project "/home/alex/Github/Project-E/"
+  "Path to project root.")
 (defvar quake-progslist '(
-                    "~/GitHub/Project-E/qwprogs.dat"
-                    "~/GitHub/Project-E/menu.dat"
-                    "~/GitHub/Project-E/csprogs.dat")
+                    "qwprogs.dat"
+                    "menu.dat"
+                    "csprogs.dat")
   "List of progs (.dat) files for Quake mod.")
 
 (provide 'quake)
