@@ -22,6 +22,7 @@
   target(target_destination) : "Name"
   ]
 @BaseClass = ModelLight [ ]
+@SolidClass = func_detail : "geometry does not split bsp" [ ]
 @PointClass base(Spawnflags) color(0 255 0) = info_firingpoint : "firing point placed on map."
   [
   targetname(target_source) : "firing group"
@@ -134,10 +135,12 @@ style(Flags) action flags forced when assigned to this objective"
 @PointClass base(Spawnflags) color(0 255 0) = info_null : "info null" [ ]
 @SolidClass base(ModelLight) = func_illusionary : "non-solid brush" [ ]
 @SolidClass base(Target) = trigger_multiple : "trigger multiple brush" [ ]
-@SolidClass base(Targetname) = func_door : "door brush" [ ]
-@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : "key item placed on map" [ ]
 @SolidClass base(Spawnflags) = func_breakable : "breakable brush"
   [
   health(float) : "starting health value" : "20"
   ]
 @PointClass base(Spawnflags) color(0 255 0) = info_player_start : "initial spawn point" [ ]
+@Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : "key item placed on map" [ ]
+@SolidClass base(Target, Targetname) = func_door : "door brush" [ ]
+@BaseClass base(Spawnflags, Targetname) color(0 0 255) = obj_door : "door object placed on map." [ ]
+@PointClass base(obj_door) model({ "path": "mdls/obj_door_single.mdl" }) = obj_door_single : "door object placed on map.placed on map" [ ]

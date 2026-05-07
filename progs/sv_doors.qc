@@ -180,6 +180,8 @@ class func_door : entity {
     //deal with shadows later
     state = STATE_DOWN;
     SUB_CalcMove (pos1, speed, door_hit_bottom);
+
+    if (primary) primary.use();
   };
 
   nonvirtual void() door_go_up = {
@@ -190,7 +192,8 @@ class func_door : entity {
     }
     state = STATE_UP;
     SUB_CalcMove (pos2, speed, door_hit_top);
-    //SUB_UseTargets();
+
+    if (primary) primary.use();
   };
 
   nonvirtual void() door_fire = {
@@ -264,11 +267,10 @@ class func_door : entity {
     solid = SOLID_BSP;
     movetype = MOVETYPE_PUSH;
     FUNC(func_door, "Targetname", "door brush");
-    //TODO
     owner = this;
     if !(movedir) movedir = '1 0 0'; //no quotes in editor
 
-    //TODO: fgdgen
+    //TODO
     if !(speed) speed = 100;
     if !(wait) wait = 3;
     //if !(lip) lip = 8;
@@ -287,6 +289,13 @@ class func_door : entity {
       th_die = door_killed;
     }
 */
+    /// door objects
+    // FIXME: dont use target strings for this. huge waste of time. find door objects inside bounds.
+    if (target) {
+      entity obj = findtarget(target);
+      primary = obj;
+      obj.owner = this;
+    }
     //dont spawn field if key door
     if (health) return;
     if (ammo_nails) return;
@@ -325,3 +334,31 @@ void(func_door e, float closealldoors) door_estate_lock = {
   }
   self = oself;
 }
+
+// Door Objects
+$frame key0 key1 key2 key3
+class obj_door {
+  nonvirtual void() down3 = [$key0, sub_noop]{};
+  nonvirtual void() down2 = [$key1, down3]{};
+  nonvirtual void() down1 = [$key2, down2]{};
+  nonvirtual void() up3 = [$key3, sub_noop]{};
+  nonvirtual void() up2 = [$key2, up3]{};
+  nonvirtual void() up1 = [$key1, up2]{};
+  virtual void() use = {
+    func_door thedoor = owner;
+    if (thedoor.state = STATE_UP){
+      up1();
+      return;
+    }
+    down1();
+  };
+  void() obj_door = {
+  FGDbase("Spawnflags, Targetname", obj_door, "door object placed on map.");
+  COLOR(0 0 255);
+  //SIZE(0 0 0, 16 64 96);
+  };
+};
+
+CLASSDEF(obj_door_single, obj_door, "door object placed on map.")
+  MODEL("obj_door_single.mdl");
+ENDCLASS;

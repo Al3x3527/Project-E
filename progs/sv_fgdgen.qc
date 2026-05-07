@@ -3,12 +3,12 @@ void(string text) fgdprint = {}; //exposes string in compiled program.
 //void() spawnEverything = {}; //can this be done procedurally?
 #define FGDbase(flags, BASEname, BASEdesc) fgdprint("@fgd \n@BaseClass base("flags") = "#BASEname" : \""BASEdesc"\"\n [");
 //#define FGDfield(field, desc)
-#define CLASSDEF(CLASSbase, CLASSname, CLASSdesc)\
+#define CLASSDEF(CLASSname, CLASSbase, CLASSdesc)\
 class CLASSname : CLASSbase {\
 void() CLASSname = {\
 classname = #CLASSname;\
 netname = #CLASSdesc;\
-fgdprint("@fgd \n@PointClass base("CLASSbase") = "#CLASSname" : \""CLASSdesc"placed on map\"\n [");
+fgdprint("@fgd \n@PointClass base("#CLASSbase") = "#CLASSname" : \""CLASSdesc"placed on map\"\n [");
 
 #define ENDCLASS };}
 
@@ -66,11 +66,14 @@ fgdprint("@fgd \n"#FLOATfield"(float) : "#FLOATdesc" : \""#FLOATfloat"\"")
 
 #define COLOR(color) fgdprint("@fgd\n color("#color")")
 
+#define SIZE(smins, smaxs) fgdprint("@fgd\n size("#smins","#smaxs")")
+
 #define STRING(field, type, text) fgdprint("@fgd\n "#field"("#type") : "#text)
 
-#define MODELdefault(modelstring) {\
+#define MODEL(modelstring) \
 precache_model(modelstring);\
-if (!this.model) setmodel(this, modelstring);}
+if (!this.model) setmodel(this, gamemodels modelstring);\
+fgdprint("@fgd\n model({ \"path\": \""gamemodels modelstring"\" })")
 
 #define BPCLASS(BPname, BPdesc)\
   runtime_t BPname ## _runtime;\
@@ -140,4 +143,5 @@ void() fgdinit = {
   FGDflag(Target);
   STRING(target, target_destination, "Name");
   FGDflag(ModelLight);
+  fgdprint("@fgd\n@SolidClass = func_detail : \"geometry does not split bsp\" [");
 };
