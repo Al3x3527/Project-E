@@ -291,11 +291,13 @@ class func_door : entity {
 */
     /// door objects
     // FIXME: dont use target strings for this. huge waste of time. find door objects inside bounds.
-    if (target) {
-      entity obj = findtarget(target);
-      primary = obj;
-      obj.owner = this;
-    }
+    tracebox(origin, mins, maxs, origin, 0, this);
+    if (trace_ent)
+      if (trace_ent.solid == SOLID_BBOX) { //you're a door now.
+        primary = trace_ent;
+        trace_ent.owner = this;
+        }
+
     //dont spawn field if key door
     if (health) return;
     if (ammo_nails) return;
@@ -356,9 +358,14 @@ class obj_door {
   FGDbase("Spawnflags, Targetname", obj_door, "door object placed on map.");
   COLOR(0 0 255);
   //SIZE(0 0 0, 16 64 96);
+  solid = SOLID_BBOX;
   };
 };
 
 CLASSDEF(obj_door_single, obj_door, "door object placed on map.")
   MODEL("obj_door_single.mdl");
+ENDCLASS;
+
+CLASSDEF(obj_door_garage, obj_door, "garage door placed on map.")
+  MODEL("obj_garage_door.mdl");
 ENDCLASS;

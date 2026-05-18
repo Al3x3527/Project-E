@@ -20,18 +20,18 @@
 ;;; Code:
 
 ; For export and run:
-; FIXME: I dont like updating
+; FIXME: defvars not updating on eval-buffer
 (defvar quake-gamedirpath "/home/alex/Programs/project_enoch/FTEQW/"
   "Path to Quake game engine.")
 (defvar quake-moddirpath "enoch/"
   "Relative path to Quake mod.")
-(defvar quake-launch-args "+map blockout_demo.bsp"
+(defvar quake-launch-args '("+map" "blockout_demo.bsp")
   "Command line launch arguments for Quake engine.")
 (defvar quake-engine "fteqw64"
   "Name of Quake engine executable.")
 
 ; NOTE project root should just be the location of this config.
-(defvar quake-project "/home/alex/Github/Project-E/"
+(defvar quake-project "/home/alex/GitHub/Project-E/"
   "Path to project root.")
 (defvar quake-progslist '(
                     "qwprogs.dat"

@@ -141,6 +141,7 @@ style(Flags) action flags forced when assigned to this objective"
   ]
 @PointClass base(Spawnflags) color(0 255 0) = info_player_start : "initial spawn point" [ ]
 @Pointclass base(Spawnflags, Target) color(0 0 255) = item_key : "key item placed on map" [ ]
-@SolidClass base(Target, Targetname) = func_door : "door brush" [ ]
+@SolidClass base(Targetname) = func_door : "door brush" [ ]
 @BaseClass base(Spawnflags, Targetname) color(0 0 255) = obj_door : "door object placed on map." [ ]
 @PointClass base(obj_door) model({ "path": "mdls/obj_door_single.mdl" }) = obj_door_single : "door object placed on map.placed on map" [ ]
+@PointClass base(obj_door) model({ "path": "mdls/obj_garage_door.mdl" }) = obj_door_garage : "garage door placed on map.placed on map" [ ]
