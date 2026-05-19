@@ -193,7 +193,11 @@ class func_door : entity {
     state = STATE_UP;
     SUB_CalcMove (pos2, speed, door_hit_top);
 
-    if (primary) primary.use();
+    if (primary) {
+      primary.use();
+      dprint("door_go_up primary found\n");
+      }
+    else dprint("door_go_up no mdl\n");
   };
 
   nonvirtual void() door_fire = {
@@ -293,9 +297,10 @@ class func_door : entity {
     // FIXME: dont use target strings for this. huge waste of time. find door objects inside bounds.
     tracebox(origin, mins, maxs, origin, 0, this);
     if (trace_ent)
-      if (trace_ent.solid == SOLID_BBOX) { //you're a door now.
+      if (trace_ent.solid == SOLID_SLIDEBOX) { //you're a door now.
         primary = trace_ent;
-        trace_ent.owner = this;
+        primary.solid = SOLID_NOT;
+        primary.owner = this; //to check state
         }
 
     //dont spawn field if key door
@@ -338,34 +343,69 @@ void(func_door e, float closealldoors) door_estate_lock = {
 }
 
 // Door Objects
-$frame key0 key1 key2 key3
+$frame key0 key1 key2 key3 key4 key5 key6
 class obj_door {
-  nonvirtual void() down3 = [$key0, sub_noop]{};
-  nonvirtual void() down2 = [$key1, down3]{};
-  nonvirtual void() down1 = [$key2, down2]{};
-  nonvirtual void() up3 = [$key3, sub_noop]{};
-  nonvirtual void() up2 = [$key2, up3]{};
-  nonvirtual void() up1 = [$key1, up2]{};
-  virtual void() use = {
-    func_door thedoor = owner;
-    if (thedoor.state = STATE_UP){
-      up1();
-      return;
-    }
-    down1();
-  };
   void() obj_door = {
   FGDbase("Spawnflags, Targetname", obj_door, "door object placed on map.");
   COLOR(0 0 255);
   //SIZE(0 0 0, 16 64 96);
-  solid = SOLID_BBOX;
+  solid = SOLID_SLIDEBOX;
+  movetype = MOVETYPE_NONE;
   };
 };
 
 CLASSDEF(obj_door_single, obj_door, "door object placed on map.")
-  MODEL("obj_door_single.mdl");
-ENDCLASS;
+  ENTMODEL("obj_door_single.mdl");
+};
+  nonvirtual void() down3 = [$key0, sub_noop]{dprint("down3\n");};
+  nonvirtual void() down2 = [$key1, down3]{dprint("down2\n");};
+  nonvirtual void() down1 = [$key2, down2]{dprint("down1\n");};
+  nonvirtual void() up3 = [$key3, sub_noop]{dprint("up3\n");};
+  nonvirtual void() up2 = [$key2, up3]{dprint("up2\n");
+  nextthink = time + 0.1;};
+  nonvirtual void() up1 = [$key1, up2]{dprint("up1\n");
+  dprint(strcat("nextthink is in ", ftos(nextthink - time), "seconds \n"));};
+  virtual void() use = {
+    //solid = SOLID_NOT;
+    dprint("door obj use\n");
+    func_door thedoor = owner;
+    if (thedoor.state == STATE_UP){
+      dprint("door state up\n");
+      think = up1;
+      think();
+      return;
+    }
+    dprint("door state down\n");
+    think = down1;
+    think();
+  };
+};
 
 CLASSDEF(obj_door_garage, obj_door, "garage door placed on map.")
-  MODEL("obj_garage_door.mdl");
-ENDCLASS;
+  ENTMODEL("obj_garage_door.mdl");
+};
+  nonvirtual void() down6 = [$key0, sub_noop]{};
+  nonvirtual void() down5 = [$key1, down6]{};
+  nonvirtual void() down4 = [$key2, down5]{};
+  nonvirtual void() down3 = [$key3, down4]{};
+  nonvirtual void() down2 = [$key4, down3]{};
+  nonvirtual void() down1 = [$key5, down2]{};
+  nonvirtual void() up6 = [$key6, sub_noop]{};
+  nonvirtual void() up5 = [$key5, up6]{};
+  nonvirtual void() up4 = [$key4, up5]{};
+  nonvirtual void() up3 = [$key3, up4]{};
+  nonvirtual void() up2 = [$key2, up3]{};
+  nonvirtual void() up1 = [$key1, up2]{};
+  virtual void() use = {
+    dprint("door obj use\n");
+    //solid = SOLID_NOT;
+    func_door thedoor = owner;
+    if (thedoor.state == STATE_UP){
+      dprint("door state up\n");
+      up1();
+      return;
+    }
+    dprint("door state down\n");
+    down1();
+  };
+};
