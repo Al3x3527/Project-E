@@ -27,7 +27,7 @@
   "Relative path to Quake mod.")
 (defvar quake-launch-args '("+map" "blockout_demo.bsp")
   "Command line launch arguments for Quake engine.")
-(defvar quake-engine "fteqw64"
+(defvar quake-engine "fteqw64-git"
   "Name of Quake engine executable.")
 
 ; NOTE project root should just be the location of this config.

@@ -778,6 +778,7 @@ nonvirtual void(float dist) ai_walk = {
 };
 
 nonvirtual void(float dist) ai_charge = {
+  entity old, new;
   //dprint("ai charge\n");
   if !(this.enemy) {
     this.think = this.th_stand;
@@ -795,8 +796,8 @@ nonvirtual void(float dist) ai_charge = {
       //dprint("path search uncertain charge\n");
       this.status = STA_UNCERTAIN;
       //searchpoint at enemy.lastseen
-      entity old = this.enemy;
-      entity new = spawn(path_search);
+      old = this.enemy;
+      new = spawn(path_search);
       this.enemy = new;
       new.lastseen = old.lastseen;
       setorigin(new, old.lastseen);
@@ -805,8 +806,8 @@ nonvirtual void(float dist) ai_charge = {
     }
   else {
     if (CheckLine(enemy.enemy)) {
-      entity old = enemy;
-      entity new = old.enemy;
+      old = enemy;
+      new = old.enemy;
       //remove(old);
       old.nextthink = time + 0.1;
       enemy = new;
@@ -844,8 +845,10 @@ nonvirtual void() RespawnBipedDo = { //walkmonster start, do
   //this.think = StateMachineGo;
   //this.nextthink = time + 0.3;
   //dprint("respawn biped do\n");
+  /*
   this.commandlist = findcmdlist(this.targetcmdlist);
   if(this.commandlist) this.commandlist.th_pain(this,0);
+  */
   //else {dprint(this.targetcmdlist);dprint("no command list\n");}
   this.enemies = spawn(enemylist_c);
   this.tracked = spawn(tracked_c);

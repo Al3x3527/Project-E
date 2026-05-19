@@ -100,9 +100,10 @@ void(string key_name) keylock_set_custom_key = {
   dprint("keylock_set_custom_key\n");
   self.items = CustomKeyFlag (key_name);
   self.netname = key_name;
-  entity door0 = find(world, targetname, key_name);
+  entity door, door0 = world;
+  door0 = find(world, targetname, key_name);
   if (door0) {
-    entity door = door0;
+    door = door0;
     } else objerror("custom key no doors");
   while (door){
     dprint(strcat("door found for ", key_name, "\n"));
@@ -247,7 +248,7 @@ class func_door : entity {
     }
     if (ammo_nails) {
       centerprint (other, strcat("open for ", ftos(ammo_nails)));
-      if (other.impulse = 1) {
+      if (other.impulse == 1) {
         if !(other.ammo_nails < ammo_nails) {
             other.ammo_nails -= ammo_nails;
             centerprint (other, strcat("-", ftos(ammo_nails), " blood"));
@@ -264,6 +265,23 @@ class func_door : entity {
       return; }
     //NOTE: door otherwise opens with trigger volume
     keylock_try_to_unlock (other, "", door_unlock);
+  };
+
+  nonvirtual void() door_find_model = {
+    //dprint("door find model\n");
+    tracebox(origin, mins - '8 8 8', maxs + '8 8 8', origin + '1 1 1', 32, this);
+    if (trace_ent){
+      if (trace_ent.solid == SOLID_SLIDEBOX) { //you're a door now.
+        dprint("door object traced\n");
+        primary = trace_ent;
+        primary.solid = SOLID_NOT;
+        primary.owner = this; //to check state
+        return;
+        }
+      dprint("err unexpected object in door\n");
+      return;
+    }
+    dprint("no object in door\n");
   };
 
   void() func_door = {
@@ -295,14 +313,8 @@ class func_door : entity {
 */
     /// door objects
     // FIXME: dont use target strings for this. huge waste of time. find door objects inside bounds.
-    tracebox(origin, mins, maxs, origin, 0, this);
-    if (trace_ent)
-      if (trace_ent.solid == SOLID_SLIDEBOX) { //you're a door now.
-        primary = trace_ent;
-        primary.solid = SOLID_NOT;
-        primary.owner = this; //to check state
-        }
-
+    think = door_find_model;
+    nextthink = time + 0.1;
     //dont spawn field if key door
     if (health) return;
     if (ammo_nails) return;
@@ -351,6 +363,8 @@ class obj_door {
   //SIZE(0 0 0, 16 64 96);
   solid = SOLID_SLIDEBOX;
   movetype = MOVETYPE_NONE;
+  flags = FL_FINDABLE_NONSOLID;
+  size = (16, 64, 96);
   };
 };
 
