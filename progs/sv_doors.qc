@@ -182,7 +182,10 @@ class func_door : entity {
     state = STATE_DOWN;
     SUB_CalcMove (pos1, speed, door_hit_bottom);
 
-    if (primary) primary.use();
+    if (primary) {
+      primary.think = primary.use;
+      primary.nextthink = time + 0.01;
+    }
   };
 
   nonvirtual void() door_go_up = {
@@ -195,7 +198,8 @@ class func_door : entity {
     SUB_CalcMove (pos2, speed, door_hit_top);
 
     if (primary) {
-      primary.use();
+      primary.think = primary.use;
+      primary.nextthink = 0.01;
       dprint("door_go_up primary found\n");
       }
     else dprint("door_go_up no mdl\n");
@@ -372,20 +376,32 @@ CLASSDEF(obj_door_single, obj_door, "door object placed on map.")
   ENTMODEL("obj_door_single.mdl");
 };
   nonvirtual void() down3 = [$key0, sub_noop]{dprint("down3\n");};
-  nonvirtual void() down2 = [$key1, down3]{dprint("down2\n");};
-  nonvirtual void() down1 = [$key2, down2]{dprint("down1\n");};
-  nonvirtual void() up3 = [$key3, sub_noop]{dprint("up3\n");};
-  nonvirtual void() up2 = [$key2, up3]{dprint("up2\n");
-  nextthink = time + 0.1;};
-  nonvirtual void() up1 = [$key1, up2]{dprint("up1\n");
-  dprint(strcat("nextthink is in ", ftos(nextthink - time), "seconds \n"));};
+  nonvirtual void() down2 = [$key1, this.down3]{dprint("down2\n");};
+  nonvirtual void() down1 = [$key2, this.down2]{dprint("down1\n");};
+  nonvirtual void() up3 = {dprint("up3\n");
+    frame = $key3;
+  };
+  nonvirtual void() up2 = {
+    dprint("up2\n");
+    nextthink = time + 0.1;
+    think = up3;
+    frame = $key2;
+  };
+  nonvirtual void() up1 = {dprint("up1\n");
+    nextthink = time + 0.1;
+    //dprint(strcat("nextthink is in ", ftos(nextthink - time), "seconds \n"));
+    frame = $key1;
+    think = this.up2;
+    //dprint(this.classname);
+    //dprint(strcat(ftos(frame), " is current frame\n"));
+  };
   virtual void() use = {
     //solid = SOLID_NOT;
     dprint("door obj use\n");
     func_door thedoor = owner;
     if (thedoor.state == STATE_UP){
       dprint("door state up\n");
-      think = up1;
+      think = this.up1;
       think();
       return;
     }
@@ -397,6 +413,7 @@ CLASSDEF(obj_door_single, obj_door, "door object placed on map.")
 
 CLASSDEF(obj_door_garage, obj_door, "garage door placed on map.")
   ENTMODEL("obj_garage_door.mdl");
+  classname = "obj_door";
 };
   nonvirtual void() down6 = [$key0, sub_noop]{};
   nonvirtual void() down5 = [$key1, down6]{};
